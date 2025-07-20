@@ -4,7 +4,7 @@ from fastapi import FastAPI
 
 from app.api.v1 import api_v1_router
 from app.config import settings
-from infrastructure.db import db_helper
+from app.infrastructure.db import db_helper
 
 
 @asynccontextmanager
