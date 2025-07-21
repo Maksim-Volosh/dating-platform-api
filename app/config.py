@@ -7,10 +7,12 @@ class RunConfig(BaseSettings):
     port: int = 8000
     reload: bool = True
     
-    
 class ApiConfig(BaseModel):
     prefix: str = "/api"
     
+class StaticFilesConfig(BaseModel):
+    directory: str = "./uploads"
+    url: str = "/uploads"
 
 class DatabaseConfig(BaseSettings):
     url: PostgresDsn
@@ -18,7 +20,6 @@ class DatabaseConfig(BaseSettings):
     echo_pool: bool = False
     pool_size: int = 50
     max_overflow: int = 10
-
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -31,6 +32,7 @@ class Settings(BaseSettings):
     run: RunConfig = RunConfig()
     api: ApiConfig = ApiConfig()
     db: DatabaseConfig
+    static: StaticFilesConfig = StaticFilesConfig()
     
 
 settings = Settings() # type: ignore
