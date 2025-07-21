@@ -1,0 +1,14 @@
+from sqlalchemy import UUID, ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from .base import Base
+
+
+class Photo(Base):
+    __tablename__ = "photo"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    url: Mapped[str] = mapped_column(String(255))
+
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))
+    user: Mapped["User"] = relationship("User", back_populates="photos") # type: ignore

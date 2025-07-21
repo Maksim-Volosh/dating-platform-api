@@ -1,9 +1,8 @@
 from enum import Enum
 from typing import List, Optional
 
-from sqlalchemy import UUID
 from sqlalchemy import Enum as SQLAlchemyEnum
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -30,14 +29,6 @@ class User(Base):
     gender: Mapped[Gender] = mapped_column(SQLAlchemyEnum(Gender))
     prefer_gender: Mapped[PreferGender] = mapped_column(SQLAlchemyEnum(PreferGender))
     
-    photos: Mapped[List["Photo"]] = relationship("Photo", back_populates="user", cascade="all, delete-orphan")
+    photos: Mapped[List["Photo"]] = relationship("Photo", back_populates="user", cascade="all, delete-orphan") # type: ignore
 
 
-class Photo(Base):
-    __tablename__ = "photo"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    url: Mapped[str] = mapped_column(String(255))
-
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))
-    user: Mapped["User"] = relationship("User", back_populates="photos")
