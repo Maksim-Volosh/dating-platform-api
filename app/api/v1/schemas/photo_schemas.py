@@ -5,6 +5,6 @@ from pydantic import BaseModel
 class PhotoURL(BaseModel):
     url: str
     
-class PhotoCreateResponse(BaseModel):
+class PhotoResponse(BaseModel):
     user_id: int
     photos: List[PhotoURL]
