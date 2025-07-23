@@ -4,11 +4,10 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
 
-from app.api.v1.schemas.user_schemas import (UserCreateRequest,
-                                             UserCreateResponse,
-                                             UserReadResponse, UserUpdateRequest, UserUpdateResponse)
+from app.api.v1.schemas.user_schemas import (UserCreate, UserReadResponse,
+                                             UserUpdateRequest,
+                                             UserUpdateResponse)
 from app.infrastructure.db import db_helper
 from app.infrastructure.models.users import User
 
@@ -38,14 +37,14 @@ async def get_user(
 
 @router.post("/")
 async def create_user(
-    user: UserCreateRequest,
+    user: UserCreate,
     db: AsyncSession = Depends(db_helper.session_getter)
-) -> UserCreateResponse:
+) -> UserCreate:
     new_user = User(**user.model_dump())
     db.add(new_user)
     await db.flush()
     await db.commit()
-    return UserCreateResponse.model_validate(new_user, from_attributes=True)
+    return UserCreate.model_validate(new_user, from_attributes=True)
 
 @router.put("/{user_id}")
 async def update_user(  

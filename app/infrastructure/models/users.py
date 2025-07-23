@@ -2,7 +2,7 @@ from enum import Enum
 from typing import List, Optional
 
 from sqlalchemy import Enum as SQLAlchemyEnum
-from sqlalchemy import String
+from sqlalchemy import String, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -21,7 +21,7 @@ class PreferGender(str, Enum):
 class User(Base):
     __tablename__ = "user"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    telegram_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     name: Mapped[str] = mapped_column(String(30))
     age: Mapped[int]
     city: Mapped[str] = mapped_column(String(30))

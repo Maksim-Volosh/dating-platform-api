@@ -10,5 +10,5 @@ class Photo(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     url: Mapped[str] = mapped_column(String(255))
 
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("user.telegram_id"))
     user: Mapped["User"] = relationship("User", back_populates="photos") # type: ignore
