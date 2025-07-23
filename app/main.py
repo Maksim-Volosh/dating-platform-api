@@ -1,6 +1,7 @@
 import os
 from contextlib import asynccontextmanager
 
+import redis.asyncio as redis
 from fastapi import Depends, FastAPI
 from fastapi.staticfiles import StaticFiles
 
@@ -9,17 +10,20 @@ from app.config import settings
 from app.dependencies import verify_bot_key
 from app.infrastructure.db import db_helper
 from app.infrastructure.models.base import Base
+from app.infrastructure.redis import redis_helper
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Initialize
     async with db_helper.engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     os.makedirs(settings.static.directory, exist_ok=True)
-    # Initialize
     yield
+    
     # Cleanup
     await db_helper.dispose()
+    await redis_helper.dispose()
 
 main_app = FastAPI(
     lifespan=lifespan,
