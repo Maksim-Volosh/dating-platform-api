@@ -84,8 +84,8 @@ async def upload_user_photos(
         unique_name = f"{uuid.uuid4()}_{file.filename}"
         save_path = os.path.join(settings.static.directory, unique_name)
 
-        with open(save_path, "wb") as f:
-            f.write(contents)
+        async with aiofiles.open(save_path, "wb") as f:
+            await f.write(contents)
 
         new_photo = Photo(
             url=f"{settings.static.url}/{unique_name}", user_id=user_id
