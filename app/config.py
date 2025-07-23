@@ -1,5 +1,6 @@
 from pydantic import BaseModel, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from redis import Redis
 
 
 class RunConfig(BaseSettings):
@@ -23,6 +24,9 @@ class DatabaseConfig(BaseSettings):
     echo_pool: bool = False
     pool_size: int = 50
     max_overflow: int = 10
+    
+class CacheConfig(BaseSettings):
+    url: str
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -36,6 +40,7 @@ class Settings(BaseSettings):
     security: SecurityConfig
     api: ApiConfig = ApiConfig()
     db: DatabaseConfig
+    cache: CacheConfig
     static: StaticFilesConfig = StaticFilesConfig()
     
 
