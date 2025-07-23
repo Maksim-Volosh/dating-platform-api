@@ -1,11 +1,12 @@
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.api.v1 import api_v1_router
 from app.config import settings
+from app.dependencies import verify_bot_key
 from app.infrastructure.db import db_helper
 from app.infrastructure.models.base import Base
 
@@ -24,6 +25,7 @@ main_app = FastAPI(
     lifespan=lifespan,
     title="Dating Platform API",
     description="API for the Dating Platform",
+    dependencies=[Depends(verify_bot_key)],
 )
 main_app.include_router(api_v1_router, prefix=settings.api.prefix)
 

@@ -10,6 +10,9 @@ class RunConfig(BaseSettings):
 class ApiConfig(BaseModel):
     prefix: str = "/api"
     
+class SecurityConfig(BaseModel):
+    api_key: str
+    
 class StaticFilesConfig(BaseModel):
     directory: str = "./uploads"
     url: str = "/uploads"
@@ -30,6 +33,7 @@ class Settings(BaseSettings):
         env_prefix="APP_CONFIG__",
     )
     run: RunConfig = RunConfig()
+    security: SecurityConfig
     api: ApiConfig = ApiConfig()
     db: DatabaseConfig
     static: StaticFilesConfig = StaticFilesConfig()
