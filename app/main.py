@@ -1,7 +1,6 @@
 import os
 from contextlib import asynccontextmanager
 
-import redis.asyncio as redis
 from fastapi import Depends, FastAPI
 from fastapi.staticfiles import StaticFiles
 

@@ -1,3 +1,4 @@
+from typing import AsyncGenerator
 import redis.asyncio as redis
 from app.config import settings 
 
@@ -8,7 +9,7 @@ class RedisHelper:
     async def dispose(self) -> None:
         await self.client.close()
 
-    async def get_client(self):
+    async def get_client(self) -> AsyncGenerator[redis.Redis, None]:
         yield self.client
 
 
