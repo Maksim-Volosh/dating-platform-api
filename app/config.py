@@ -8,6 +8,10 @@ class RunConfig(BaseSettings):
     port: int = 8000
     reload: bool = True
     
+class DetailsConfig(BaseModel):
+    title: str = "FastAPI App"
+    description: str = "API"
+    
 class ApiConfig(BaseModel):
     prefix: str = "/api"
     
@@ -42,6 +46,7 @@ class Settings(BaseSettings):
     db: DatabaseConfig
     cache: CacheConfig
     static: StaticFilesConfig = StaticFilesConfig()
+    details: DetailsConfig = DetailsConfig()
     
 
 settings = Settings() # type: ignore

@@ -26,8 +26,8 @@ async def lifespan(app: FastAPI):
 
 main_app = FastAPI(
     lifespan=lifespan,
-    title="Dating Platform API",
-    description="API for the Dating Platform",
+    title=settings.details.title,
+    description=settings.details.description,
     dependencies=[Depends(verify_bot_key)],
 )
 main_app.include_router(api_v1_router, prefix=settings.api.prefix)
