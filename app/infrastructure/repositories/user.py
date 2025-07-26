@@ -4,8 +4,8 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.entities import UserEntity
-from app.core.interfaces import IUserRepository
+from app.domain.entities import UserEntity
+from app.domain.interfaces import IUserRepository
 from app.infrastructure.mappers import UserMapper
 from app.infrastructure.models import User
 

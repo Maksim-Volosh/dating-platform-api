@@ -2,16 +2,16 @@ import os
 import uuid
 from typing import List
 
+import aiofiles
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.schemas.photo import PhotoResponse, PhotoURL
-from app.config import settings
+from app.core.config import settings
 from app.infrastructure.db import db_helper
 from app.infrastructure.models.photos import Photo
 from app.infrastructure.models.users import User
-import aiofiles
 
 router = APIRouter(prefix="/users", tags=["User Photos"])
 

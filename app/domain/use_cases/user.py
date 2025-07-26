@@ -1,7 +1,7 @@
-from app.core.entities.user import UserEntity
-from app.core.exceptions import (UserAlreadyExists, UserNotFoundById,
+from app.domain.entities.user import UserEntity
+from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
                                  UsersNotFound)
-from app.core.interfaces import IUserRepository
+from app.domain.interfaces import IUserRepository
 
 
 class UserUseCase:

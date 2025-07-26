@@ -1,6 +1,6 @@
 from fastapi import Header, HTTPException, status
 
-from app.config import settings
+from app.core.config import settings
 
 
 async def verify_bot_key(x_api_key: str = Header(...)):

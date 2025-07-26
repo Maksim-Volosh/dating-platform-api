@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.entities.user import UserEntity
+from app.domain.entities.user import UserEntity
 
 
 class IUserRepository(ABC):

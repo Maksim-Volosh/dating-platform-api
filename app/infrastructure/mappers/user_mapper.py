@@ -1,5 +1,5 @@
 from app.infrastructure.models import User as UserModel
-from app.core.entities import UserEntity
+from app.domain.entities import UserEntity
 
 class UserMapper:
     @staticmethod

@@ -1,7 +1,7 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.use_cases import UserUseCase
+from app.domain.use_cases import UserUseCase
 from app.infrastructure.db import db_helper
 from app.infrastructure.repositories import SQLAlchemyUserRepository
 

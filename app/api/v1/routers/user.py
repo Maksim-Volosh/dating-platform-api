@@ -2,16 +2,14 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.api.v1.schemas.user import (UserCreateRequest,
-                                             UserCreateResponse, UserResponse,
-                                             UserUpdateRequest,
-                                             UserUpdateResponse)
-from app.core.entities import UserEntity
-from app.core.exceptions import (UserAlreadyExists, UserNotFoundById,
-                                 UsersNotFound)
-from app.core.use_cases import UserUseCase
-from app.dependencies.user import get_user_use_case
-
+from app.api.v1.schemas.user import (UserCreateRequest, UserCreateResponse,
+                                     UserResponse, UserUpdateRequest,
+                                     UserUpdateResponse)
+from app.core.containers.user import get_user_use_case
+from app.domain.entities import UserEntity
+from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
+                                   UsersNotFound)
+from app.domain.use_cases import UserUseCase
 
 router = APIRouter(prefix="/users", tags=["User"])
 
