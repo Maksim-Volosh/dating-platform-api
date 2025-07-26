@@ -39,7 +39,7 @@ async def create_user(
     user: UserCreateRequest,
     use_case: UserUseCase = Depends(get_user_use_case)
 ) -> UserCreateResponse:
-    user_entity = UserEntity(**user.model_dump())
+    user_entity = user.to_entity()
     try:
         new_user: UserEntity = await use_case.create(user_entity)
     except UserAlreadyExists:
@@ -52,7 +52,7 @@ async def update_user(
     update: UserUpdateRequest,
     use_case: UserUseCase = Depends(get_user_use_case)
 ) -> UserUpdateResponse:
-    update_entity = UserEntity(telegram_id=0, **update.model_dump())
+    update_entity = update.to_entity()
     try:
         user_model = await use_case.update(telegram_id, update_entity)
     except UserNotFoundById:

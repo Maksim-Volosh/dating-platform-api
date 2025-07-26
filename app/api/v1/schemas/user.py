@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
+from app.domain.entities import UserEntity
 from app.infrastructure.models.users import Gender, PreferGender
 
 class UserResponse(BaseModel):
@@ -21,6 +22,9 @@ class UserCreateRequest(BaseModel):
     description: Optional[str]
     gender: Gender
     prefer_gender: PreferGender
+    
+    def to_entity(self) -> UserEntity:
+        return UserEntity(**self.model_dump())
 
 class UserCreateResponse(BaseModel):
     telegram_id: int
@@ -38,6 +42,9 @@ class UserUpdateRequest(BaseModel):
     description: Optional[str]
     gender: Gender
     prefer_gender: PreferGender
+    
+    def to_entity(self) -> UserEntity:
+        return UserEntity(telegram_id=0, **self.model_dump())
     
 class UserUpdateResponse(BaseModel):
     telegram_id: int
