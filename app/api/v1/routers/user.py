@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.api.v1.schemas.user_schemas import (UserCreateRequest,
+from app.api.v1.schemas.user import (UserCreateRequest,
                                              UserCreateResponse, UserResponse,
                                              UserUpdateRequest,
                                              UserUpdateResponse)
@@ -10,7 +10,7 @@ from app.core.entities import UserEntity
 from app.core.exceptions import (UserAlreadyExists, UserNotFoundById,
                                  UsersNotFound)
 from app.core.use_cases import UserUseCase
-from app.infrastructure.di.container import get_user_use_case
+from app.dependencies.user import get_user_use_case
 
 
 router = APIRouter(prefix="/users", tags=["User"])

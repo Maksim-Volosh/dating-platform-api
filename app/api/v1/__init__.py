@@ -1,9 +1,9 @@
 from fastapi import APIRouter
     
-from .endpoints import deck_router, photo_router, user_router
+from .routers import deck, photo, user
 
 api_v1_router = APIRouter(prefix="/v1")
-router_list = [user_router, photo_router, deck_router]
+router_list = [user, photo, deck]
 
 for router in router_list:
     api_v1_router.include_router(router.router)

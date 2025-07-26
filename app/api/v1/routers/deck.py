@@ -6,7 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.v1.schemas.user_schemas import UserResponse
+from app.api.v1.schemas.user import UserResponse
 from app.infrastructure.db import db_helper
 from app.infrastructure.models.users import User
 from app.infrastructure.redis import redis_helper

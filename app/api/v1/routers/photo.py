@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.v1.schemas.photo_schemas import PhotoResponse, PhotoURL
+from app.api.v1.schemas.photo import PhotoResponse, PhotoURL
 from app.config import settings
 from app.infrastructure.db import db_helper
 from app.infrastructure.models.photos import Photo
