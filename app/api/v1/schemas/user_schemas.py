@@ -4,8 +4,7 @@ from pydantic import BaseModel
 
 from app.infrastructure.models.users import Gender, PreferGender
 
-
-class UserCreate(BaseModel):
+class UserResponse(BaseModel):
     telegram_id: int
     name: str
     age: int
@@ -14,7 +13,16 @@ class UserCreate(BaseModel):
     gender: Gender
     prefer_gender: PreferGender
 
-class UserReadResponse(BaseModel):
+class UserCreateRequest(BaseModel):
+    telegram_id: int
+    name: str
+    age: int
+    city: str
+    description: Optional[str]
+    gender: Gender
+    prefer_gender: PreferGender
+
+class UserCreateResponse(BaseModel):
     telegram_id: int
     name: str
     age: int
@@ -23,8 +31,20 @@ class UserReadResponse(BaseModel):
     gender: Gender
     prefer_gender: PreferGender
     
-class UserUpdateRequest(UserCreate):
-    ...
+class UserUpdateRequest(BaseModel):
+    name: str
+    age: int
+    city: str
+    description: Optional[str]
+    gender: Gender
+    prefer_gender: PreferGender
     
-class UserUpdateResponse(UserCreate):
-    ...
+class UserUpdateResponse(BaseModel):
+    telegram_id: int
+    name: str
+    age: int
+    city: str
+    description: Optional[str]
+    gender: Gender
+    prefer_gender: PreferGender
+
