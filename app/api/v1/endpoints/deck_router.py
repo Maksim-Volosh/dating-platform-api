@@ -11,7 +11,7 @@ from app.infrastructure.db import db_helper
 from app.infrastructure.models.users import User
 from app.infrastructure.redis import redis_helper
 
-router = APIRouter()
+router = APIRouter(prefix="/decks", tags=["Deck"])
 
 class DeckService:
     def __init__(self, db: AsyncSession, redis: redis.Redis) -> None:

@@ -13,7 +13,7 @@ from app.infrastructure.models.photos import Photo
 from app.infrastructure.models.users import User
 import aiofiles
 
-router = APIRouter()
+router = APIRouter(prefix="/users", tags=["User Photos"])
 
 
 @router.get("/{user_id}/photos", status_code=200)

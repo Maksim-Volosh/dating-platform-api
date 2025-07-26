@@ -13,7 +13,7 @@ from app.core.use_cases import UserUseCase
 from app.infrastructure.di.container import get_user_use_case
 
 
-router = APIRouter()
+router = APIRouter(prefix="/users", tags=["User"])
 
 @router.get("/{telegram_id}")
 async def get_user(  
