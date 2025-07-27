@@ -28,7 +28,7 @@ main_app = FastAPI(
     lifespan=lifespan,
     title=settings.details.title,
     description=settings.details.description,
-    # dependencies=[Depends(verify_bot_key)],
+    dependencies=[Depends(verify_bot_key)],
 )
 main_app.include_router(api_v1_router, prefix=settings.api.prefix)
 
