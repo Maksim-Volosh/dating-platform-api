@@ -17,8 +17,8 @@ async def lifespan(app: FastAPI):
     # Initialize
     async with db_helper.engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    os.makedirs(settings.static.directory, exist_ok=True)
-    yield
+        
+    yield # ---------
     
     # Cleanup
     await db_helper.dispose()
@@ -28,11 +28,11 @@ main_app = FastAPI(
     lifespan=lifespan,
     title=settings.details.title,
     description=settings.details.description,
-    dependencies=[Depends(verify_bot_key)],
+    # dependencies=[Depends(verify_bot_key)],
 )
 main_app.include_router(api_v1_router, prefix=settings.api.prefix)
 
-
+os.makedirs(settings.static.directory, exist_ok=True)
 main_app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
