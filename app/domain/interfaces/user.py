@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,7 +15,7 @@ class IUserRepository(ABC):
         raise NotImplementedError
         
     @abstractmethod
-    async def get_all(self) -> list[UserEntity] | None:
+    async def get_all(self) -> List[UserEntity] | None:
         raise NotImplementedError
     
     @abstractmethod
@@ -23,6 +24,10 @@ class IUserRepository(ABC):
         
     @abstractmethod
     async def update(self, telegram_id: int, update: UserEntity) -> UserEntity | None:
+        raise NotImplementedError
+    
+    @abstractmethod
+    async def get_users_by_preferences(self, city: str, age: int, gender: str, prefer_gender: str) -> List[UserEntity] | None:
         raise NotImplementedError
         
     # @abstractmethod
