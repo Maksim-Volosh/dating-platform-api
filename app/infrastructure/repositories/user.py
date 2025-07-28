@@ -56,3 +56,27 @@ class SQLAlchemyUserRepository(IUserRepository):
             
         await self.session.commit()
         return UserMapper.to_entity(user_model)
+    
+    async def get_users_by_preferences(self, city: str, age: int, gender: str, prefer_gender: str) -> List[UserEntity] | None:
+        prefer_ages = list(range(age - 2, age + 3))
+        
+        if prefer_gender != 'anyone':
+            q = select(User).where(
+                User.city == city,
+                User.age.in_(prefer_ages),
+                User.gender == prefer_gender,
+                User.prefer_gender.in_(['anyone', gender])
+            )
+        else:
+            q = select(User).where(
+                User.city == city,
+                User.age.in_(prefer_ages),
+                User.prefer_gender.in_(['anyone', gender])
+            )
+            
+        result = await self.session.execute(q)
+        user_models = result.scalars().all()
+        if user_models is None:
+            return None
+        
+        return [UserMapper.to_entity(user_model) for user_model in user_models]
