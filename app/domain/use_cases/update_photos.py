@@ -2,8 +2,8 @@ from typing import List
 
 from app.domain.entities import (PhotoEntity, PhotoUniqueNameEntity,
                                  PhotoUrlEntity, UserEntity)
-from app.domain.exceptions import (TooManyPhotos,
-                                   UserNotFoundById, WrongFileExtension)
+from app.domain.exceptions import (TooManyPhotos, UserNotFoundById,
+                                   WrongFileExtension)
 from app.domain.interfaces import (IPhotoRepository, IPhotoStorage,
                                    IUserRepository)
 

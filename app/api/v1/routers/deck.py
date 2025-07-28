@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.api.v1.schemas.user import UserResponse
 from app.core.containers.deck import get_user_deck_use_case
-from app.domain.exceptions import UserNotFoundById, NoCandidatesFound
+from app.domain.exceptions import NoCandidatesFound, UserNotFoundById
 from app.domain.use_cases import UserDeckUseCase
 
 router = APIRouter(prefix="/decks", tags=["Deck"])

@@ -1,8 +1,9 @@
 from enum import Enum
 from typing import List, Optional
 
+from sqlalchemy import BigInteger
 from sqlalchemy import Enum as SQLAlchemyEnum
-from sqlalchemy import String, BigInteger
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base

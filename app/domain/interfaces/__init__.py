@@ -5,7 +5,7 @@ __all__ = (
     "IDeckCache",
     
 )
-from .user import IUserRepository
+from .deck_cache import IDeckCache
 from .photo import IPhotoRepository
 from .photo_storage import IPhotoStorage
-from .deck_cache import IDeckCache
+from .user import IUserRepository

@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-    
+
 from .routers import deck, photo, user
 
 api_v1_router = APIRouter(prefix="/v1")

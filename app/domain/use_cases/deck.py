@@ -1,7 +1,6 @@
 from app.domain.entities import UserEntity
-from app.domain.exceptions import UserNotFoundById
-from app.domain.exceptions import NoCandidatesFound
-from app.domain.interfaces import IUserRepository, IDeckCache
+from app.domain.exceptions import NoCandidatesFound, UserNotFoundById
+from app.domain.interfaces import IDeckCache, IUserRepository
 
 
 class UserDeckUseCase:

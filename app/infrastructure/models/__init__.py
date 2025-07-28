@@ -4,5 +4,5 @@ __all__ = (
     "Photo"
 )
 from .base import Base
-from .users import User
 from .photos import Photo
+from .users import User

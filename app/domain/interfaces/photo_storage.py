@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from app.domain.entities import PhotoEntity, PhotoUniqueNameEntity, PhotoUrlEntity
+from app.domain.entities import (PhotoEntity, PhotoUniqueNameEntity,
+                                 PhotoUrlEntity)
 
 
 class IPhotoStorage(ABC):
