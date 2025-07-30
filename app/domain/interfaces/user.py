@@ -27,7 +27,7 @@ class IUserRepository(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    async def get_users_by_preferences(self, city: str, age: int, gender: str, prefer_gender: str) -> List[UserEntity] | None:
+    async def get_users_by_preferences(self, telegram_id: int, city: str, age: int, gender: str, prefer_gender: str) -> List[UserEntity] | None:
         raise NotImplementedError
         
     # @abstractmethod
