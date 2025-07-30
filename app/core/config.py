@@ -30,6 +30,10 @@ class DatabaseConfig(BaseSettings):
     
 class CacheConfig(BaseSettings):
     url: str
+    
+class DeckConfig(BaseSettings):
+    timeout: int = 60 * 60
+    max_size: int = 100
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -46,6 +50,7 @@ class Settings(BaseSettings):
     cache: CacheConfig
     static: StaticFilesConfig = StaticFilesConfig()
     details: DetailsConfig = DetailsConfig()
+    deck: DeckConfig = DeckConfig()
     
 
 settings = Settings() # type: ignore
