@@ -6,6 +6,6 @@ __all__ = (
     "SwipeEntity",
     "NormalizedSwipeEntity",
 )
+from .photo import PhotoEntity, PhotoUniqueNameEntity, PhotoUrlEntity
+from .swipe import NormalizedSwipeEntity, SwipeEntity
 from .user import UserEntity
-from .photo import PhotoUrlEntity, PhotoEntity, PhotoUniqueNameEntity
-from .swipe import SwipeEntity, NormalizedSwipeEntity

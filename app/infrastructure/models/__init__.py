@@ -6,5 +6,5 @@ __all__ = (
 )
 from .base import Base
 from .photos import Photo
-from .users import User
 from .swipe import Swipe
+from .users import User

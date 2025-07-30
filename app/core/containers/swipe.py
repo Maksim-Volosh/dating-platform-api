@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.use_cases import SwipeUserUseCase
 from app.infrastructure.db import db_helper
-from app.infrastructure.repositories import SQLAlchemyUserRepository
-from app.infrastructure.repositories.swipe import SQLAlchemySwipeRepository
+from app.infrastructure.repositories import (SQLAlchemySwipeRepository,
+                                             SQLAlchemyUserRepository)
 
 
 async def get_swipe_user_use_case(

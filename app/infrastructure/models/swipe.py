@@ -1,8 +1,10 @@
-from .base import Base
 from typing import Optional
 
 from sqlalchemy import BigInteger
 from sqlalchemy.orm import Mapped, mapped_column
+
+from .base import Base
+
 
 class Swipe(Base):
     __tablename__ = "swipe"

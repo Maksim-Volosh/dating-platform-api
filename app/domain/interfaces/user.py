@@ -3,7 +3,7 @@ from typing import List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.entities.user import UserEntity
+from app.domain.entities import UserEntity
 
 
 class IUserRepository(ABC):

@@ -1,4 +1,4 @@
-from app.domain.entities.user import UserEntity
+from app.domain.entities import UserEntity
 from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
                                    UsersNotFound)
 from app.domain.interfaces import IUserRepository

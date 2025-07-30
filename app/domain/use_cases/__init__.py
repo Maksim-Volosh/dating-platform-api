@@ -10,5 +10,5 @@ __all__ = (
 from .deck import UserDeckUseCase
 from .photo import (DeleteUserPhotosUseCase, RetrieveUserPhotosUseCase,
                     UpdateUserPhotosUseCase, UploadUserPhotosUseCase)
-from .user import UserUseCase
 from .swipe import SwipeUserUseCase
+from .user import UserUseCase

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from .routers import deck, photo, user, swipe
+from .routers import deck, photo, swipe, user
 
 api_v1_router = APIRouter(prefix="/v1")
 router_list = [user, photo, deck, swipe]
