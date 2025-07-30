@@ -1,17 +1,14 @@
-from typing import List, Type
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 
 from app.api.v1.schemas.user import (UserCreateRequest, UserCreateResponse,
                                      UserResponse, UserUpdateRequest,
                                      UserUpdateResponse)
 from app.core.containers.user import get_user_use_case
 from app.domain.entities import UserEntity
-from app.domain.exceptions import (NoCandidatesFound, PhotosNotFound,
-                                   TooManyPhotos, UserAlreadyExists,
-                                   UserNotFoundById, UsersNotFound,
-                                   WrongFileExtension)
+from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
+                                   UsersNotFound)
 from app.domain.use_cases import UserUseCase
 
 router = APIRouter(prefix="/users", tags=["User"])

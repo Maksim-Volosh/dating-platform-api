@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from app.domain.entities import UserEntity
 from app.infrastructure.models.users import Gender, PreferGender
 
+
 class UserResponse(BaseModel):
     telegram_id: int
     name: str
