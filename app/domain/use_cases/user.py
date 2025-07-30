@@ -11,7 +11,7 @@ class UserUseCase:
     async def get_by_id(self, telegram_id: int) -> UserEntity:
         user: UserEntity | None = await self.repo.get_by_id(telegram_id)
         if user is None:
-            raise UserNotFoundById()
+            raise UserNotFoundById
         return user
     
     async def get_all(self) -> list[UserEntity]:
