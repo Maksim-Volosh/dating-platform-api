@@ -1,3 +1,5 @@
+import random
+
 from app.core.config import settings
 from app.domain.entities import UserEntity
 from app.domain.exceptions import NoCandidatesFound, UserNotFoundById
@@ -17,6 +19,8 @@ class UserDeckUseCase:
         candidates = await self.user_repo.get_users_by_preferences(telegram_id, user.city, user.age, user.gender, user.prefer_gender)
         if candidates is None:
             raise NoCandidatesFound
+        
+        random.shuffle(candidates)
         
         key = f"deck:{telegram_id}"
         
