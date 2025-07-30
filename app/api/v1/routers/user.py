@@ -1,14 +1,17 @@
-from typing import List
+from typing import List, Type
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 
 from app.api.v1.schemas.user import (UserCreateRequest, UserCreateResponse,
                                      UserResponse, UserUpdateRequest,
                                      UserUpdateResponse)
 from app.core.containers.user import get_user_use_case
 from app.domain.entities import UserEntity
-from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
-                                   UsersNotFound)
+from app.domain.exceptions import (NoCandidatesFound, PhotosNotFound,
+                                   TooManyPhotos, UserAlreadyExists,
+                                   UserNotFoundById, UsersNotFound,
+                                   WrongFileExtension)
 from app.domain.use_cases import UserUseCase
 
 router = APIRouter(prefix="/users", tags=["User"])
@@ -20,8 +23,8 @@ async def get_user(
 ) -> UserResponse:
     try:
         user = await use_case.get_by_id(telegram_id=telegram_id)
-    except UserNotFoundById:
-        raise HTTPException(status_code=404, detail=f"User with Id: {telegram_id} not found")
+    except UserNotFoundById as e:
+        raise HTTPException(status_code=404, detail=e.message)
     return UserResponse.model_validate(user, from_attributes=True)
 
 @router.get("/")
@@ -30,8 +33,8 @@ async def get_users(
 ) -> List[UserResponse]:
     try:
         users = await use_case.get_all()
-    except UsersNotFound:
-        raise HTTPException(status_code=404, detail="No users found")
+    except UsersNotFound as e:
+        raise HTTPException(status_code=404, detail=e.message)
     return [UserResponse.model_validate(user, from_attributes=True) for user in users]
 
 @router.post("/")
@@ -42,8 +45,8 @@ async def create_user(
     user_entity = user.to_entity()
     try:
         new_user: UserEntity = await use_case.create(user_entity)
-    except UserAlreadyExists:
-        raise HTTPException(status_code=400, detail="User with this Telegram ID already exists")
+    except UserAlreadyExists as e:
+        raise HTTPException(status_code=400, detail=e.message)
     return UserCreateResponse.model_validate(new_user, from_attributes=True)
 
 @router.put("/{telegram_id}")
@@ -55,8 +58,8 @@ async def update_user(
     update_entity = update.to_entity()
     try:
         user_model = await use_case.update(telegram_id, update_entity)
-    except UserNotFoundById:
-        raise HTTPException(status_code=404, detail=f"User with Id: {telegram_id} not found")
+    except UserNotFoundById as e:
+        raise HTTPException(status_code=404, detail=e.message)
     return UserUpdateResponse.model_validate(user_model, from_attributes=True)
 
 

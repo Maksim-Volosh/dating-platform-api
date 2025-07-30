@@ -15,8 +15,8 @@ async def get_next_user_from_deck(
 ) -> UserResponse:
     try:
         user_entity = await use_case.next(telegram_id)
-    except UserNotFoundById:
-        raise HTTPException(status_code=404, detail=f"User with telegram_id: {telegram_id} not found")
-    except NoCandidatesFound:
-        raise HTTPException(status_code=404, detail="No candidates found")
+    except UserNotFoundById as e:
+        raise HTTPException(status_code=404, detail=e.message)
+    except NoCandidatesFound as e:
+        raise HTTPException(status_code=404, detail=e.message)
     return UserResponse.model_validate(user_entity, from_attributes=True)

@@ -25,13 +25,13 @@ async def get_user_photos(
 ) -> PhotoResponse:
     try:
         photos = await use_case.execute(telegram_id)
-    except UserNotFoundById:
+    except UserNotFoundById as e:
         raise HTTPException(
-            status_code=404, detail=f"User with telegram_id: {telegram_id} not found"
+            status_code=404, detail=e.message
         )
-    except PhotosNotFound:
+    except PhotosNotFound as e:
         raise HTTPException(
-            status_code=404, detail=f"User with telegram_id: {telegram_id} has no photos"
+            status_code=404, detail=e.message
         )
     
     return PhotoResponse(
@@ -46,13 +46,13 @@ async def delete_user_photos(
 ):
     try:
         await use_case.execute(telegram_id)
-    except UserNotFoundById:
+    except UserNotFoundById as e:
         raise HTTPException(
-            status_code=404, detail=f"User with telegram_id: {telegram_id} not found"
+            status_code=404, detail=e.message
         )
-    except PhotosNotFound:
+    except PhotosNotFound as e:
         raise HTTPException(
-            status_code=404, detail=f"User with telegram_id: {telegram_id} has no photos"
+            status_code=404, detail=e.message
         )
     return
     
@@ -65,15 +65,15 @@ async def upload_user_photos(
     photo_entities = await to_entities(photos)
     try:
         photo_urls = await use_case.execute(telegram_id, photo_entities)
-    except UserNotFoundById:
+    except UserNotFoundById as e:
         raise HTTPException(
-            status_code=404, detail=f"User with telegram_id: {telegram_id} not found"
+            status_code=404, detail=e.message
         )
     except TooManyPhotos as e:
         raise HTTPException(status_code=400, detail=e.message)
-    except WrongFileExtension:
+    except WrongFileExtension as e:
         raise HTTPException(
-            status_code=400, detail="You can upload only .jpg, .jpeg, .png or .webp files"
+            status_code=400, detail=e.message
         )
     
     return PhotoResponse(
@@ -90,15 +90,15 @@ async def update_user_photos(
     photo_entities = await to_entities(photos)
     try:
         photo_urls = await use_case.execute(telegram_id=telegram_id, photos=photo_entities)
-    except UserNotFoundById:
+    except UserNotFoundById as e:
         raise HTTPException(
-            status_code=404, detail=f"User with telegram_id: {telegram_id} not found"
+            status_code=404, detail=e.message
         )
     except TooManyPhotos as e:
         raise HTTPException(status_code=400, detail=e.message)
-    except WrongFileExtension:
+    except WrongFileExtension as e:
         raise HTTPException(
-            status_code=400, detail="You can upload only .jpg, .jpeg, .png or .webp files"
+            status_code=400, detail=e.message
         )
     
     return PhotoResponse(
