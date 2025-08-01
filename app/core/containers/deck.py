@@ -2,6 +2,7 @@ from fastapi import Depends
 from redis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.domain.services import DeckBuilderService
 from app.domain.use_cases import UserDeckUseCase
 from app.infrastructure.db import db_helper
 from app.infrastructure.redis import redis_helper
@@ -15,7 +16,9 @@ async def get_user_deck_use_case(
 ) -> UserDeckUseCase:
     user_repo = SQLAlchemyUserRepository(db)
     cache = DeckRedisCache(client)
+    deck_builder = DeckBuilderService(user_repo, cache)
     return UserDeckUseCase(
         user_repo=user_repo,
-        cache=cache
+        cache=cache,
+        deck_builder=deck_builder
     )

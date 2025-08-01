@@ -1,37 +1,21 @@
-import random
 
-from app.core.config import settings
 from app.domain.entities import UserEntity
-from app.domain.exceptions import NoCandidatesFound, UserNotFoundById
+from app.domain.exceptions import UserNotFoundById
 from app.domain.interfaces import IDeckCache, IUserRepository
+from app.domain.services import DeckBuilderService
 
 
 class UserDeckUseCase:
-    def __init__(self, user_repo: IUserRepository, cache: IDeckCache) -> None:
+    def __init__(self, user_repo: IUserRepository, cache: IDeckCache, deck_builder: DeckBuilderService) -> None:
         self.user_repo = user_repo
         self.cache = cache
+        self.deck_builder = deck_builder
         
-    async def build(self, telegram_id: int) -> None:
-        user: UserEntity | None = await self.user_repo.get_by_id(telegram_id)
-        if user is None:
-            raise UserNotFoundById
-        
-        candidates = await self.user_repo.get_users_by_preferences(telegram_id, user.city, user.age, user.gender, user.prefer_gender)
-        if candidates is None:
-            raise NoCandidatesFound
-        
-        random.shuffle(candidates)
-        
-        key = f"deck:{telegram_id}"
-        
-        await self.cache.rpush(key, candidates, timeout=settings.deck.timeout)
-        return
-    
     async def next(self, telegram_id: int) -> UserEntity:
         key = f"deck:{telegram_id}"
         user = await self.cache.lpop(key)
         if user is None:
-            await self.build(telegram_id)
+            await self.deck_builder.build(telegram_id)
             user = await self.cache.lpop(key)
             if user is None:
                 raise UserNotFoundById
