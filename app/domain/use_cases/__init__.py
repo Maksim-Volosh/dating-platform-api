@@ -6,9 +6,10 @@ __all__ = (
     "UpdateUserPhotosUseCase",
     "UserDeckUseCase",
     "SwipeUserUseCase",
+    "CreateUserUseCase",
 )
 from .deck import UserDeckUseCase
 from .photo import (DeleteUserPhotosUseCase, RetrieveUserPhotosUseCase,
                     UpdateUserPhotosUseCase, UploadUserPhotosUseCase)
 from .swipe import SwipeUserUseCase
-from .user import UserUseCase
+from .user import UserUseCase, CreateUserUseCase
