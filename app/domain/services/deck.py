@@ -11,18 +11,14 @@ class DeckBuilderService:
         self.user_repo = user_repo
         self.cache = cache
         
-    async def build(self, telegram_id: int) -> None:
-        user: UserEntity | None = await self.user_repo.get_by_id(telegram_id)
-        if user is None:
-            raise UserNotFoundById
-        
-        candidates = await self.user_repo.get_users_by_preferences(telegram_id, user.city, user.age, user.gender, user.prefer_gender)
+    async def build(self, user: UserEntity) -> None:
+        candidates = await self.user_repo.get_users_by_preferences(user.telegram_id, user.city, user.age, user.gender, user.prefer_gender)
         if candidates is None:
             raise NoCandidatesFound
         
         random.shuffle(candidates)
         
-        key = f"deck:{telegram_id}"
+        key = f"deck:{user.telegram_id}"
         
         await self.cache.rpush(key, candidates, timeout=settings.deck.timeout)
         return

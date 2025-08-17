@@ -11,12 +11,12 @@ class UserDeckUseCase:
         self.cache = cache
         self.deck_builder = deck_builder
         
-    async def next(self, telegram_id: int) -> UserEntity:
-        key = f"deck:{telegram_id}"
-        user = await self.cache.lpop(key)
-        if user is None:
-            await self.deck_builder.build(telegram_id)
-            user = await self.cache.lpop(key)
-            if user is None:
+    async def next(self, user: UserEntity) -> UserEntity:
+        key = f"deck:{user.telegram_id}"
+        user_entity = await self.cache.lpop(key)
+        if user_entity is None:
+            await self.deck_builder.build(user)
+            user_entity = await self.cache.lpop(key)
+            if user_entity is None:
                 raise UserNotFoundById
-        return user
+        return user_entity
