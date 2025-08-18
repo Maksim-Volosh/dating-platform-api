@@ -3,9 +3,8 @@ from app.domain.interfaces import ISwipeRepository, IUserRepository
 
 
 class SwipeUserUseCase:
-    def __init__(self, swipe_repo: ISwipeRepository, user_repo: IUserRepository) -> None:
+    def __init__(self, swipe_repo: ISwipeRepository) -> None:
         self.swipe_repo = swipe_repo
-        self.user_repo = user_repo
         
     async def _normalize_swipe(self, swipe: SwipeEntity) -> NormalizedSwipeEntity:
         if swipe.liker_id > swipe.liked_id:

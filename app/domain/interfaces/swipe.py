@@ -6,12 +6,13 @@ from app.infrastructure.models.swipe import Swipe
 
 class ISwipeRepository(ABC):
     @abstractmethod
-    async def create(self, swipe: NormalizedSwipeEntity):
+    async def create(self, swipe: NormalizedSwipeEntity) -> None:
         raise NotImplementedError
     
     @abstractmethod
     async def get_by_ids(self, user1_id: int, user2_id: int) -> Swipe | None:
         raise NotImplementedError
     
+    @abstractmethod
     async def update(self, swipe: NormalizedSwipeEntity) -> None:
         raise NotImplementedError

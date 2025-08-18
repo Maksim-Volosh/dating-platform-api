@@ -11,8 +11,6 @@ async def get_swipe_user_use_case(
     db: AsyncSession = Depends(db_helper.session_getter)
 ) -> SwipeUserUseCase:
     swipe_repo = SQLAlchemySwipeRepository(db)
-    user_repo = SQLAlchemyUserRepository(db)
     return SwipeUserUseCase(
-        swipe_repo=swipe_repo,
-        user_repo=user_repo
+        swipe_repo=swipe_repo
     )
