@@ -6,11 +6,13 @@ from app.api.v1.schemas.user import (UserCreateRequest, UserCreateResponse,
                                      UserResponse, UserUpdateRequest,
                                      UserUpdateResponse)
 from app.core.containers.user import (get_create_user_use_case,
+                                      get_update_user_use_case,
                                       get_user_use_case)
 from app.domain.entities import UserEntity
 from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
                                    UsersNotFound)
-from app.domain.use_cases import CreateUserUseCase, UserUseCase
+from app.domain.use_cases import (CreateUserUseCase, UpdateUserUseCase,
+                                  UserUseCase)
 
 router = APIRouter(prefix="/users", tags=["User"])
 
@@ -51,11 +53,11 @@ async def create_user(
 async def update_user(  
     telegram_id: int,  
     update: UserUpdateRequest,
-    use_case: UserUseCase = Depends(get_user_use_case)
+    use_case: UpdateUserUseCase = Depends(get_update_user_use_case)
 ) -> UserUpdateResponse:
     update_entity = update.to_entity()
     try:
-        user_model = await use_case.update(telegram_id, update_entity)
+        user_model = await use_case.execute(telegram_id, update_entity)
     except UserNotFoundById as e:
         raise HTTPException(status_code=404, detail=e.message)
     return UserUpdateResponse.model_validate(user_model, from_attributes=True)

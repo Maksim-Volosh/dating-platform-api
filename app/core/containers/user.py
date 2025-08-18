@@ -3,7 +3,8 @@ from redis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.services import DeckBuilderService
-from app.domain.use_cases import CreateUserUseCase, UserUseCase
+from app.domain.use_cases import (CreateUserUseCase, UpdateUserUseCase,
+                                  UserUseCase)
 from app.infrastructure.db import db_helper
 from app.infrastructure.redis import redis_helper
 from app.infrastructure.repositories import (DeckRedisCache,
@@ -24,3 +25,12 @@ async def get_create_user_use_case(
     cache = DeckRedisCache(client)
     deck_builder = DeckBuilderService(user_repo, cache)
     return CreateUserUseCase(user_repo=user_repo, deck_builder=deck_builder)
+
+async def get_update_user_use_case(
+    db: AsyncSession = Depends(db_helper.session_getter),
+    client: Redis = Depends(redis_helper.get_client)
+) -> UpdateUserUseCase:
+    user_repo = SQLAlchemyUserRepository(db)
+    cache = DeckRedisCache(client)
+    deck_builder = DeckBuilderService(user_repo, cache)
+    return UpdateUserUseCase(user_repo=user_repo, deck_builder=deck_builder)
