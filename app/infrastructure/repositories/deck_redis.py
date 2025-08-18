@@ -26,3 +26,6 @@ class DeckRedisCache(IDeckCache):
             return UserEntity(**json.loads(user_json))
         else:
             return None
+        
+    async def delete(self, key: str) -> None:
+        await self.client.delete(key)

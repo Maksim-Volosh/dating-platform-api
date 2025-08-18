@@ -19,6 +19,7 @@ class DeckBuilderService:
         random.shuffle(candidates)
         
         key = f"deck:{user.telegram_id}"
+        await self.cache.delete(key)
         
         await self.cache.rpush(key, candidates, timeout=settings.deck.timeout)
         return

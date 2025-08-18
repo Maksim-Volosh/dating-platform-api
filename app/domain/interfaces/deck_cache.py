@@ -12,3 +12,7 @@ class IDeckCache(ABC):
     @abstractmethod
     async def lpop(self, key: str) -> UserEntity | None:
         raise NotImplementedError
+    
+    @abstractmethod
+    async def delete(self, key: str) -> None:
+        raise NotImplementedError
