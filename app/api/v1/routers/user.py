@@ -37,7 +37,7 @@ async def get_users(
         raise HTTPException(status_code=404, detail=e.message)
     return [UserResponse.model_validate(user, from_attributes=True) for user in users]
 
-@router.post("/")
+@router.post("/", status_code=201)
 async def create_user(
     user: UserCreateRequest,
     use_case: CreateUserUseCase = Depends(get_create_user_use_case)
