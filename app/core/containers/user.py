@@ -8,6 +8,7 @@ from app.domain.use_cases import (CreateUserUseCase, UpdateUserUseCase,
 from app.infrastructure.db import db_helper
 from app.infrastructure.redis import redis_helper
 from app.infrastructure.repositories import (DeckRedisCache,
+                                             SQLAlchemySwipeRepository,
                                              SQLAlchemyUserRepository)
 
 
@@ -22,8 +23,9 @@ async def get_create_user_use_case(
     client: Redis = Depends(redis_helper.get_client)
 ) -> CreateUserUseCase:
     user_repo = SQLAlchemyUserRepository(db)
+    swipe_repo = SQLAlchemySwipeRepository(db)
     cache = DeckRedisCache(client)
-    deck_builder = DeckBuilderService(user_repo, cache)
+    deck_builder = DeckBuilderService(user_repo, swipe_repo, cache)
     return CreateUserUseCase(user_repo=user_repo, deck_builder=deck_builder)
 
 async def get_update_user_use_case(
@@ -31,6 +33,7 @@ async def get_update_user_use_case(
     client: Redis = Depends(redis_helper.get_client)
 ) -> UpdateUserUseCase:
     user_repo = SQLAlchemyUserRepository(db)
+    swipe_repo = SQLAlchemySwipeRepository(db)
     cache = DeckRedisCache(client)
-    deck_builder = DeckBuilderService(user_repo, cache)
+    deck_builder = DeckBuilderService(user_repo, swipe_repo, cache)
     return UpdateUserUseCase(user_repo=user_repo, deck_builder=deck_builder)

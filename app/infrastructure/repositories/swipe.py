@@ -28,6 +28,20 @@ class SQLAlchemySwipeRepository(ISwipeRepository):
             return None
         return swipe_model
     
+    async def was_swiped(self, user_id: int, candidate_id: int) -> bool:
+        if user_id > candidate_id:
+            q = select(Swipe).where(Swipe.user1_id == candidate_id, Swipe.user2_id == user_id)
+        else:
+            q = select(Swipe).where(Swipe.user1_id == user_id, Swipe.user2_id == candidate_id)
+        result = await self.session.execute(q)
+        swipe_model = result.scalars().one_or_none()
+        if swipe_model is None:
+            return False
+        if user_id > candidate_id:
+            return swipe_model.user2_decision is not None 
+        else:
+            return swipe_model.user1_decision is not None 
+    
     async def update(self, swipe: NormalizedSwipeEntity):
         swipe_model = await self.get_by_ids(swipe.user1_id, swipe.user2_id)
         if swipe_model is None:

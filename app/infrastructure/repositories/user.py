@@ -79,7 +79,7 @@ class SQLAlchemyUserRepository(IUserRepository):
             
         result = await self.session.execute(q)
         user_models = result.scalars().all()
-        if user_models is None:
+        if not user_models:
             return None
         
         return [UserMapper.to_entity(user_model) for user_model in user_models]

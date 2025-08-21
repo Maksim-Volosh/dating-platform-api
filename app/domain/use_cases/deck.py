@@ -1,6 +1,7 @@
 
 from app.domain.entities import UserEntity
 from app.domain.exceptions import UserNotFoundById
+from app.domain.exceptions.deck import NoCandidatesFound
 from app.domain.interfaces import IDeckCache, IUserRepository
 from app.domain.services import DeckBuilderService
 
@@ -15,7 +16,9 @@ class UserDeckUseCase:
         key = f"deck:{user.telegram_id}"
         user_entity = await self.cache.lpop(key)
         if user_entity is None:
-            await self.deck_builder.build(user)
+            res = await self.deck_builder.build(user)
+            if res is None:
+                raise NoCandidatesFound
             user_entity = await self.cache.lpop(key)
             if user_entity is None:
                 raise UserNotFoundById
