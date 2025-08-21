@@ -208,3 +208,6 @@ __marimo__/
 
 # Media files
 uploads/
+
+# Profile creator
+create_profiles.py
