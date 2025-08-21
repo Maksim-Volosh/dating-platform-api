@@ -4,9 +4,11 @@ __all__ = (
     "LocalPhotoStorage",
     "DeckRedisCache",
     "SQLAlchemySwipeRepository",
+    "SQLAlchemyCandidateRepository",
 )
 from .deck_redis import DeckRedisCache
 from .photo import SQLAlchemyPhotoRepository
 from .photo_storage import LocalPhotoStorage
 from .swipe import SQLAlchemySwipeRepository
 from .user import SQLAlchemyUserRepository
+from .candidate import SQLAlchemyCandidateRepository

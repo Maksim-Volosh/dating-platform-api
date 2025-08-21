@@ -7,6 +7,7 @@ from app.domain.use_cases import UserDeckUseCase
 from app.infrastructure.db import db_helper
 from app.infrastructure.redis import redis_helper
 from app.infrastructure.repositories import (DeckRedisCache,
+                                             SQLAlchemyCandidateRepository,
                                              SQLAlchemySwipeRepository,
                                              SQLAlchemyUserRepository)
 
@@ -18,7 +19,8 @@ async def get_user_deck_use_case(
     user_repo = SQLAlchemyUserRepository(db)
     swipe_repo = SQLAlchemySwipeRepository(db)
     cache = DeckRedisCache(client)
-    deck_builder = DeckBuilderService(user_repo, swipe_repo, cache)
+    candidate_repo = SQLAlchemyCandidateRepository(db)
+    deck_builder = DeckBuilderService(candidate_repo, swipe_repo, cache)
     return UserDeckUseCase(
         user_repo=user_repo,
         cache=cache,

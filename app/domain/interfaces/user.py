@@ -25,10 +25,6 @@ class IUserRepository(ABC):
     @abstractmethod
     async def update(self, telegram_id: int, update: UserEntity) -> UserEntity | None:
         raise NotImplementedError
-    
-    @abstractmethod
-    async def get_users_by_preferences(self, telegram_id: int, city: str, age: int, gender: str, prefer_gender: str) -> List[UserEntity] | None:
-        raise NotImplementedError
         
     # @abstractmethod
     # async def delete(self, user: UserEntity) -> UserEntity:

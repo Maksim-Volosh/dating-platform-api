@@ -2,17 +2,18 @@ import random
 
 from app.core.config import settings
 from app.domain.entities import UserEntity
-from app.domain.interfaces import IDeckCache, ISwipeRepository, IUserRepository
+from app.domain.interfaces import (ICandidateRepository, IDeckCache,
+                                   ISwipeRepository)
 
 
 class DeckBuilderService:
-    def __init__(self, user_repo: IUserRepository, swipe_repo: ISwipeRepository, cache: IDeckCache) -> None:
-        self.user_repo = user_repo
+    def __init__(self, candidate_repo: ICandidateRepository, swipe_repo: ISwipeRepository, cache: IDeckCache) -> None:
+        self.candidate_repo = candidate_repo
         self.swipe_repo = swipe_repo
         self.cache = cache
         
     async def build(self, user: UserEntity) -> None | bool:
-        candidates = await self.user_repo.get_users_by_preferences(user.telegram_id, user.city, user.age, user.gender, user.prefer_gender)
+        candidates = await self.candidate_repo.get_candidates_by_preferences(user.telegram_id, user.city, user.age, user.gender, user.prefer_gender)
         if candidates is None:
             return None
         
