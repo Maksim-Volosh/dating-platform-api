@@ -7,6 +7,8 @@ from app.core.containers.photo import (get_delete_user_photos_use_case,
                                        get_retrieve_user_photos_use_case,
                                        get_update_user_photos_use_case,
                                        get_upload_user_photos_use_case)
+from app.core.dependencies import get_existing_user
+from app.domain.entities import UserEntity
 from app.domain.exceptions import (PhotosNotFound, TooManyPhotos,
                                    UserNotFoundById, WrongFileExtension)
 from app.domain.use_cases import (DeleteUserPhotosUseCase,
@@ -20,11 +22,11 @@ router = APIRouter(prefix="/users", tags=["User Photos"])
 
 @router.get("/{telegram_id}/photos", status_code=200)
 async def get_user_photos(
-    telegram_id: int,
+    user: UserEntity = Depends(get_existing_user),
     use_case: RetrieveUserPhotosUseCase = Depends(get_retrieve_user_photos_use_case)
 ) -> PhotoResponse:
     try:
-        photos = await use_case.execute(telegram_id)
+        photos = await use_case.execute(user)
     except UserNotFoundById as e:
         raise HTTPException(
             status_code=404, detail=e.message
@@ -35,17 +37,17 @@ async def get_user_photos(
         )
     
     return PhotoResponse(
-        user_id=telegram_id, 
+        user_id=user.telegram_id, 
         photos=[PhotoURL.model_validate(photo, from_attributes=True) for photo in photos]
     )
     
 @router.delete("/{telegram_id}/photos", status_code=204)
 async def delete_user_photos(
-    telegram_id: int,
+    user: UserEntity = Depends(get_existing_user),
     use_case: DeleteUserPhotosUseCase = Depends(get_delete_user_photos_use_case)
 ):
     try:
-        await use_case.execute(telegram_id)
+        await use_case.execute(user)
     except UserNotFoundById as e:
         raise HTTPException(
             status_code=404, detail=e.message
@@ -58,13 +60,13 @@ async def delete_user_photos(
     
 @router.post("/{telegram_id}/photos", status_code=201)
 async def upload_user_photos(
-    telegram_id: int,
     photos: List[UploadFile],
+    user: UserEntity = Depends(get_existing_user),
     use_case: UploadUserPhotosUseCase = Depends(get_upload_user_photos_use_case)
 ) -> PhotoResponse:
     photo_entities = await to_entities(photos)
     try:
-        photo_urls = await use_case.execute(telegram_id, photo_entities)
+        photo_urls = await use_case.execute(user, photo_entities)
     except UserNotFoundById as e:
         raise HTTPException(
             status_code=404, detail=e.message
@@ -77,19 +79,19 @@ async def upload_user_photos(
         )
     
     return PhotoResponse(
-        user_id=telegram_id, 
+        user_id=user.telegram_id, 
         photos=[PhotoURL.model_validate(photo, from_attributes=True) for photo in photo_urls]
     )
     
 @router.put("/{telegram_id}/photos", status_code=201)
 async def update_user_photos(
-    telegram_id: int,
     photos: List[UploadFile],
+    user: UserEntity = Depends(get_existing_user),
     use_case: UpdateUserPhotosUseCase = Depends(get_update_user_photos_use_case)
 ) -> PhotoResponse:
     photo_entities = await to_entities(photos)
     try:
-        photo_urls = await use_case.execute(telegram_id=telegram_id, photos=photo_entities)
+        photo_urls = await use_case.execute(user, photo_entities)
     except UserNotFoundById as e:
         raise HTTPException(
             status_code=404, detail=e.message
@@ -102,6 +104,6 @@ async def update_user_photos(
         )
     
     return PhotoResponse(
-        user_id=telegram_id,
+        user_id=user.telegram_id,
         photos=[PhotoURL(url=p.url) for p in photo_urls]
     )

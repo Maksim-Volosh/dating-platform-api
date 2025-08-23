@@ -11,18 +11,12 @@ from app.domain.interfaces import (IPhotoRepository, IPhotoStorage,
 class RetrieveUserPhotosUseCase:
     def __init__(
         self,
-        user_repo: IUserRepository, 
         photo_repo: IPhotoRepository, 
     ) -> None:
         self.photo_repo = photo_repo
-        self.user_repo = user_repo
         
-    async def execute(self, telegram_id: int) -> list[PhotoUrlEntity]:
-        user: UserEntity | None = await self.user_repo.get_by_id(telegram_id)
-        if user is None:
-            raise UserNotFoundById
-        
-        photos: List[PhotoUrlEntity] | None = await self.photo_repo.get_by_user_id(telegram_id)
+    async def execute(self, user: UserEntity) -> list[PhotoUrlEntity]:
+        photos: List[PhotoUrlEntity] | None = await self.photo_repo.get_by_user_id(user.telegram_id)
         if photos is None:
             raise PhotosNotFound
         return photos
@@ -31,24 +25,17 @@ class RetrieveUserPhotosUseCase:
 class UpdateUserPhotosUseCase:
     def __init__(
         self,
-        user_repo: IUserRepository, 
         photo_repo: IPhotoRepository, 
         file_storage: IPhotoStorage
     ) -> None:
         self.photo_repo = photo_repo
-        self.user_repo = user_repo
         self.file_storage = file_storage
     
     async def execute(
-        self, telegram_id: int, photos: List[PhotoEntity]
+        self, user: UserEntity, photos: List[PhotoEntity]
     ) -> List[PhotoUrlEntity]:
-        # Check user exists
-        user: UserEntity | None = await self.user_repo.get_by_id(telegram_id)
-        if user is None:
-            raise UserNotFoundById
-        
         # Delete old photos
-        deleted_photos: List[PhotoUrlEntity] | None = await self.photo_repo.delete(telegram_id)
+        deleted_photos: List[PhotoUrlEntity] | None = await self.photo_repo.delete(user.telegram_id)
         if deleted_photos:
             await self.file_storage.delete(deleted_photos)
         
@@ -64,29 +51,23 @@ class UpdateUserPhotosUseCase:
             raise WrongFileExtension
             
         # Save new photos to database
-        urls: List[PhotoUrlEntity] = await self.photo_repo.create(telegram_id, unique_names) 
+        urls: List[PhotoUrlEntity] = await self.photo_repo.create(user.telegram_id, unique_names) 
         return urls
         
 
 class UploadUserPhotosUseCase:
     def __init__(
         self,
-        user_repo: IUserRepository, 
         photo_repo: IPhotoRepository, 
         file_storage: IPhotoStorage
     ) -> None:
         self.photo_repo = photo_repo
-        self.user_repo = user_repo
         self.file_storage = file_storage
     
     async def execute(
-        self, telegram_id: int, photos: List[PhotoEntity]
+        self, user: UserEntity, photos: List[PhotoEntity]
     ) -> List[PhotoUrlEntity]:
-        user: UserEntity | None = await self.user_repo.get_by_id(telegram_id)
-        if user is None:
-            raise UserNotFoundById
-        
-        user_photos = await self.photo_repo.get_by_user_id(telegram_id)
+        user_photos = await self.photo_repo.get_by_user_id(user.telegram_id)
         if user_photos is None:
             photos_len = 0
         else:
@@ -103,31 +84,25 @@ class UploadUserPhotosUseCase:
         if unique_names is None:
             raise WrongFileExtension
             
-        urls: List[PhotoUrlEntity] = await self.photo_repo.create(telegram_id, unique_names) 
+        urls: List[PhotoUrlEntity] = await self.photo_repo.create(user.telegram_id, unique_names) 
         return urls
 
 
 class DeleteUserPhotosUseCase:
     def __init__(
         self,
-        user_repo: IUserRepository, 
         photo_repo: IPhotoRepository, 
         file_storage: IPhotoStorage
     ) -> None:
         self.photo_repo = photo_repo
-        self.user_repo = user_repo
         self.file_storage = file_storage
     
     async def execute(
-        self, telegram_id: int
+        self, user: UserEntity
     ) -> None:
-        user: UserEntity | None = await self.user_repo.get_by_id(telegram_id)
-        if user is None:
-            raise UserNotFoundById
-        
-        deleted_photos: List[PhotoUrlEntity] | None = await self.photo_repo.delete(telegram_id)
+        deleted_photos: List[PhotoUrlEntity] | None = await self.photo_repo.delete(user.telegram_id)
         if deleted_photos is None:
             raise PhotosNotFound
         
         await self.file_storage.delete(deleted_photos)
-        return     
+        return
