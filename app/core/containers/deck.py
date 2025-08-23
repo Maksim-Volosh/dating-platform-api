@@ -8,8 +8,7 @@ from app.infrastructure.db import db_helper
 from app.infrastructure.redis import redis_helper
 from app.infrastructure.repositories import (DeckRedisCache,
                                              SQLAlchemyCandidateRepository,
-                                             SQLAlchemySwipeRepository,
-                                             SQLAlchemyUserRepository)
+                                             SQLAlchemySwipeRepository)
 
 
 async def get_user_deck_use_case(

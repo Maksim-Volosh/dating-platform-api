@@ -7,8 +7,7 @@ from app.domain.use_cases import (DeleteUserPhotosUseCase,
                                   UploadUserPhotosUseCase)
 from app.infrastructure.db import db_helper
 from app.infrastructure.repositories import (LocalPhotoStorage,
-                                             SQLAlchemyPhotoRepository,
-                                             SQLAlchemyUserRepository)
+                                             SQLAlchemyPhotoRepository)
 
 
 async def get_retrieve_user_photos_use_case(
