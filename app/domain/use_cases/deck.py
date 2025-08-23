@@ -7,8 +7,7 @@ from app.domain.services import DeckBuilderService
 
 
 class UserDeckUseCase:
-    def __init__(self, user_repo: IUserRepository, cache: IDeckCache, deck_builder: DeckBuilderService) -> None:
-        self.user_repo = user_repo
+    def __init__(self, cache: IDeckCache, deck_builder: DeckBuilderService) -> None:
         self.cache = cache
         self.deck_builder = deck_builder
         

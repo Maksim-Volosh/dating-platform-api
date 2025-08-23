@@ -16,13 +16,11 @@ async def get_user_deck_use_case(
     db: AsyncSession = Depends(db_helper.session_getter),
     client: Redis = Depends(redis_helper.get_client)
 ) -> UserDeckUseCase:
-    user_repo = SQLAlchemyUserRepository(db)
     swipe_repo = SQLAlchemySwipeRepository(db)
     cache = DeckRedisCache(client)
     candidate_repo = SQLAlchemyCandidateRepository(db)
     deck_builder = DeckBuilderService(candidate_repo, swipe_repo, cache)
     return UserDeckUseCase(
-        user_repo=user_repo,
         cache=cache,
         deck_builder=deck_builder
     )
