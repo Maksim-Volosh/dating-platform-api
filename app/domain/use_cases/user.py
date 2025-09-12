@@ -1,3 +1,5 @@
+import asyncio
+
 from app.domain.entities import UserEntity
 from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
                                    UsersNotFound)
@@ -33,7 +35,7 @@ class CreateUserUseCase:
             raise UserAlreadyExists
         
         if created_user:
-            await self.deck_builder.build(created_user)
+            asyncio.create_task(self.deck_builder.build(created_user))
             
         return created_user
     
@@ -48,6 +50,6 @@ class UpdateUserUseCase:
             raise UserNotFoundById
         
         if updated_user:
-            await self.deck_builder.build(updated_user)
+            asyncio.create_task(self.deck_builder.build(updated_user))
             
         return updated_user
