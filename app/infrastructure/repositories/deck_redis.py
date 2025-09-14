@@ -29,3 +29,13 @@ class DeckRedisCache(IDeckCache):
         
     async def delete(self, key: str) -> None:
         await self.client.delete(key)
+        
+    async def get_deck(self, key: str) -> List[UserEntity] | None:
+        data = await self.client.lrange(key, 0, -1) # type: ignore
+
+        if not data:
+            return None
+        
+        parsed = [json.loads(item) for item in data]
+
+        return [UserEntity(**item) for item in parsed]

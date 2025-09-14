@@ -1,9 +1,12 @@
 import asyncio
+from typing import List
 
+from app.core.config import settings
 from app.domain.entities import UserEntity
 from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
                                    UsersNotFound)
 from app.domain.interfaces import IUserRepository
+from app.domain.interfaces.deck_cache import IDeckCache
 from app.domain.services import DeckBuilderService
 
 
@@ -40,9 +43,10 @@ class CreateUserUseCase:
         return created_user
     
 class UpdateUserUseCase:
-    def __init__(self, user_repo: IUserRepository, deck_builder: DeckBuilderService) -> None:
+    def __init__(self, user_repo: IUserRepository, deck_builder: DeckBuilderService, cache: IDeckCache) -> None:
         self.user_repo = user_repo
         self.deck_builder = deck_builder
+        self.cache = cache
         
     async def execute(self, telegram_id: int, update: UserEntity) -> UserEntity:
         updated_user = await self.user_repo.update(telegram_id, update)
@@ -50,6 +54,6 @@ class UpdateUserUseCase:
             raise UserNotFoundById
         
         if updated_user:
-            asyncio.create_task(self.deck_builder.build(updated_user))
+            asyncio.create_task(self.deck_builder.build_and_clean_others(updated_user))
             
         return updated_user

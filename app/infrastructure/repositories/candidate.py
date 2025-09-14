@@ -24,14 +24,14 @@ class SQLAlchemyCandidateRepository(ICandidateRepository):
                 User.age.in_(prefer_ages),
                 User.gender == prefer_gender,
                 User.prefer_gender.in_(['anyone', gender])
-            ).limit(settings.deck.max_size)
+            )
         else:
             q = select(User).where(
                 User.telegram_id != telegram_id,
                 User.city == city,
                 User.age.in_(prefer_ages),
                 User.prefer_gender.in_(['anyone', gender])
-            ).limit(settings.deck.max_size)
+            )
             
         result = await self.session.execute(q)
         user_models = result.scalars().all()

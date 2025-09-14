@@ -39,4 +39,4 @@ async def get_update_user_use_case(
     cache = DeckRedisCache(client)
     candidate_repo = SQLAlchemyCandidateRepository(db)
     deck_builder = DeckBuilderService(candidate_repo, swipe_repo, cache)
-    return UpdateUserUseCase(user_repo=user_repo, deck_builder=deck_builder)
+    return UpdateUserUseCase(user_repo=user_repo, deck_builder=deck_builder, cache=cache)
