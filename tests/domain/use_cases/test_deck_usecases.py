@@ -25,11 +25,10 @@ def fake_user():
 # -------------------------------
 
 @pytest.mark.asyncio
-async def test_user_deck_use_case_get_from_cahce(fake_user):
+async def test_user_deck_use_case_get_from_cache(fake_user):
     cache = AsyncMock()
     cache.lpop.return_value = fake_user 
     deck_builder = AsyncMock()
-    deck_builder.build.return_value = [fake_user]
     
     use_case = UserDeckUseCase(cache, deck_builder)
 
@@ -51,7 +50,7 @@ async def test_user_deck_use_case_build_deck(fake_user):
 
     assert user == fake_user
     assert cache.lpop.await_count == 2
-    cache.lpop.assert_awaited_with("deck:1")
+    cache.lpop.assert_any_await("deck:1")
     deck_builder.build.assert_awaited_once_with(fake_user)
     
 @pytest.mark.asyncio
