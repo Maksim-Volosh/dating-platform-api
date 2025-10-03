@@ -3,7 +3,7 @@ import logging
 import os
 import sys
 import tempfile
-from os import getenv
+from config import API_KEY, API_URL, TOKEN
 
 import aiohttp
 from aiogram import Bot, Dispatcher, F, html
@@ -15,14 +15,6 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import (FSInputFile, InputMediaPhoto, KeyboardButton,
                            Message, ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
-from dotenv import load_dotenv
-
-load_dotenv()
-
-TOKEN = getenv("BOT_TOKEN", "key")
-API_URL = getenv("API_URL", "http://localhost:8000/api/v1")
-API_KEY = getenv("API_KEY", "k")
-
 
 dp = Dispatcher()
 
