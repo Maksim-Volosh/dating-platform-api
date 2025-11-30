@@ -24,12 +24,12 @@ class SQLAlchemyPhotoRepository(IPhotoRepository):
         return [PhotoEntity(file_id=photo.file_id) for photo in photo_models]
     
     async def create(
-        self, telegram_id: int, file_ids: List[PhotoEntity]
+        self, telegram_id: int, photos: List[PhotoEntity]
     ) -> List[PhotoEntity]:
         photo_objs = []
-        for file_id in file_ids:
+        for photo in photos:
             new_photo = Photo(
-                file_id=file_id, user_id=telegram_id
+                file_id=photo.file_id, user_id=telegram_id
                 )
             photo_objs.append(new_photo)
             
