@@ -11,7 +11,7 @@ class IPhotoRepository(ABC):
 
     @abstractmethod
     async def create(
-        self, telegram_id: int, ids: List[PhotoEntity]
+        self, telegram_id: int, file_ids: List[PhotoEntity]
     ) -> List[PhotoEntity]:
         raise NotImplementedError
 

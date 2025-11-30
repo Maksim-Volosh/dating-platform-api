@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.domain.entities import PhotoUniqueNameEntity, PhotoUrlEntity
+from app.domain.entities import PhotoEntity
 from app.domain.interfaces import IPhotoRepository
 from app.infrastructure.models import Photo
 
@@ -13,7 +13,7 @@ class SQLAlchemyPhotoRepository(IPhotoRepository):
     def __init__(self, session) -> None:
         self.session: AsyncSession = session
         
-    async def get_by_user_id(self, telegram_id: int) -> List[PhotoUrlEntity] | None:
+    async def get_by_user_id(self, telegram_id: int) -> List[PhotoEntity] | None:
         q = select(Photo).where(Photo.user_id == telegram_id)
         result = await self.session.execute(q)
         photo_models = result.scalars().all()
@@ -21,24 +21,24 @@ class SQLAlchemyPhotoRepository(IPhotoRepository):
         if not photo_models:
             return None
 
-        return [PhotoUrlEntity(url=photo.url) for photo in photo_models]
+        return [PhotoEntity(file_id=photo.file_id) for photo in photo_models]
     
     async def create(
-        self, telegram_id: int, unique_names: List[PhotoUniqueNameEntity]
-    ) -> List[PhotoUrlEntity]:
+        self, telegram_id: int, file_ids: List[PhotoEntity]
+    ) -> List[PhotoEntity]:
         photo_objs = []
-        for unique_name in unique_names:
+        for file_id in file_ids:
             new_photo = Photo(
-                url=f"{settings.static.url}/{unique_name.name}", user_id=telegram_id
+                file_id=file_id, user_id=telegram_id
                 )
             photo_objs.append(new_photo)
             
         for photo in photo_objs:
             self.session.add(photo)
         await self.session.commit()
-        return [PhotoUrlEntity(url=photo.url) for photo in photo_objs]
+        return [PhotoEntity(file_id=photo.file_id) for photo in photo_objs]
     
-    async def delete(self, telegram_id: int) -> List[PhotoUrlEntity] | None:
+    async def delete(self, telegram_id: int) -> List[PhotoEntity] | None:
         q = select(Photo).where(Photo.user_id == telegram_id)
         result = await self.session.execute(q)
         photos_models = result.scalars().all()
@@ -46,10 +46,10 @@ class SQLAlchemyPhotoRepository(IPhotoRepository):
         if photos_models is None:
             return None
         
-        photo_urls = []
+        photo_file_ids = []
         for photo in photos_models:
-            photo_urls.append(PhotoUrlEntity(url=photo.url))
+            photo_file_ids.append(PhotoEntity(file_id=photo.file_id))
             await self.session.delete(photo)
             
         await self.session.commit()
-        return photo_urls
+        return photo_file_ids
