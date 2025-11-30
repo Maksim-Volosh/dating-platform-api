@@ -27,9 +27,9 @@ async def command_start_handler(message: Message, state: FSMContext) -> None:
                     data = await resp.json()
                     await message.answer(f"С возвращением, {html.bold(data['name'])}! 👋", reply_markup=main_kb)
                 else:
-                    await message.answer("Привет! Я тебя не нашёл в базе. Давай зарегистрируемся ✨")
+                    await message.answer("Привет! Тебя еще нет с нами. Давай зарегистрируемся) ✨")
                     await state.set_state(Registration.name)
-                    await message.answer("Как тебя зовут?", reply_markup=await get_name_keyboard(message))
+                    await message.answer("Сначало расскажи - как тебя зовут?", reply_markup=await get_name_keyboard(message))
 
         except Exception as e:
             await message.answer("⚠️ Ошибка при соединении с сервером.")

@@ -1,6 +1,9 @@
-from aiogram import Dispatcher, Router
+import asyncio
+
+from aiogram import Dispatcher, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types.input_media_photo import InputMediaPhoto
 
 from app.keyboards.keyboards import (get_gender_keyboard,
                                      get_prefer_gender_keyboard, main_kb)
@@ -63,13 +66,52 @@ async def process_prefer_gender(message: Message, state: FSMContext) -> None:
         await message.answer("⚠️ Пожалуйста, выбери валидный пол.")
         return
     await state.update_data(prefer_gender=message.text)
+    await state.set_state(Registration.photos)
+    await message.answer("Отлично, теперь пришли мне свои фотографии где можно увидеть твою красоту!) Фотографий не должно быть больше 3х")
+    
+
+@router.message(Registration.photos, F.photo)
+async def process_photos(message: Message, state: FSMContext) -> None:
     data = await state.get_data()
-    await message.answer("Отлично! Теперь я знаю о тебе все! 🎉", reply_markup=main_kb)
+    photo_ids = data.get("photo_ids", [])
+
+
+    if len(photo_ids) < 3:
+        file_id = message.photo[-1].file_id # type: ignore
+        # take the highest quality photo
+        photo_ids.append(file_id)
+
+        await state.update_data(photo_ids=photo_ids)
+        if len(photo_ids) == 3:
+            await message.answer(
+                f"Фото добавлено ({len(photo_ids)}/3)."
+            )
+            await finish_photo_upload(message, state)
+        elif len(photo_ids) < 3:
+            await message.answer(
+                f"Фото добавлено ({len(photo_ids)}/3). Отправь ещё или нажми «Завершить», когда закончишь."
+            )
+    
+@router.message(Registration.photos, F.text.lower() == "завершить")
+async def finish_photo_upload(message: Message, state: FSMContext):
+    data = await state.get_data()
+    photo_ids = data.get("photo_ids", [])
+
+    if not photo_ids:
+        await message.answer("Ты не отправил ни одной фотографии 🙃")
+        return
+    
+    await asyncio.sleep(0.5)
+    await message.answer("Отлично! Теперь я знаю о тебе всё! 🎉", reply_markup=main_kb)
+    await message.answer_media_group(media=[InputMediaPhoto(media=photo_id) for photo_id in photo_ids])
+
+    # Здесь можно вызывать create_user(...)
+    # await create_user(data, message.from_user.id)
+    print(data)
+
     await state.clear()
-    await create_user(
-        data, 
-        message.from_user.id # type: ignore
-    )
     
 def register(dp: Dispatcher) -> None:
     dp.include_router(router)
+    
+    

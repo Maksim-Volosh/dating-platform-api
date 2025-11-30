@@ -8,3 +8,4 @@ class Registration(StatesGroup):
     description = State()
     gender = State()
     prefer_gender = State()
+    photos = State()
