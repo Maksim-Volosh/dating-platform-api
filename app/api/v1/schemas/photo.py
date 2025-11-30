@@ -3,9 +3,9 @@ from typing import List
 from pydantic import BaseModel
 
 
-class PhotoURL(BaseModel):
-    url: str
+class PhotoFileId(BaseModel):
+    file_id: str
     
 class PhotoResponse(BaseModel):
     user_id: int
-    photos: List[PhotoURL]
+    photos: List[PhotoFileId]
