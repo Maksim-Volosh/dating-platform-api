@@ -1,8 +1,8 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException
 
-from app.api.v1.schemas.photo import PhotoResponse, PhotoFileId
+from app.api.v1.schemas.photo import PhotoFileId, PhotoResponse
 from app.core.containers.photo import (get_delete_user_photos_use_case,
                                        get_retrieve_user_photos_use_case,
                                        get_update_user_photos_use_case,

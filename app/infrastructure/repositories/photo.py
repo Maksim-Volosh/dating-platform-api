@@ -3,7 +3,6 @@ from typing import List
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
 from app.domain.entities import PhotoEntity
 from app.domain.interfaces import IPhotoRepository
 from app.infrastructure.models import Photo
