@@ -8,6 +8,7 @@ from config import API_KEY, API_URL
 
 from app.keyboards.keyboards import get_name_keyboard, main_kb
 from app.states.registration import Registration
+from app.services import get_user_photos
 
 router = Router()
 
@@ -38,17 +39,7 @@ async def my_profile(message: Message, state: FSMContext) -> None:
             )
 
             # --- 2. Get user photos ---
-            async with session.get(
-                f"{API_URL}/users/{telegram_id}/photos",
-                headers={"x-api-key": API_KEY}
-            ) as photo_resp:
-
-                if photo_resp.status != 200:
-                    await message.answer(caption, reply_markup=main_kb)
-                    return
-
-                photos_data = await photo_resp.json()
-                photos = photos_data.get("photos", [])
+            photos = await get_user_photos(telegram_id)
 
             if not photos:
                 await message.answer(caption, reply_markup=main_kb)

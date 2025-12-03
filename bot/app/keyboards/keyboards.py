@@ -29,3 +29,11 @@ main_kb = ReplyKeyboardMarkup(
     resize_keyboard=True,
     one_time_keyboard=True,
 )
+
+photo_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Завершить")]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True,
+)

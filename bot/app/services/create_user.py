@@ -14,8 +14,8 @@ PREFER_GENDER_MAP = {
     "Неважно": "anyone",
 }
 
-async def create_user(data: dict, telegram_id: int) -> bool:
-    payload = {
+async def create_user_profile(data: dict, telegram_id: int) -> bool:
+    user_payload = {
         "telegram_id": telegram_id,
         "name": data["name"],
         "age": int(data["age"]),
@@ -24,21 +24,21 @@ async def create_user(data: dict, telegram_id: int) -> bool:
         "gender": GENDER_MAP[data["gender"]],
         "prefer_gender": PREFER_GENDER_MAP[data["prefer_gender"]],
     }
-    logging.info(f"Creating user at {time.time()}: {payload}")
+    
+    logging.info(f"Creating user at {time.time()}: {user_payload}")
     async with aiohttp.ClientSession() as session:
         try:
             async with session.post(
                 f"{API_URL}/users/",
                 headers={"x-api-key": API_KEY},
-                json=payload,
+                json=user_payload,
             ) as resp:
-                if resp.status == 201:
-                    return True
-                else:
-                    logging.error(f"API error: {await resp.text()}")
+                if resp.status != 201:
+                    logging.error(f"CREATE USER API error: {await resp.text()}")
                     return False
 
 
         except Exception as e:
             logging.error(f"API error: {e}")
+
     return False

@@ -6,8 +6,9 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.types.input_media_photo import InputMediaPhoto
 
 from app.keyboards.keyboards import (get_gender_keyboard,
-                                     get_prefer_gender_keyboard, main_kb)
-from app.services.create_user import create_user
+                                     get_prefer_gender_keyboard, main_kb,
+                                     photo_kb)
+from app.services import create_user_profile, create_photos_for_user
 from app.states.registration import Registration
 
 router = Router()
@@ -89,7 +90,7 @@ async def process_photos(message: Message, state: FSMContext) -> None:
             await finish_photo_upload(message, state)
         elif len(photo_ids) < 3:
             await message.answer(
-                f"Фото добавлено ({len(photo_ids)}/3). Отправь ещё или нажми «Завершить», когда закончишь."
+                f"Фото добавлено ({len(photo_ids)}/3). Отправь ещё или нажми «Завершить», когда закончишь.", reply_markup=photo_kb
             )
     
 @router.message(Registration.photos, F.text.lower() == "завершить")
@@ -103,11 +104,10 @@ async def finish_photo_upload(message: Message, state: FSMContext):
     
     await asyncio.sleep(0.5)
     await message.answer("Отлично! Теперь я знаю о тебе всё! 🎉", reply_markup=main_kb)
-    await message.answer_media_group(media=[InputMediaPhoto(media=photo_id) for photo_id in photo_ids])
-
-    # Здесь можно вызывать create_user(...)
-    # await create_user(data, message.from_user.id)
-    print(data)
+    
+    if message.from_user is not None:
+        await create_user_profile(data, message.from_user.id)
+        await create_photos_for_user(data, message.from_user.id)
 
     await state.clear()
     
