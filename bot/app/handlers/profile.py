@@ -1,11 +1,9 @@
 import logging
-import os
-import tempfile
 
 import aiohttp
 from aiogram import Dispatcher, F, Router, html
 from aiogram.fsm.context import FSMContext
-from aiogram.types import FSInputFile, InputMediaPhoto, Message
+from aiogram.types import InputMediaPhoto, Message
 from config import API_KEY, API_URL
 
 from app.keyboards.keyboards import get_name_keyboard, main_kb
@@ -19,7 +17,7 @@ async def my_profile(message: Message, state: FSMContext) -> None:
 
     async with aiohttp.ClientSession() as session:
         try:
-            # --- 1. Получаем данные пользователя ---
+            # --- 1. Get user data ---
             async with session.get(
                 f"{API_URL}/users/{telegram_id}",
                 headers={"x-api-key": API_KEY}
@@ -31,60 +29,47 @@ async def my_profile(message: Message, state: FSMContext) -> None:
                     return
 
                 data = await resp.json()
-                caption = (
-                    f"{html.bold(data['name'])}, {html.bold(str(data['age']))}, "
-                    f"{html.bold(data['city'])}\n\n{html.bold(data['description'] or 'Без описания')}"
-                )
+                
+            # --- Create caption ---
+            caption = (
+                f"{html.bold(data['name'])}, {html.bold(str(data['age']))}, "
+                f"{html.bold(data['city'])}\n\n"
+                f"{html.italic(data['description'] or 'Без описания')}"
+            )
 
-            # --- 2. Получаем фото пользователя ---
+            # --- 2. Get user photos ---
             async with session.get(
                 f"{API_URL}/users/{telegram_id}/photos",
                 headers={"x-api-key": API_KEY}
             ) as photo_resp:
-                if photo_resp.status == 200:
-                    photos_data = await photo_resp.json()
-                    photos = photos_data.get("photos", [])
 
-                    if photos:
-                        media = []
-                        tmp_files = []  # сохраняем, чтобы потом удалить
-
-                        for i, p in enumerate(photos):
-                            async with session.get("http://localhost:8000" + p["url"]) as resp:
-                                if resp.status == 200:
-                                    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".jpg")
-                                    tmp_file.write(await resp.read())
-                                    tmp_file.close()
-
-                                    # caption добавляем только к первому фото
-                                    if i == 0:
-                                        media.append(InputMediaPhoto(
-                                            media=FSInputFile(tmp_file.name),
-                                            caption=caption,
-                                            parse_mode="HTML"
-                                        ))
-                                    else:
-                                        media.append(InputMediaPhoto(media=FSInputFile(tmp_file.name)))
-
-                                    tmp_files.append(tmp_file.name)
-
-                        if media:
-                            await message.answer_media_group(media)
-                            await message.answer("⬆️ Вот твоя анкета", reply_markup=main_kb)
-
-                        # удаляем файлы после отправки
-                        for f in tmp_files:
-                            os.remove(f)
-
-                    else:
-                        await message.answer(caption, reply_markup=main_kb)
-                else:
+                if photo_resp.status != 200:
                     await message.answer(caption, reply_markup=main_kb)
+                    return
+
+                photos_data = await photo_resp.json()
+                photos = photos_data.get("photos", [])
+
+            if not photos:
+                await message.answer(caption, reply_markup=main_kb)
+                return
+
+            file_ids = [p.get("file_id") for p in photos if p.get("file_id")]
+
+            media_group = [
+                InputMediaPhoto(media=fid) for fid in file_ids
+            ]
+
+            media_group[0].caption = caption
+            media_group[0].parse_mode = "HTML"
+
+            await message.answer_media_group(media_group) # type: ignore
+            await message.answer("⬆️ Вот твоя анкета", reply_markup=main_kb)
 
         except Exception as e:
-            await message.answer("⚠️ Ошибка при соединении с сервером.")
             logging.error(f"API error: {e}")
-            
+            await message.answer("⚠️ Ошибка при соединении с сервером.")
+      
             
 def register(dp: Dispatcher) -> None:
     dp.include_router(router)
