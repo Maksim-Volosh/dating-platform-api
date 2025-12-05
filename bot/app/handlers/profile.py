@@ -59,16 +59,7 @@ async def my_profile(message: Message, state: FSMContext) -> None:
 
         except Exception as e:
             logging.error(f"API error: {e}")
-            await message.answer("⚠️ Ошибка при соединении с сервером.")
-            
-@router.message(F.text == "2")
-async def restart_registration(message: Message, state: FSMContext) -> None:
-    await state.clear()
-    await message.answer("Ну давай по новой ✨")
-    await state.set_state(Registration.name)
-    await state.update_data(update=True)
-    await message.answer("Как тебя зовут?", reply_markup=await get_name_keyboard(message))
-      
+            await message.answer("⚠️ Ошибка при соединении с сервером.")     
             
 def register(dp: Dispatcher) -> None:
     dp.include_router(router)
