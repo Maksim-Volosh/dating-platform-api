@@ -6,7 +6,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InputMediaPhoto, Message
 from config import API_KEY, API_URL
 
-from app.keyboards.keyboards import get_name_keyboard, main_kb
+from app.keyboards.keyboards import get_name_keyboard, main_kb, profile_kb
 from app.states.registration import Registration
 from app.services import get_user_photos
 
@@ -55,11 +55,19 @@ async def my_profile(message: Message, state: FSMContext) -> None:
             media_group[0].parse_mode = "HTML"
 
             await message.answer_media_group(media_group) # type: ignore
-            await message.answer("⬆️ Вот твоя анкета", reply_markup=main_kb)
+            await message.answer("1. Листать анкеты. \n2. Заполнить анкету заново. \n3. Изменить фотографии. \n4. Изменить описание.", reply_markup=profile_kb)
 
         except Exception as e:
             logging.error(f"API error: {e}")
             await message.answer("⚠️ Ошибка при соединении с сервером.")
+            
+@router.message(F.text == "2")
+async def restart_registration(message: Message, state: FSMContext) -> None:
+    await state.clear()
+    await message.answer("Ну давай по новой ✨")
+    await state.set_state(Registration.name)
+    await state.update_data(update=True)
+    await message.answer("Как тебя зовут?", reply_markup=await get_name_keyboard(message))
       
             
 def register(dp: Dispatcher) -> None:

@@ -3,12 +3,12 @@ import asyncio
 from aiogram import Dispatcher, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
-from aiogram.types.input_media_photo import InputMediaPhoto
 
 from app.keyboards.keyboards import (get_gender_keyboard,
                                      get_prefer_gender_keyboard, main_kb,
                                      photo_kb)
-from app.services import create_user_profile, create_photos_for_user
+from app.services import (create_photos_for_user, create_user_profile,
+                          update_photos_for_user, update_user_profile)
 from app.states.registration import Registration
 
 router = Router()
@@ -106,8 +106,12 @@ async def finish_photo_upload(message: Message, state: FSMContext):
     await message.answer("Отлично! Теперь я знаю о тебе всё! 🎉", reply_markup=main_kb)
     
     if message.from_user is not None:
-        await create_user_profile(data, message.from_user.id)
-        await create_photos_for_user(data, message.from_user.id)
+        if data.get("update"):
+            await update_user_profile(data, message.from_user.id)
+            await update_photos_for_user(data, message.from_user.id)
+        else:
+            await create_user_profile(data, message.from_user.id)
+            await create_photos_for_user(data, message.from_user.id)
 
     await state.clear()
     

@@ -9,3 +9,4 @@ class Registration(StatesGroup):
     gender = State()
     prefer_gender = State()
     photos = State()
+    update = State()
