@@ -38,7 +38,7 @@ class CreateUserUseCase:
             raise UserAlreadyExists
         
         if created_user:
-            asyncio.create_task(self.deck_builder.build(created_user))
+            await self.deck_builder.build(created_user)
             
         return created_user
     
@@ -54,6 +54,6 @@ class UpdateUserUseCase:
             raise UserNotFoundById
         
         if updated_user:
-            asyncio.create_task(self.deck_builder.build_and_clean_others(updated_user))
+            await self.deck_builder.build_and_clean_others(updated_user)
             
         return updated_user
