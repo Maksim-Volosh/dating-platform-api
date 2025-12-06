@@ -1,7 +1,3 @@
-import asyncio
-from typing import List
-
-from app.core.config import settings
 from app.domain.entities import UserEntity
 from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
                                    UsersNotFound)
@@ -55,5 +51,16 @@ class UpdateUserUseCase:
         
         if updated_user:
             await self.deck_builder.build_and_clean_others(updated_user)
+            
+        return updated_user
+    
+class UpdateUserDescriptionUseCase:
+    def __init__(self, user_repo: IUserRepository) -> None:
+        self.user_repo = user_repo
+        
+    async def execute(self, telegram_id: int, description: str) -> UserEntity:
+        updated_user = await self.user_repo.update_description(telegram_id, description)
+        if updated_user is None:
+            raise UserNotFoundById
             
         return updated_user

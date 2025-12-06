@@ -56,3 +56,12 @@ class SQLAlchemyUserRepository(IUserRepository):
             
         await self.session.commit()
         return UserMapper.to_entity(user_model)
+    
+    async def update_description(self, telegram_id: int, description: str) -> UserEntity | None:
+        user_model = await self.session.get(User, telegram_id)
+        if user_model is None:
+            return None
+        
+        user_model.description = description
+        await self.session.commit()
+        return UserMapper.to_entity(user_model)

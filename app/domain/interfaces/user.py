@@ -20,6 +20,10 @@ class IUserRepository(ABC):
     @abstractmethod
     async def update(self, telegram_id: int, update: UserEntity) -> UserEntity | None:
         raise NotImplementedError
+    
+    @abstractmethod
+    async def update_description(self, telegram_id: int, description: str) -> UserEntity | None:
+        raise NotImplementedError
         
     # @abstractmethod
     # async def delete(self, user: UserEntity) -> UserEntity:

@@ -56,3 +56,5 @@ class UserUpdateResponse(BaseModel):
     gender: Gender
     prefer_gender: PreferGender
 
+class UserUpdateDescriptionRequest(BaseModel):
+    description: str

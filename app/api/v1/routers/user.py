@@ -3,16 +3,18 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.api.v1.schemas.user import (UserCreateRequest, UserCreateResponse,
-                                     UserResponse, UserUpdateRequest,
-                                     UserUpdateResponse)
+                                     UserResponse,
+                                     UserUpdateDescriptionRequest,
+                                     UserUpdateRequest, UserUpdateResponse)
 from app.core.containers.user import (get_create_user_use_case,
                                       get_update_user_use_case,
-                                      get_user_use_case)
+                                      get_user_use_case, get_update_user_description_use_case)
 from app.domain.entities import UserEntity
 from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
                                    UsersNotFound)
-from app.domain.use_cases import (CreateUserUseCase, UpdateUserUseCase,
-                                  UserUseCase)
+from app.domain.use_cases import (CreateUserUseCase,
+                                  UpdateUserDescriptionUseCase,
+                                  UpdateUserUseCase, UserUseCase)
 
 router = APIRouter(prefix="/users", tags=["User"])
 
@@ -58,6 +60,18 @@ async def update_user(
     update_entity = update.to_entity()
     try:
         user_model = await use_case.execute(telegram_id, update_entity)
+    except UserNotFoundById as e:
+        raise HTTPException(status_code=404, detail=e.message)
+    return UserUpdateResponse.model_validate(user_model, from_attributes=True)
+
+@router.patch("/{telegram_id}/description")
+async def update_user_description(  
+    telegram_id: int,  
+    update: UserUpdateDescriptionRequest,
+    use_case: UpdateUserDescriptionUseCase = Depends(get_update_user_description_use_case)
+) -> UserUpdateResponse:
+    try:
+        user_model = await use_case.execute(telegram_id, update.description)
     except UserNotFoundById as e:
         raise HTTPException(status_code=404, detail=e.message)
     return UserUpdateResponse.model_validate(user_model, from_attributes=True)
