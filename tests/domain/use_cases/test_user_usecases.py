@@ -84,16 +84,15 @@ async def test_create_user_success(fake_user):
     repo = AsyncMock()
     repo.create.return_value = fake_user
     deck_builder = AsyncMock()
-    deck_builder.build_and_clean_others = AsyncMock(return_value=None)
+    deck_builder.build.return_value = None
     
     use_case = CreateUserUseCase(repo, deck_builder)
 
-    with patch("asyncio.create_task") as mock_task:
-        user = await use_case.execute(fake_user)
+    user = await use_case.execute(fake_user)
 
     assert user == fake_user
     repo.create.assert_awaited_once_with(fake_user)
-    mock_task.assert_called_once()
+    deck_builder.build.assert_called_once_with(fake_user)
 
 
 @pytest.mark.asyncio
@@ -117,17 +116,16 @@ async def test_update_user_success(fake_user):
     repo = AsyncMock()
     repo.update.return_value = fake_user
     deck_builder = AsyncMock()
-    deck_builder.build_and_clean_others = AsyncMock(return_value=None)
+    deck_builder.build_and_clean_others.return_value = None
     cache = AsyncMock()
     
     use_case = UpdateUserUseCase(repo, deck_builder, cache)
 
-    with patch("asyncio.create_task") as mock_task:
-        user = await use_case.execute(fake_user.telegram_id, fake_user)
+    user = await use_case.execute(fake_user.telegram_id, fake_user)
 
     assert user == fake_user
     repo.update.assert_awaited_once_with(fake_user.telegram_id, fake_user)
-    mock_task.assert_called_once()
+    deck_builder.build_and_clean_others.assert_called_once()
 
 
 @pytest.mark.asyncio
