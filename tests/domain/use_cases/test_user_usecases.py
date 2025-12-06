@@ -6,7 +6,7 @@ from app.domain.entities import UserEntity
 from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
                                    UsersNotFound)
 from app.domain.use_cases.user import (CreateUserUseCase, UpdateUserUseCase,
-                                       UserUseCase)
+                                       UserUseCase, UpdateUserDescriptionUseCase)
 
 
 @pytest.fixture
@@ -139,3 +139,36 @@ async def test_update_user_not_found(fake_user):
 
     with pytest.raises(UserNotFoundById):
         await use_case.execute(fake_user.telegram_id, fake_user)
+        
+# -------------------------------
+# Tests for UpdateUserDescriptionUseCase
+# -------------------------------
+
+@pytest.mark.asyncio
+async def test_update_user_description_success(fake_user):
+    old_description = fake_user.description
+    fake_user.description = "New description"
+    repo = AsyncMock()
+    repo.update_description.return_value = fake_user
+    
+    use_case = UpdateUserDescriptionUseCase(repo)
+
+    user = await use_case.execute(fake_user.telegram_id, "New description")
+
+    assert user == fake_user
+    assert user.description == "New description"
+    assert old_description == "Test user" 
+    assert user.description != old_description
+    repo.update_description.assert_awaited_once_with(fake_user.telegram_id, "New description")
+    
+@pytest.mark.asyncio
+async def test_update_user_description_not_found(fake_user):
+    repo = AsyncMock()
+    repo.update_description.return_value = None
+    
+    use_case = UpdateUserDescriptionUseCase(repo)
+
+    with pytest.raises(UserNotFoundById):
+        await use_case.execute(fake_user.telegram_id, "New description")
+
+
