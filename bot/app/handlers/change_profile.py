@@ -5,8 +5,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from app.keyboards.keyboards import get_name_keyboard, main_kb, photo_kb
-from app.services import update_photos_for_user
-from app.states import Registration, UpdatePhotos
+from app.services import update_description, update_photos_for_user
+from app.states import Registration, UpdateDescription, UpdatePhotos
 
 router = Router()
             
@@ -62,6 +62,26 @@ async def finish_photo_upload(message: Message, state: FSMContext):
         await update_photos_for_user(data, message.from_user.id)
 
     await state.clear()
+    
+@router.message(F.text == "4")
+async def update_profile_description(message: Message, state: FSMContext) -> None:
+    await state.clear()
+    await message.answer("Окей, давай по новой! Расскажи немного о себе.")
+    await state.set_state(UpdateDescription.description)
             
+@router.message(UpdateDescription.description)
+async def process_description(message: Message, state: FSMContext) -> None:
+    if message.text is not None and message.from_user is not None:
+        if len(message.text) > 300:
+            await message.answer("⚠️ Описание не должно превышать 300 символов.")
+            return
+        if len(message.text) < 20: # type: ignore
+            await message.answer("⚠️ Описание не должно быть короче 20 символов.")
+            return
+        
+        await update_description(message.text, message.from_user.id)
+        await state.clear()
+        await message.answer("Описание обновлено! 🎉", reply_markup=main_kb)
+    
 def register(dp: Dispatcher) -> None:
     dp.include_router(router)
