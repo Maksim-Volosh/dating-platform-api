@@ -24,7 +24,6 @@ async def update_description(description: str, telegram_id: int) -> bool:
                     logging.error(f"UPDATE DESCRIPTION API error: {await resp.text()}")
                     return False
 
-
         except Exception as e:
             logging.error(f"API error: {e}")
     return False

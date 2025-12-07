@@ -36,7 +36,6 @@ async def update_user_profile(data: dict, telegram_id: int) -> bool:
                     logging.error(f"UPDATE USER API error: {await resp.text()}")
                     return False
 
-
         except Exception as e:
             logging.error(f"API error: {e}")
 

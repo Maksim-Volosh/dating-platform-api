@@ -10,19 +10,20 @@ async def get_next_user(telegram_id: int):
             async with session.get(
                     f"{API_URL}/decks/next/{telegram_id}",
                     headers={"x-api-key": API_KEY}
-                ) as deck_resp:
+                ) as resp:
 
-                    if deck_resp.status == 404:
+                    if resp.status == 404:
                         return None
 
-                    if deck_resp.status != 200:
-                        logging.error(f"GET PHOTO API error: {await deck_resp.text()}")
+                    if resp.status != 200:
+                        logging.error(f"GET PHOTO API error: {await resp.text()}")
                         return None
 
-                    user_data = await deck_resp.json()
+                    user_data = await resp.json()
                     if user_data:
                         return user_data
                     return
+                
         except Exception as e:
             logging.error(f"API error: {e}")
             return

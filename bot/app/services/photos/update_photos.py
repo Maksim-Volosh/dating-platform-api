@@ -24,7 +24,6 @@ async def update_photos_for_user(data: dict, telegram_id: int) -> bool:
                     logging.error(f"UPDATE PHOTO API error: {await resp.text()}")
                     return False
 
-
         except Exception as e:
             logging.error(f"API error: {e}")
     return False
