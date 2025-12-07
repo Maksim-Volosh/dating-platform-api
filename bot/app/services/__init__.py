@@ -4,6 +4,7 @@ from .photos.get_photos import get_user_photos
 from .user.update_user import update_user_profile
 from .photos.update_photos import update_photos_for_user
 from .user.update_description import update_description
+from .deck.get_next_user import get_next_user
 
 __all__ = (
     "create_user_profile",
@@ -12,4 +13,5 @@ __all__ = (
     "update_user_profile",
     "update_photos_for_user",
     "update_description",
+    "get_next_user",
 )

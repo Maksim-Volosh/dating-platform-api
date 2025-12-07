@@ -50,3 +50,10 @@ profile_kb = ReplyKeyboardMarkup(
     resize_keyboard=True,
     one_time_keyboard=True,
 )
+
+swipe_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="❤️"), KeyboardButton(text="👎")]
+    ],
+    resize_keyboard=True,
+)
