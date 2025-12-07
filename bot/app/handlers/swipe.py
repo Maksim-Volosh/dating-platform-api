@@ -2,8 +2,8 @@ from aiogram import Dispatcher, F, Router, html
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InputMediaPhoto, Message
 
-from app.keyboards.keyboards import swipe_kb, main_kb
-from app.services import get_next_user, get_user_photos
+from app.keyboards.keyboards import main_kb, swipe_kb
+from app.services import create_swipe, get_next_user, get_user_photos
 from app.states import SwipeState
 
 router = Router()
@@ -27,7 +27,7 @@ async def next_profile(message: Message, state: FSMContext) -> None:
             
             # --- 2. Get user photos ---
             photos = await get_user_photos(data['telegram_id'])
-
+            await state.update_data(current_profile_id=data['telegram_id'])
             if not photos:
                 await message.answer(caption, reply_markup=swipe_kb)
                 await state.set_state(SwipeState.swipe)
@@ -50,14 +50,19 @@ async def next_profile(message: Message, state: FSMContext) -> None:
 
 @router.message(SwipeState.swipe)
 async def swipe(message: Message, state: FSMContext) -> None:
-    print("Swipe", flush=True)
-    if message.text == "❤️":
-        await state.clear()
-        await message.answer("Отлично, лайк отправлен ✨ Ждем взаимного лайка")
-        await next_profile(message, state)
-    elif message.text == "👎":
-        await state.clear()
-        await next_profile(message, state)
+    data = await state.get_data()
+    liked_id = data.get("current_profile_id")
+    print(liked_id)
+    if message.from_user:
+        if message.text == "❤️" and liked_id:
+            await state.clear()
+            await message.answer("Отлично, лайк отправлен ✨ Ждем взаимного лайка")
+            await create_swipe(message.from_user.id, liked_id, True)
+            await next_profile(message, state)
+        elif message.text == "👎" and liked_id:
+            await state.clear()
+            await create_swipe(message.from_user.id, liked_id, False)
+            await next_profile(message, state)
 
 
 
