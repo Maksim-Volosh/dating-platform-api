@@ -57,3 +57,10 @@ swipe_kb = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True,
 )
+
+like_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Посмотреть)")]
+    ],
+    resize_keyboard=True,
+)
