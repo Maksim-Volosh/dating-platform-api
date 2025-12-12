@@ -10,6 +10,10 @@ class ILikeCache(ABC):
     async def lindex(self, liked_id: int) -> int | None:
         raise NotImplementedError
     
+    @abstractmethod
+    async def count(self, liked_id: int) -> int:
+        raise NotImplementedError
+    
     @abstractmethod  
     async def lpop(self, liked_id: int) -> int | None:
         raise NotImplementedError

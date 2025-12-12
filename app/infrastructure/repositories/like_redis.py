@@ -19,7 +19,7 @@ class LikeRedisCache(ILikeCache):
                 await self.client.expire(key, timeout)
             
         # Get count
-        count = await self.client.llen(key) # type: ignore
+        count = await self.count(liked_id)
         if not count:
             return 0
 
@@ -34,6 +34,13 @@ class LikeRedisCache(ILikeCache):
             return int(liker_id)
         else:
             return None
+        
+    async def count(self, liked_id: int) -> int:
+        key = f"like:{liked_id}"
+        count = await self.client.llen(key) # type: ignore
+        if not count:
+            return 0
+        return count
         
     async def lpop(self, liked_id: int) -> int | None:
         key = f"like:{liked_id}"

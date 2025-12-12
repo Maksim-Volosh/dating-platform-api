@@ -30,6 +30,15 @@ async def get_next_like(
     
     return LikeNextResponse(liker_id=liker_id)
 
+@router.get("/pending/count/{liked_id}", status_code=200)
+async def get_like_count(
+    liked_id: int,
+    use_case: LikeUseCase = Depends(get_like_use_case)
+) -> LikeCreateResponse:
+    count = await use_case.get_count(liked_id)
+    
+    return LikeCreateResponse(count=count)
+
 @router.delete("/pending/{liked_id}", status_code=204)
 async def remove_like(
     liked_id: int,

@@ -18,5 +18,9 @@ class LikeUseCase:
         
         return liker_id
     
+    async def get_count(self, liked_id: int) -> int:
+        count = await self.cache.count(liked_id)
+        return count
+    
     async def remove_like(self, liked_id: int) -> None:
         await self.cache.lpop(liked_id)
