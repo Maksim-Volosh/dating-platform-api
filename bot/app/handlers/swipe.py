@@ -3,7 +3,7 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InputMediaPhoto, Message
 
-from app.keyboards.keyboards import like_kb, main_kb, swipe_kb
+from app.keyboards.keyboards import main_kb, swipe_kb
 from app.services import (create_like, create_swipe, get_next_user,
                           get_user_photos)
 from app.states import SwipeState
@@ -68,9 +68,9 @@ async def swipe(message: Message, state: FSMContext, bot: Bot) -> None:
             
             # --- Send message to liked user ---
             if count and count > 1:
-                await bot.send_message(liked_id, f"Еййй, ты понравился {count} девушкам! ❤️))", reply_markup=like_kb)
+                await bot.send_message(liked_id, f"Эййй, ты понравился {count} людям! Что бы посмотреть их анкеты - выйди в меню ❤️))")
             elif count and count == 1:
-                await bot.send_message(liked_id, f"Еййй, ты понравился {count} девушке! ❤️))", reply_markup=like_kb)
+                await bot.send_message(liked_id, f"Эййй, ты понравился {count} человеку! Что бы посмотреть кто это - выйди в меню ❤️))")
             
             # --- Get next profile ---
             await next_profile(message, state)

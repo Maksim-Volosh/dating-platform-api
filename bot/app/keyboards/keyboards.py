@@ -51,16 +51,22 @@ profile_kb = ReplyKeyboardMarkup(
     one_time_keyboard=True,
 )
 
+profile_with_likes_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="🔥"),
+            KeyboardButton(text="2"),
+            KeyboardButton(text="3"),
+            KeyboardButton(text="4")
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True,
+)
+
 swipe_kb = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="❤️"), KeyboardButton(text="👎"), KeyboardButton(text="💤")]
-    ],
-    resize_keyboard=True,
-)
-
-like_kb = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text="Посмотреть)")]
     ],
     resize_keyboard=True,
 )

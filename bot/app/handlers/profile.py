@@ -3,8 +3,8 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InputMediaPhoto, Message
 
-from app.keyboards.keyboards import get_name_keyboard, main_kb, profile_kb
-from app.services import get_user, get_user_photos
+from app.keyboards.keyboards import get_name_keyboard, main_kb, profile_kb, profile_with_likes_kb
+from app.services import get_user, get_user_photos, get_like_count
 from app.states.registration import Registration
 from app.states import SwipeState
 
@@ -42,7 +42,15 @@ async def my_profile(message: Message, state: FSMContext) -> None:
         media_group[0].parse_mode = "HTML"
 
         await message.answer_media_group(media_group) # type: ignore
-        await message.answer("1. Листать анкеты. \n2. Заполнить анкету заново. \n3. Изменить фотографии. \n4. Изменить описание.", reply_markup=profile_kb)   
+        # --- 3. Get like count ---
+        count = await get_like_count(telegram_id)
+        
+        if count and count > 1:
+            await message.answer(f"🔥. Посмотреть {count} лайков. \n2. Заполнить анкету заново. \n3. Изменить фотографии. \n4. Изменить описание.", reply_markup=profile_with_likes_kb)   
+        elif count and count == 1:
+            await message.answer(f"🔥. Посмотреть {count} лайк. \n2. Заполнить анкету заново. \n3. Изменить фотографии. \n4. Изменить описание.", reply_markup=profile_with_likes_kb)   
+        else:
+            await message.answer("1. Листать анкеты. \n2. Заполнить анкету заново. \n3. Изменить фотографии. \n4. Изменить описание.", reply_markup=profile_kb)   
         
     elif data is None:
         await message.answer("Привет! Тебя еще нет с нами. Давай зарегистрируемся) ✨")

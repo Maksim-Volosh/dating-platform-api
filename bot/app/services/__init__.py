@@ -8,6 +8,7 @@ from .deck.get_next_user import get_next_user
 from .swipe.create_swipe import create_swipe
 from .user.get_user import get_user
 from .like.create_like import create_like
+from .like.get_count import get_like_count
 
 __all__ = (
     "create_user_profile",
@@ -20,4 +21,5 @@ __all__ = (
     "create_swipe",
     "get_user",
     "create_like",
+    "get_like_count",
 )
