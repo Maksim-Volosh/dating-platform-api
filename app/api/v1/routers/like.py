@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.api.v1.schemas.like import LikeCreateResponse, LikeNextResponse
+from app.api.v1.schemas.like import LikeCreateResponse, LikeNextResponse, LikeRequest
 from app.core.containers.like import get_like_use_case
 from app.domain.exceptions import LikeNotFound
 from app.domain.use_cases import LikeUseCase
@@ -11,10 +11,10 @@ router = APIRouter(prefix="/likes", tags=["Likes"])
 @router.post("/add_like/{liked_id}", status_code=201)
 async def create_like(
     liked_id: int,
-    liker_id: int,
+    body: LikeRequest,
     use_case: LikeUseCase = Depends(get_like_use_case)
 ) -> LikeCreateResponse:
-    count = await use_case.add_like(liked_id, liker_id)
+    count = await use_case.add_like(liked_id, body.liker_id)
     
     return LikeCreateResponse(count=count)
 
