@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 
-from app.domain.entities import NormalizedSwipeEntity
+from app.domain.entities import NormalizedSwipeEntity, FullSwipeEntity
 from app.infrastructure.models.swipe import Swipe
 
 
 class ISwipeRepository(ABC):
     @abstractmethod
-    async def create(self, swipe: NormalizedSwipeEntity) -> None:
+    async def create(self, swipe: NormalizedSwipeEntity) -> FullSwipeEntity:
         raise NotImplementedError
     
     @abstractmethod
@@ -18,5 +18,5 @@ class ISwipeRepository(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    async def update(self, swipe: NormalizedSwipeEntity) -> None:
+    async def update(self, swipe: NormalizedSwipeEntity) -> None | FullSwipeEntity:
         raise NotImplementedError

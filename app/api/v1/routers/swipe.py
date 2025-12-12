@@ -12,11 +12,11 @@ router = APIRouter(prefix="/swipes", tags=["Swipe"])
 async def swipe_user(
     swipe: SwipeRequest,
     use_case: SwipeUserUseCase = Depends(get_swipe_user_use_case)
-) -> SwipeRequest:
+) -> SwipeResponse:
     swipe_entity = SwipeEntity(
         liker_id=swipe.liker_id,
         liked_id=swipe.liked_id,
         decision=swipe.decision
     )
-    await use_case.execute(swipe_entity)
+    swipe_entity = await use_case.execute(swipe_entity)
     return SwipeResponse.model_validate(swipe_entity, from_attributes=True)

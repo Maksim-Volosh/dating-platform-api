@@ -6,5 +6,8 @@ class SwipeRequest(BaseModel):
     liked_id: int
     decision: bool
     
-class SwipeResponse(SwipeRequest):
-    pass
+class SwipeResponse(BaseModel):
+    user1_id: int
+    user1_decision: bool | None
+    user2_id: int
+    user2_decision: bool | None

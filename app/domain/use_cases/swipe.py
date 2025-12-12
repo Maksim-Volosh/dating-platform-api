@@ -1,4 +1,4 @@
-from app.domain.entities import NormalizedSwipeEntity, SwipeEntity
+from app.domain.entities import NormalizedSwipeEntity, SwipeEntity, FullSwipeEntity
 from app.domain.interfaces import ISwipeRepository, IUserRepository
 
 
@@ -21,13 +21,18 @@ class SwipeUserUseCase:
             liker_is_user1=True
         )
         
-    async def execute(self, swipe: SwipeEntity) -> SwipeEntity:
+    async def execute(self, swipe: SwipeEntity) -> FullSwipeEntity:
         normalized_swipe = await self._normalize_swipe(swipe)
         exist_swipe = await self.swipe_repo.get_by_ids(normalized_swipe.user1_id, normalized_swipe.user2_id)
         if exist_swipe is None:
             result = await self.swipe_repo.create(normalized_swipe)
             
-            return swipe
+            return result
         
         result = await self.swipe_repo.update(normalized_swipe)
-        return swipe
+        return result if result is not None else FullSwipeEntity(
+            user1_id=0,
+            user1_decision=None,
+            user2_id=0,
+            user2_decision=None
+        )
