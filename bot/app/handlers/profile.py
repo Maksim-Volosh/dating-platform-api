@@ -1,14 +1,15 @@
 from aiogram import Dispatcher, F, Router, html
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InputMediaPhoto, Message
 
 from app.keyboards.keyboards import get_name_keyboard, main_kb, profile_kb
+from app.services import get_user, get_user_photos
 from app.states.registration import Registration
-from app.services import get_user_photos, get_user
 
 router = Router()
 
-@router.message(F.text == "Моя анкета")
+@router.message(StateFilter(None), F.text == "Моя анкета")
 async def my_profile(message: Message, state: FSMContext) -> None:
     # --- 1. Get user ---
     telegram_id = message.from_user.id # type: ignore

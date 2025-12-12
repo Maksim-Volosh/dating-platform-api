@@ -1,15 +1,16 @@
-from aiogram import Dispatcher, F, Router, html
+from aiogram import Bot, Dispatcher, F, Router, html
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InputMediaPhoto, Message
-from aiogram import Bot
 
-from app.keyboards.keyboards import main_kb, swipe_kb, like_kb
-from app.services import create_swipe, get_next_user, get_user_photos, create_like
+from app.keyboards.keyboards import like_kb, main_kb, swipe_kb
+from app.services import (create_like, create_swipe, get_next_user,
+                          get_user_photos)
 from app.states import SwipeState
 
 router = Router()
 
-@router.message(F.text.in_({"1", "Листать анкеты"}))
+@router.message(StateFilter(None), F.text.in_({"1", "Листать анкеты"}))
 async def next_profile(message: Message, state: FSMContext) -> None:
     if message.text in ["1", "Листать анкеты"]:
         await message.answer("Окей, поехали! 🚀", reply_markup=swipe_kb)

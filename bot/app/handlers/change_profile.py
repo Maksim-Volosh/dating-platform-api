@@ -1,6 +1,7 @@
 import asyncio
 
 from aiogram import Dispatcher, F, Router
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
@@ -10,7 +11,7 @@ from app.states import Registration, UpdateDescription, UpdatePhotos
 
 router = Router()
             
-@router.message(F.text == "2")
+@router.message(StateFilter(None), F.text == "2")
 async def restart_registration(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer("Ну давай по новой ✨")
@@ -18,7 +19,7 @@ async def restart_registration(message: Message, state: FSMContext) -> None:
     await state.update_data(update=True)
     await message.answer("Как тебя зовут?", reply_markup=await get_name_keyboard(message))
     
-@router.message(F.text == "3")
+@router.message(StateFilter(None), F.text == "3")
 async def update_photos(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer("Окей, пришли мне свои фотографии где можно увидеть твою красоту!) Фотографий не должно быть больше 3х")
@@ -63,7 +64,7 @@ async def finish_photo_upload(message: Message, state: FSMContext):
 
     await state.clear()
     
-@router.message(F.text == "4")
+@router.message(StateFilter(None), F.text == "4")
 async def update_profile_description(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer("Окей, давай по новой! Расскажи немного о себе.")
