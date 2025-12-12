@@ -5,7 +5,7 @@ import aiohttp
 from config import API_KEY, API_URL
 
 
-async def create_swipe(liker_id: int, liked_id: int, decision: bool) -> bool:
+async def create_swipe(liker_id: int, liked_id: int, decision: bool):
     swipe_payload = {
         "liker_id": liker_id,
         "liked_id": liked_id,
@@ -22,9 +22,12 @@ async def create_swipe(liker_id: int, liked_id: int, decision: bool) -> bool:
             ) as resp:
                 if resp.status != 201:
                     logging.error(f"CREATE SWIPE API {resp.status}: {await resp.text()}")
-                    return False
+                    return
+                
+                data = await resp.json()
+                return data if data else None
 
         except Exception as e:
             logging.error(f"API error: {e}")
 
-    return False
+    return

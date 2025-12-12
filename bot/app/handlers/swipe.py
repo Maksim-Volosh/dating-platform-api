@@ -1,6 +1,7 @@
 from aiogram import Dispatcher, F, Router, html
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InputMediaPhoto, Message
+from aiogram import Bot
 
 from app.keyboards.keyboards import main_kb, swipe_kb
 from app.services import create_swipe, get_next_user, get_user_photos
@@ -49,16 +50,24 @@ async def next_profile(message: Message, state: FSMContext) -> None:
 
 
 @router.message(SwipeState.swipe)
-async def swipe(message: Message, state: FSMContext) -> None:
+async def swipe(message: Message, state: FSMContext, bot: Bot) -> None:
     data = await state.get_data()
     liked_id = data.get("current_profile_id")
-    print(liked_id)
+
     if message.from_user:
         if message.text == "❤️" and liked_id:
             await state.clear()
+            
+            # --- Create swipe ---
             await message.answer("Отлично, лайк отправлен ✨ Ждем взаимного лайка")
             await create_swipe(message.from_user.id, liked_id, True)
+            
+            # --- Send message to liked user ---
+            await bot.send_message(liked_id, "ЕЕйй, тебя тут лайкнули ❤️))", reply_markup=main_kb)
+            
+            # --- Get next profile ---
             await next_profile(message, state)
+            
         elif message.text == "👎" and liked_id:
             await state.clear()
             await create_swipe(message.from_user.id, liked_id, False)
