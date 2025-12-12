@@ -15,6 +15,7 @@ router = Router()
 
 @router.message(CommandStart())
 async def command_start_handler(message: Message, state: FSMContext) -> None:
+    await state.clear()
     telegram_id = message.from_user.id # type: ignore
     
     async with aiohttp.ClientSession() as session:
