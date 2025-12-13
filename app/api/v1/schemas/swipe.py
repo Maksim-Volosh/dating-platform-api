@@ -11,3 +11,7 @@ class SwipeResponse(BaseModel):
     user1_decision: bool | None
     user2_id: int
     user2_decision: bool | None
+    
+class SwipeMatchRequest(BaseModel):
+    user1_id: int
+    user2_id: int

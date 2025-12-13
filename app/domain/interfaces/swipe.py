@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-from app.domain.entities import NormalizedSwipeEntity, FullSwipeEntity
+from app.domain.entities import (FullSwipeEntity, NormalizedMatchEntity,
+                                 NormalizedSwipeEntity)
 from app.infrastructure.models.swipe import Swipe
 
 
@@ -19,4 +20,8 @@ class ISwipeRepository(ABC):
     
     @abstractmethod
     async def update(self, swipe: NormalizedSwipeEntity) -> None | FullSwipeEntity:
+        raise NotImplementedError
+    
+    @abstractmethod
+    async def is_match(self, swipe: NormalizedMatchEntity) -> bool:
         raise NotImplementedError

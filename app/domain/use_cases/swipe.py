@@ -1,5 +1,7 @@
-from app.domain.entities import NormalizedSwipeEntity, SwipeEntity, FullSwipeEntity
-from app.domain.interfaces import ISwipeRepository, IUserRepository
+from app.domain.entities import (FullSwipeEntity, MatchEntity,
+                                 NormalizedMatchEntity, NormalizedSwipeEntity,
+                                 SwipeEntity)
+from app.domain.interfaces import ISwipeRepository
 
 
 class SwipeUserUseCase:
@@ -36,3 +38,24 @@ class SwipeUserUseCase:
             user2_id=0,
             user2_decision=None
         )
+        
+class SwipeMatchUserCase:
+    def __init__(self, swipe_repo: ISwipeRepository) -> None:
+        self.swipe_repo = swipe_repo
+        
+    async def _normalize_swipe(self, swipe: MatchEntity) -> NormalizedMatchEntity:
+        if swipe.user2_id > swipe.user1_id:
+            return NormalizedMatchEntity(
+                user1_id=swipe.user1_id,
+                user2_id=swipe.user2_id
+            )
+        return NormalizedMatchEntity(
+            user1_id=swipe.user2_id,
+            user2_id=swipe.user1_id
+        )
+        
+    async def execute(self, swipe: MatchEntity) -> bool:
+        normalized_match_entity: NormalizedMatchEntity = await self._normalize_swipe(swipe)
+        
+        result = await self.swipe_repo.is_match(normalized_match_entity)
+        return result
