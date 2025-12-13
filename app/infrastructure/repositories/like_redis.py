@@ -49,8 +49,8 @@ class LikeRedisCache(ILikeCache):
         liker_id = await self.client.lpop(key) # type: ignore
         if not liker_id:
             return None
-        if type(liker_id) == int:
-            await self.client.srem(set_key, liker_id) # type: ignore
-            return liker_id
+        if type(liker_id) == bytes:
+            await self.client.srem(set_key, int(liker_id)) # type: ignore
+            return int(liker_id)
         else:
             return None
