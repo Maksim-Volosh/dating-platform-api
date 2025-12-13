@@ -10,7 +10,6 @@ async def create_like(liker_id: int, liked_id: int) -> None | int:
         "liker_id": liker_id,
     }
     
-    logging.info(f"Creating like at {time.time()}: {like_payload}")
     async with aiohttp.ClientSession() as session:
         try:
             async with session.post(

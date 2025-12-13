@@ -16,7 +16,7 @@ async def get_next_user(telegram_id: int):
                         return None
 
                     if resp.status != 200:
-                        logging.error(f"GET PHOTO API error: {await resp.text()}")
+                        logging.error(f"GET PHOTO API {resp.status}: {await resp.text()}")
                         return None
 
                     user_data = await resp.json()

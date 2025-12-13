@@ -12,7 +12,6 @@ async def create_swipe(liker_id: int, liked_id: int, decision: bool):
         "decision": decision
     }
     
-    logging.info(f"Creating swipe at {time.time()}: {swipe_payload}")
     async with aiohttp.ClientSession() as session:
         try:
             async with session.post(

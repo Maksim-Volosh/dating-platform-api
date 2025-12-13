@@ -10,7 +10,6 @@ async def update_photos_for_user(data: dict, telegram_id: int) -> bool:
         {"file_id": file_id} for file_id in data["photo_ids"]
     ]
 
-    logging.info(f"Updating photos for user at {time.time()}: {photo_payload}") 
     async with aiohttp.ClientSession() as session:
         try:
             async with session.put(
@@ -21,7 +20,7 @@ async def update_photos_for_user(data: dict, telegram_id: int) -> bool:
                 if resp.status == 201:
                     return True
                 else:
-                    logging.error(f"UPDATE PHOTO API error: {await resp.text()}")
+                    logging.error(f"UPDATE PHOTO API {resp.status}: {await resp.text()}")
                     return False
 
         except Exception as e:

@@ -13,7 +13,7 @@ async def get_user_photos(telegram_id: int):
                 ) as resp:
 
                     if resp.status != 200:
-                        logging.error(f"GET PHOTO API error: {await resp.text()}")
+                        logging.error(f"GET PHOTO API {resp.status}: {await resp.text()}")
                         return
 
                     photos_data = await resp.json()

@@ -10,7 +10,6 @@ async def update_description(description: str, telegram_id: int) -> bool:
         "description": description
     }
 
-    logging.info(f"Updating description for user at {time.time()}: {description_payload}") 
     async with aiohttp.ClientSession() as session:
         try:
             async with session.patch(
@@ -21,7 +20,7 @@ async def update_description(description: str, telegram_id: int) -> bool:
                 if resp.status == 200:
                     return True
                 else:
-                    logging.error(f"UPDATE DESCRIPTION API error: {await resp.text()}")
+                    logging.error(f"UPDATE DESCRIPTION API {resp.status}: {await resp.text()}")
                     return False
 
         except Exception as e:
