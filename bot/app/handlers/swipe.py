@@ -13,7 +13,7 @@ router = Router()
 @router.message(StateFilter(None), F.text.in_({"1", "Листать анкеты"}))
 async def next_profile(message: Message, state: FSMContext) -> None:
     if message.text in ["1", "Листать анкеты"]:
-        await message.answer("Окей, поехали! 🚀", reply_markup=swipe_kb)
+        await message.answer("✨🔍", reply_markup=swipe_kb)
     
     if message.from_user:
         # --- 1. Get user data ---
