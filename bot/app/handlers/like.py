@@ -17,19 +17,27 @@ async def next_like_profile(message: Message, state: FSMContext) -> None:
             await message.answer("✨🔍", reply_markup=swipe_kb)
             
         # --- 1. Get next profile who liked us ---
-        liker_id = await get_next_like(message.from_user.id)
+        next_like_data = await get_next_like(message.from_user.id)
         
-        if liker_id:
+        if next_like_data:
+            liker_id = next_like_data.get("liker_id", )
+            more = next_like_data.get("more")
+            
             # --- 2. Check is match with him ---
             is_match_result = await is_match(message.from_user.id, liker_id)
             
             # --- 3. Get user data ---
             data = await get_user(liker_id)
             
+            if more > 0:
+                msg = f"Кому-то понравилась твоя анкета (И еще {more}):\n\n"
+            else:
+                msg = "Кому-то понравилась твоя анкета:\n\n"
+            
             if data:
                 # --- 4. Create caption ---
                 caption = (
-                    f"Кому-то понравилась твоя анкета:\n\n"
+                    f"{msg}"
                     f"{html.bold(data['name'])}, {html.bold(str(data['age']))}, "
                     f"{html.bold(data['city'])}\n\n"
                     f"{html.italic(data['description'] or 'Без описания')}"

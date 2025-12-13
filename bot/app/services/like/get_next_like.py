@@ -15,8 +15,7 @@ async def get_next_like(liked_id: int):
                     return None
 
                 data = await resp.json()
-                liker_id: int = data.get("liker_id")
-                return liker_id if liker_id else None
+                return data if data else None
             
         except Exception as e:
             logging.error(f"API error: {e}")
