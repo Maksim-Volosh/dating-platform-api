@@ -9,6 +9,8 @@ from .swipe.create_swipe import create_swipe
 from .user.get_user import get_user
 from .like.create_like import create_like
 from .like.get_count import get_like_count
+from .like.get_next_like import get_next_like
+from .like.remove_like import remove_like
 
 __all__ = (
     "create_user_profile",
@@ -22,4 +24,6 @@ __all__ = (
     "get_user",
     "create_like",
     "get_like_count",
+    "get_next_like",
+    "remove_like",
 )

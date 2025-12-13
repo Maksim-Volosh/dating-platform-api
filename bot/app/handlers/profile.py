@@ -3,14 +3,15 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InputMediaPhoto, Message
 
-from app.keyboards.keyboards import get_name_keyboard, main_kb, profile_kb, profile_with_likes_kb
-from app.services import get_user, get_user_photos, get_like_count
+from app.keyboards.keyboards import (get_name_keyboard, main_kb, profile_kb,
+                                     profile_with_likes_kb)
+from app.services import get_like_count, get_user, get_user_photos
+from app.states import LikeSwipeState, SwipeState
 from app.states.registration import Registration
-from app.states import SwipeState
 
 router = Router()
 
-@router.message(StateFilter(None, SwipeState.swipe), F.text.in_({"💤", "Моя анкета"}))
+@router.message(StateFilter(None, SwipeState.swipe, LikeSwipeState.swipe), F.text.in_({"💤", "Моя анкета"}))
 async def my_profile(message: Message, state: FSMContext) -> None:
     await state.clear()
     # --- 1. Get user ---
