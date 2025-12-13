@@ -18,7 +18,7 @@ async def create_like(
     
     return LikeCreateResponse(count=count)
 
-@router.get("/pending/{liked_id}", status_code=201)
+@router.get("/pending/{liked_id}", status_code=200)
 async def get_next_like(
     liked_id: int,
     use_case: LikeUseCase = Depends(get_like_use_case)
