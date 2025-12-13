@@ -19,7 +19,7 @@ class ISwipeRepository(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    async def update(self, swipe: NormalizedSwipeEntity) -> None | FullSwipeEntity:
+    async def update(self, exist_swipe: Swipe, swipe: NormalizedSwipeEntity) -> FullSwipeEntity:
         raise NotImplementedError
     
     @abstractmethod

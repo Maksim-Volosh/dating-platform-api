@@ -31,13 +31,8 @@ class SwipeUserUseCase:
             
             return result
         
-        result = await self.swipe_repo.update(normalized_swipe)
-        return result if result is not None else FullSwipeEntity(
-            user1_id=0,
-            user1_decision=None,
-            user2_id=0,
-            user2_decision=None
-        )
+        result = await self.swipe_repo.update(exist_swipe, normalized_swipe)
+        return result
         
 class SwipeMatchUserCase:
     def __init__(self, swipe_repo: ISwipeRepository) -> None:

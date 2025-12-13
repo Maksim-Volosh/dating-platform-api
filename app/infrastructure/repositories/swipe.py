@@ -49,20 +49,17 @@ class SQLAlchemySwipeRepository(ISwipeRepository):
         else:
             return swipe_model.user1_decision is not None 
     
-    async def update(self, swipe: NormalizedSwipeEntity) -> None | FullSwipeEntity:
-        swipe_model = await self.get_by_ids(swipe.user1_id, swipe.user2_id)
-        if swipe_model is None:
-            return None
+    async def update(self, exist_swipe: Swipe, swipe: NormalizedSwipeEntity) -> FullSwipeEntity:
         if swipe.liker_is_user1:
-            swipe_model.user1_decision = swipe.decision 
+            exist_swipe.user1_decision = swipe.decision 
         if not swipe.liker_is_user1:
-            swipe_model.user2_decision = swipe.decision
+            exist_swipe.user2_decision = swipe.decision
         await self.session.commit()
         return FullSwipeEntity(
-            user1_id=swipe_model.user1_id,
-            user1_decision=swipe_model.user1_decision,
-            user2_id=swipe_model.user2_id,
-            user2_decision=swipe_model.user2_decision
+            user1_id=exist_swipe.user1_id,
+            user1_decision=exist_swipe.user1_decision,
+            user2_id=exist_swipe.user2_id,
+            user2_decision=exist_swipe.user2_decision
         )
         
     async def is_match(self, swipe: NormalizedMatchEntity) -> bool:
