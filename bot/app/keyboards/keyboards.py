@@ -44,7 +44,8 @@ profile_kb = ReplyKeyboardMarkup(
             KeyboardButton(text="1"),
             KeyboardButton(text="2"),
             KeyboardButton(text="3"),
-            KeyboardButton(text="4")
+            KeyboardButton(text="4"),
+            KeyboardButton(text="💤")
         ]
     ],
     resize_keyboard=True,
@@ -57,7 +58,8 @@ profile_with_likes_kb = ReplyKeyboardMarkup(
             KeyboardButton(text="🔥"),
             KeyboardButton(text="2"),
             KeyboardButton(text="3"),
-            KeyboardButton(text="4")
+            KeyboardButton(text="4"),
+            KeyboardButton(text="💤")
         ]
     ],
     resize_keyboard=True,
