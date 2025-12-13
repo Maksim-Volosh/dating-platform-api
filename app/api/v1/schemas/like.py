@@ -9,6 +9,7 @@ class LikeCreateResponse(BaseModel):
     
 class LikeNextResponse(BaseModel):
     liker_id: int
+    more: int
     
 class LikeRequest(BaseModel):
     liker_id: int

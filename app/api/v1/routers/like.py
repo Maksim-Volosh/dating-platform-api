@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.api.v1.schemas.like import LikeCreateResponse, LikeNextResponse, LikeRequest
+from app.api.v1.schemas.like import (LikeCreateResponse, LikeNextResponse,
+                                     LikeRequest)
 from app.core.containers.like import get_like_use_case
+from app.domain.entities import LikeEntity
 from app.domain.exceptions import LikeNotFound
 from app.domain.use_cases import LikeUseCase
 
@@ -24,11 +26,11 @@ async def get_next_like(
     use_case: LikeUseCase = Depends(get_like_use_case)
 ) -> LikeNextResponse:
     try:
-        liker_id = await use_case.get_next_like(liked_id)
+        entity: LikeEntity = await use_case.get_next_like(liked_id)
     except LikeNotFound as e:
         raise HTTPException(status_code=404, detail=e.message)
     
-    return LikeNextResponse(liker_id=liker_id)
+    return LikeNextResponse(liker_id=entity.liker_id, more=entity.more)
 
 @router.get("/pending/count/{liked_id}", status_code=200)
 async def get_like_count(
