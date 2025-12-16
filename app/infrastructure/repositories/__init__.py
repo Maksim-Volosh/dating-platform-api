@@ -4,11 +4,11 @@ __all__ = (
     "DeckRedisCache",
     "SQLAlchemySwipeRepository",
     "SQLAlchemyCandidateRepository",
-    "LikeRedisCache",
+    "InboxRedisCache",
 )
 from .deck_redis import DeckRedisCache
 from .photo import SQLAlchemyPhotoRepository
 from .swipe import SQLAlchemySwipeRepository
 from .user import SQLAlchemyUserRepository
 from .candidate import SQLAlchemyCandidateRepository
-from .like_redis import LikeRedisCache
+from .inbox_redis import InboxRedisCache

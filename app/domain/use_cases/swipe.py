@@ -1,12 +1,15 @@
 from app.domain.entities import (FullSwipeEntity, MatchEntity,
                                  NormalizedMatchEntity, NormalizedSwipeEntity,
                                  SwipeEntity)
+from app.domain.entities import InboxSwipe
 from app.domain.interfaces import ISwipeRepository
+from app.domain.services import InboxOnSwipeService
 
 
 class SwipeUserUseCase:
-    def __init__(self, swipe_repo: ISwipeRepository) -> None:
+    def __init__(self, swipe_repo: ISwipeRepository, inbox_service: InboxOnSwipeService) -> None:
         self.swipe_repo = swipe_repo
+        self.inbox_service = inbox_service
         
     async def _normalize_swipe(self, swipe: SwipeEntity) -> NormalizedSwipeEntity:
         if swipe.liker_id > swipe.liked_id:
@@ -28,10 +31,19 @@ class SwipeUserUseCase:
         exist_swipe = await self.swipe_repo.get_by_ids(normalized_swipe.user1_id, normalized_swipe.user2_id)
         if exist_swipe is None:
             result = await self.swipe_repo.create(normalized_swipe)
+        else:
+            result = await self.swipe_repo.update(exist_swipe, normalized_swipe)
             
-            return result
+        to_user_id_decision = result.user2_decision if result.user2_id == swipe.liked_id else result.user1_decision
         
-        result = await self.swipe_repo.update(exist_swipe, normalized_swipe)
+        await self.inbox_service.create_inbox_item(
+            InboxSwipe(
+                from_user_id=swipe.liker_id,
+                from_user_id_decision=swipe.decision,
+                to_user_id=swipe.liked_id,
+                to_user_id_decision=to_user_id_decision
+            )
+        )
         return result
         
 class SwipeMatchUserCase:

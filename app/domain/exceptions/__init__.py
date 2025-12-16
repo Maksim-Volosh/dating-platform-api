@@ -6,9 +6,9 @@ __all__ = (
     "WrongFileExtension",
     "TooManyPhotos",
     "NoCandidatesFound",
-    "LikeNotFound",
+    "InboxItemNotFound",
 )
 from .deck import NoCandidatesFound
 from .photo import PhotosNotFound, TooManyPhotos, WrongFileExtension
 from .user import UserAlreadyExists, UserNotFoundById, UsersNotFound
-from .like import LikeNotFound
+from .inbox import InboxItemNotFound

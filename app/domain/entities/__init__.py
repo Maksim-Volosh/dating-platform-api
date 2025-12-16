@@ -6,10 +6,12 @@ __all__ = (
     "FullSwipeEntity",
     "MatchEntity",
     "NormalizedMatchEntity",
-    "LikeEntity",
+    "InboxItem",
+    "InboxSwipe",
+    "InboxItemType",
 )
 from .photo import PhotoEntity
 from .swipe import (FullSwipeEntity, MatchEntity, NormalizedMatchEntity,
                     NormalizedSwipeEntity, SwipeEntity)
 from .user import UserEntity
-from .like import LikeEntity
+from .inbox import InboxItem, InboxSwipe, InboxItemType
