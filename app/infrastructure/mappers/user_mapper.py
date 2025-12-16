@@ -1,4 +1,4 @@
-from app.domain.entities import UserEntity
+from app.domain.entities import UserEntity, Gender, PreferGender
 from app.infrastructure.models import User as UserModel
 
 
@@ -10,8 +10,8 @@ class UserMapper:
             name=model.name,
             age=model.age,
             city=model.city,
-            gender=model.gender,
-            prefer_gender=model.prefer_gender,
+            gender=Gender(model.gender),
+            prefer_gender=PreferGender(model.prefer_gender),
             description=model.description,
         )
 

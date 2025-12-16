@@ -1,6 +1,16 @@
 from dataclasses import dataclass
+from enum import Enum
 from typing import Optional
 
+
+class Gender(str, Enum):
+    MALE = "male"
+    FEMALE = "female"
+    
+class PreferGender(str, Enum):
+    MALE = "male"
+    FEMALE = "female"
+    ANYONE = "anyone"
 
 @dataclass
 class UserEntity:
@@ -8,8 +18,8 @@ class UserEntity:
     name: str
     age: int
     city: str
-    gender: str
-    prefer_gender: str
+    gender: Gender
+    prefer_gender: PreferGender
     description: Optional[str] = None
     
     def to_dict(self):
