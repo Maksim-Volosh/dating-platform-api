@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from app.domain.entities import UserEntity
+from app.domain.entities import UserEntity, Gender, PreferGender
 from app.domain.entities.photo import PhotoEntity
 from app.domain.exceptions.photo import (PhotosNotFound, TooManyPhotos,
                                          WrongFileExtension)
@@ -19,8 +19,8 @@ def fake_user():
         name="Maxim",
         age=18,
         city="Vilnius",
-        gender="male",
-        prefer_gender="female",
+        gender=Gender("male"),
+        prefer_gender=PreferGender("female"),
         description="Test user"
     )
     

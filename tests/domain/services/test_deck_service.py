@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from app.domain.entities import UserEntity
+from app.domain.entities import UserEntity, Gender, PreferGender
 from app.domain.exceptions import UserNotFoundById
 from app.domain.exceptions.deck import NoCandidatesFound
 from app.application.services.deck import DeckBuilderService
@@ -16,8 +16,8 @@ def fake_user():
         name="name",  
         age=18,
         city="city",
-        gender="male",
-        prefer_gender="female",
+        gender=Gender("male"),
+        prefer_gender=PreferGender("female"),
         description="description"
     )
 
@@ -74,8 +74,8 @@ async def test_delete_user_from_others_decks(fake_user):
         name="other",
         age=20,
         city="city",
-        gender="female",
-        prefer_gender="male",
+        gender=Gender("female"),
+        prefer_gender=PreferGender("male"),
         description="desc"
     )
     cache.get_deck.return_value = [fake_user, other_user]

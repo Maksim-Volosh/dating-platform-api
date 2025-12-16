@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.domain.entities import UserEntity
+from app.domain.entities import UserEntity, Gender, PreferGender
 from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
                                    UsersNotFound)
 from app.application.use_cases.user import (CreateUserUseCase, UpdateUserUseCase,
@@ -16,8 +16,8 @@ def fake_user():
         name="Maxim",
         age=18,
         city="Vilnius",
-        gender="male",
-        prefer_gender="female",
+        gender=Gender("male"),
+        prefer_gender=PreferGender("female"),
         description="Test user"
     )
 
