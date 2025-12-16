@@ -42,7 +42,7 @@ class SQLAlchemyPhotoRepository(IPhotoRepository):
         result = await self.session.execute(q)
         photos_models = result.scalars().all()
         
-        if photos_models is None:
+        if not photos_models:
             return None
         
         photo_file_ids = []
