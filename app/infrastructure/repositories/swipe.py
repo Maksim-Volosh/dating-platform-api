@@ -1,8 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.entities import (FullSwipeEntity, NormalizedMatchEntity,
-                                 NormalizedSwipeEntity)
+from app.domain.entities import FullSwipeEntity, NormalizedSwipeEntity
 from app.domain.interfaces import ISwipeRepository
 from app.infrastructure.models import Swipe
 
@@ -61,13 +60,3 @@ class SQLAlchemySwipeRepository(ISwipeRepository):
             user2_id=exist_swipe.user2_id,
             user2_decision=exist_swipe.user2_decision
         )
-        
-    async def is_match(self, swipe: NormalizedMatchEntity) -> bool:
-        swipe_model = await self.get_by_ids(swipe.user1_id, swipe.user2_id)
-        
-        if swipe_model is None:
-            return False
-        elif swipe_model.user1_decision is True and swipe_model.user2_decision is True:
-            return True
-        else:
-            return False

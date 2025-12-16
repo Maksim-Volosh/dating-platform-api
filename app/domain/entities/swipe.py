@@ -20,13 +20,3 @@ class FullSwipeEntity:
     user1_decision: bool | None
     user2_id: int
     user2_decision: bool | None
-    
-@dataclass
-class MatchEntity:
-    user1_id: int
-    user2_id: int
-    
-@dataclass
-class NormalizedMatchEntity:
-    user1_id: int
-    user2_id: int

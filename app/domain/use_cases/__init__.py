@@ -10,11 +10,11 @@ __all__ = (
     "UpdateUserUseCase",
     "UpdateUserDescriptionUseCase",
     "InboxUseCase",
-    "SwipeMatchUserCase",
 )
 from .deck import UserDeckUseCase
+from .inbox import InboxUseCase
 from .photo import (DeleteUserPhotosUseCase, RetrieveUserPhotosUseCase,
                     UpdateUserPhotosUseCase, UploadUserPhotosUseCase)
-from .swipe import SwipeUserUseCase, SwipeMatchUserCase
-from .user import CreateUserUseCase, UpdateUserUseCase, UserUseCase, UpdateUserDescriptionUseCase
-from .inbox import InboxUseCase
+from .swipe import SwipeUserUseCase
+from .user import (CreateUserUseCase, UpdateUserDescriptionUseCase,
+                   UpdateUserUseCase, UserUseCase)

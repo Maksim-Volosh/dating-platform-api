@@ -1,7 +1,5 @@
-from app.domain.entities import (FullSwipeEntity, MatchEntity,
-                                 NormalizedMatchEntity, NormalizedSwipeEntity,
-                                 SwipeEntity)
-from app.domain.entities import InboxSwipe
+from app.domain.entities import (FullSwipeEntity, InboxSwipe,
+                                 NormalizedSwipeEntity, SwipeEntity)
 from app.domain.interfaces import ISwipeRepository
 from app.domain.services import InboxOnSwipeService
 
@@ -44,25 +42,4 @@ class SwipeUserUseCase:
                 to_user_id_decision=to_user_id_decision
             )
         )
-        return result
-        
-class SwipeMatchUserCase:
-    def __init__(self, swipe_repo: ISwipeRepository) -> None:
-        self.swipe_repo = swipe_repo
-        
-    async def _normalize_swipe(self, swipe: MatchEntity) -> NormalizedMatchEntity:
-        if swipe.user2_id > swipe.user1_id:
-            return NormalizedMatchEntity(
-                user1_id=swipe.user1_id,
-                user2_id=swipe.user2_id
-            )
-        return NormalizedMatchEntity(
-            user1_id=swipe.user2_id,
-            user2_id=swipe.user1_id
-        )
-        
-    async def execute(self, swipe: MatchEntity) -> bool:
-        normalized_match_entity: NormalizedMatchEntity = await self._normalize_swipe(swipe)
-        
-        result = await self.swipe_repo.is_match(normalized_match_entity)
         return result
