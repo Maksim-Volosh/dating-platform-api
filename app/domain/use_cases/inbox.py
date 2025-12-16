@@ -11,7 +11,7 @@ class InboxUseCase:
         item = await self.cache.peek(owner_id)
         
         if item is None:
-            raise InboxItemNotFound
+            raise InboxItemNotFound()
         
         return item
     

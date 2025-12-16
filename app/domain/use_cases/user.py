@@ -13,13 +13,13 @@ class UserUseCase:
     async def get_by_id(self, telegram_id: int) -> UserEntity:
         user: UserEntity | None = await self.repo.get_by_id(telegram_id)
         if user is None:
-            raise UserNotFoundById
+            raise UserNotFoundById()
         return user
     
     async def get_all(self) -> list[UserEntity]:
         users = await self.repo.get_all()
         if users is None:
-            raise UsersNotFound
+            raise UsersNotFound()
         return users
     
     
@@ -31,7 +31,7 @@ class CreateUserUseCase:
     async def execute(self, user: UserEntity) -> UserEntity:
         created_user = await self.user_repo.create(user)
         if created_user is None:
-            raise UserAlreadyExists
+            raise UserAlreadyExists()
         
         if created_user:
             await self.deck_builder.build(created_user)
@@ -47,7 +47,7 @@ class UpdateUserUseCase:
     async def execute(self, telegram_id: int, update: UserEntity) -> UserEntity:
         updated_user = await self.user_repo.update(telegram_id, update)
         if updated_user is None:
-            raise UserNotFoundById
+            raise UserNotFoundById()
         
         if updated_user:
             await self.deck_builder.build_and_clean_others(updated_user)
@@ -61,6 +61,6 @@ class UpdateUserDescriptionUseCase:
     async def execute(self, telegram_id: int, description: str) -> UserEntity:
         updated_user = await self.user_repo.update_description(telegram_id, description)
         if updated_user is None:
-            raise UserNotFoundById
+            raise UserNotFoundById()
             
         return updated_user

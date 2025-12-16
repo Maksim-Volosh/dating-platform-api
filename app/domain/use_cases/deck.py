@@ -17,8 +17,8 @@ class UserDeckUseCase:
         if user_entity is None:
             res = await self.deck_builder.build(user)
             if res is None:
-                raise NoCandidatesFound
+                raise NoCandidatesFound()
             user_entity = await self.cache.lpop(key)
             if user_entity is None:
-                raise UserNotFoundById
+                raise UserNotFoundById()
         return user_entity

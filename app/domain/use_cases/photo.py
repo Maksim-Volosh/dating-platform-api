@@ -15,7 +15,7 @@ class RetrieveUserPhotosUseCase:
     async def execute(self, user: UserEntity) -> list[PhotoEntity]:
         photos: List[PhotoEntity] | None = await self.photo_repo.get_by_user_id(user.telegram_id)
         if photos is None:
-            raise PhotosNotFound
+            raise PhotosNotFound()
         return photos
     
 
@@ -30,7 +30,7 @@ class UpdateUserPhotosUseCase:
         self, user: UserEntity, photos: List[PhotoEntity]
     ) -> List[PhotoEntity]:
         # Delete old photos
-        deleted_photos: List[PhotoEntity] | None = await self.photo_repo.delete(user.telegram_id)
+        await self.photo_repo.delete(user.telegram_id)
         
         # Validate new photos
         if len(photos) > 3:
@@ -82,6 +82,6 @@ class DeleteUserPhotosUseCase:
     ) -> None:
         deleted_photos: List[PhotoEntity] | None = await self.photo_repo.delete(user.telegram_id)
         if deleted_photos is None:
-            raise PhotosNotFound
+            raise PhotosNotFound()
         
         return
