@@ -1,5 +1,6 @@
 from app.domain.interfaces import IInboxCache
 from app.domain.entities import InboxSwipe
+from app.core.config import settings
 
 class InboxOnSwipeService:
     def __init__(self, inbox_cache: IInboxCache) -> None:
@@ -13,6 +14,6 @@ class InboxOnSwipeService:
         
     async def create_inbox_item(self, swipe: InboxSwipe):
         if await self._is_match(swipe):
-            await self.inbox_cache.add_match(swipe.to_user_id, swipe.from_user_id)
+            await self.inbox_cache.add_match(swipe.to_user_id, swipe.from_user_id, timeout=settings.inbox.timeout)
         else:
-            await self.inbox_cache.add_incoming(swipe.to_user_id, swipe.from_user_id)
+            await self.inbox_cache.add_incoming(swipe.to_user_id, swipe.from_user_id, timeout=settings.inbox.timeout)

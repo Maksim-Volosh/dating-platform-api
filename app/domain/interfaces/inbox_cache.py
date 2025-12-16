@@ -5,11 +5,11 @@ from app.domain.entities import InboxItem
 
 class IInboxCache(ABC):
     @abstractmethod
-    async def add_incoming(self, owner_id: int, candidate_id: int):
+    async def add_incoming(self, owner_id: int, candidate_id: int, timeout=None):
         raise NotImplementedError
     
     @abstractmethod
-    async def add_match(self, owner_id: int, candidate_id: int):
+    async def add_match(self, owner_id: int, candidate_id: int, timeout=None):
         raise NotImplementedError
 
     @abstractmethod

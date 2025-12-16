@@ -8,7 +8,7 @@ class InboxRedisCache(IInboxCache):
     def __init__(self, client: Redis) -> None:
         self.client = client
         
-    async def add_incoming(self, owner_id: int, candidate_id: int):
+    async def add_incoming(self, owner_id: int, candidate_id: int, timeout=None):
         key_list = f"inbox:{owner_id}:list"
         set_key = f"inbox:{owner_id}:set"
         
@@ -16,13 +16,22 @@ class InboxRedisCache(IInboxCache):
         
         if added:
             await self.client.rpush(key_list, f"{candidate_id}:INCOMING") # type: ignore
+            if timeout:
+                await self.client.expire(key_list, timeout)
+            
+        if timeout:
+            await self.client.expire(set_key, timeout)
         
-    async def add_match(self, owner_id: int, candidate_id: int):
+    async def add_match(self, owner_id: int, candidate_id: int, timeout=None):
         key_list = f"inbox:{owner_id}:list"
         set_key = f"inbox:{owner_id}:set"
         
         await self.client.rpush(key_list, f"{candidate_id}:MATCH") # type: ignore
         await self.client.sadd(set_key, candidate_id) # type: ignore
+        
+        if timeout:
+            await self.client.expire(key_list, timeout)
+            await self.client.expire(set_key, timeout)
         
     async def peek(self, owner_id: int) -> InboxItem | None:
         key_list = f"inbox:{owner_id}:list"

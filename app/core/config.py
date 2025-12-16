@@ -34,6 +34,9 @@ class CacheConfig(BaseSettings):
 class DeckConfig(BaseSettings):
     timeout: int = 60 * 60
     max_size: int = 100
+    
+class InboxConfig(BaseSettings):
+    timeout: int = 604800
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -51,6 +54,7 @@ class Settings(BaseSettings):
     static: StaticFilesConfig = StaticFilesConfig()
     details: DetailsConfig = DetailsConfig()
     deck: DeckConfig = DeckConfig()
+    inbox: InboxConfig = InboxConfig()
     
 
 settings = Settings() # type: ignore
