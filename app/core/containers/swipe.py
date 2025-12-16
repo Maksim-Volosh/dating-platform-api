@@ -2,8 +2,8 @@ from fastapi import Depends
 from redis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.services import InboxOnSwipeService
-from app.domain.use_cases import SwipeUserUseCase
+from app.application.services import InboxOnSwipeService
+from app.application.use_cases import SwipeUserUseCase
 from app.infrastructure.db import db_helper
 from app.infrastructure.redis import redis_helper
 from app.infrastructure.repositories import (InboxRedisCache,

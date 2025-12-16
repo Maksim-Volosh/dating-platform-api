@@ -1,7 +1,7 @@
 from app.domain.entities import (FullSwipeEntity, InboxSwipe,
                                  NormalizedSwipeEntity, SwipeEntity)
 from app.domain.interfaces import ISwipeRepository
-from app.domain.services import InboxOnSwipeService
+from app.application.services import InboxOnSwipeService
 
 
 class SwipeUserUseCase:

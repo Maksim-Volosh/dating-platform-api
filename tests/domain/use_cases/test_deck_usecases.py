@@ -5,7 +5,7 @@ import pytest
 from app.domain.entities import UserEntity
 from app.domain.exceptions import UserNotFoundById
 from app.domain.exceptions.deck import NoCandidatesFound
-from app.domain.use_cases.deck import UserDeckUseCase
+from app.application.use_cases.deck import UserDeckUseCase
 
 
 @pytest.fixture

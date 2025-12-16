@@ -4,7 +4,7 @@ from app.api.v1.schemas.inbox import CurrentInboxItemResponse, InboxItemCountRes
 from app.core.containers.inbox import get_inbox_use_case
 from app.domain.entities import InboxItem
 from app.domain.exceptions import InboxItemNotFound
-from app.domain.use_cases import InboxUseCase
+from app.application.use_cases import InboxUseCase
 
 router = APIRouter(prefix="/inbox", tags=["Inbox"])
 

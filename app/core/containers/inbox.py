@@ -1,7 +1,7 @@
 from fastapi import Depends
 from redis import Redis
 
-from app.domain.use_cases import InboxUseCase
+from app.application.use_cases import InboxUseCase
 from app.infrastructure.redis import redis_helper
 from app.infrastructure.repositories import InboxRedisCache
 

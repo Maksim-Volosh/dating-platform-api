@@ -1,10 +1,10 @@
 from fastapi import Depends, Header, HTTPException, status
 
+from app.application.use_cases import UserUseCase
 from app.core.config import settings
 from app.core.containers.user import get_user_use_case
 from app.domain.entities import UserEntity
 from app.domain.exceptions import UserNotFoundById
-from app.domain.use_cases import UserUseCase
 
 
 async def verify_bot_key(x_api_key: str = Header(...)):

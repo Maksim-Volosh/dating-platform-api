@@ -5,7 +5,7 @@ import pytest
 from app.domain.entities import UserEntity
 from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
                                    UsersNotFound)
-from app.domain.use_cases.user import (CreateUserUseCase, UpdateUserUseCase,
+from app.application.use_cases.user import (CreateUserUseCase, UpdateUserUseCase,
                                        UserUseCase, UpdateUserDescriptionUseCase)
 
 

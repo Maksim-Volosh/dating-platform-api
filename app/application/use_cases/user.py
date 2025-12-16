@@ -3,7 +3,7 @@ from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
                                    UsersNotFound)
 from app.domain.interfaces import IUserRepository
 from app.domain.interfaces.deck_cache import IDeckCache
-from app.domain.services import DeckBuilderService
+from app.application.services import DeckBuilderService
 
 
 class UserUseCase:

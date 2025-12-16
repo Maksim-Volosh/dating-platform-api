@@ -12,7 +12,7 @@ from app.core.containers.user import (get_create_user_use_case,
 from app.domain.entities import UserEntity
 from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
                                    UsersNotFound)
-from app.domain.use_cases import (CreateUserUseCase,
+from app.application.use_cases import (CreateUserUseCase,
                                   UpdateUserDescriptionUseCase,
                                   UpdateUserUseCase, UserUseCase)
 

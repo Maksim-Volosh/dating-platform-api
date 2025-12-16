@@ -1,10 +1,10 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.use_cases import (DeleteUserPhotosUseCase,
-                                  RetrieveUserPhotosUseCase,
-                                  UpdateUserPhotosUseCase,
-                                  UploadUserPhotosUseCase)
+from app.application.use_cases import (DeleteUserPhotosUseCase,
+                                       RetrieveUserPhotosUseCase,
+                                       UpdateUserPhotosUseCase,
+                                       UploadUserPhotosUseCase)
 from app.infrastructure.db import db_helper
 from app.infrastructure.repositories import SQLAlchemyPhotoRepository
 

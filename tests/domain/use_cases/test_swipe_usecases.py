@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from app.domain.entities import SwipeEntity
-from app.domain.use_cases import SwipeUserUseCase
+from app.application.use_cases import SwipeUserUseCase
 
 # -------------------------------
 # Tests for SwipeUserUseCase

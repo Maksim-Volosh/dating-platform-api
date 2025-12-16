@@ -2,10 +2,10 @@ from fastapi import Depends
 from redis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.services import DeckBuilderService
-from app.domain.use_cases import (CreateUserUseCase,
-                                  UpdateUserDescriptionUseCase,
-                                  UpdateUserUseCase, UserUseCase)
+from app.application.services import DeckBuilderService
+from app.application.use_cases import (CreateUserUseCase,
+                                       UpdateUserDescriptionUseCase,
+                                       UpdateUserUseCase, UserUseCase)
 from app.infrastructure.db import db_helper
 from app.infrastructure.redis import redis_helper
 from app.infrastructure.repositories import (DeckRedisCache,

@@ -3,7 +3,7 @@ from app.domain.entities import UserEntity
 from app.domain.exceptions import UserNotFoundById
 from app.domain.exceptions.deck import NoCandidatesFound
 from app.domain.interfaces import IDeckCache
-from app.domain.services import DeckBuilderService
+from app.application.services import DeckBuilderService
 
 
 class UserDeckUseCase:

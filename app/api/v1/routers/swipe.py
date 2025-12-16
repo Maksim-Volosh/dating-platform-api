@@ -4,7 +4,7 @@ from app.api.v1.schemas.swipe import (SwipeRequest,
                                       SwipeResponse)
 from app.core.containers.swipe import (get_swipe_user_use_case)
 from app.domain.entities import SwipeEntity
-from app.domain.use_cases import SwipeUserUseCase
+from app.application.use_cases import SwipeUserUseCase
 
 router = APIRouter(prefix="/swipes", tags=["Swipe"])
 

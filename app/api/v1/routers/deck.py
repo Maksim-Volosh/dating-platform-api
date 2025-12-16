@@ -5,7 +5,7 @@ from app.core.containers.deck import get_user_deck_use_case
 from app.core.dependencies import get_existing_user
 from app.domain.entities import UserEntity
 from app.domain.exceptions import NoCandidatesFound, UserNotFoundById
-from app.domain.use_cases import UserDeckUseCase
+from app.application.use_cases import UserDeckUseCase
 
 router = APIRouter(prefix="/decks", tags=["Deck"])
 

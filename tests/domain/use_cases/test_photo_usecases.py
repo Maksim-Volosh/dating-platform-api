@@ -6,8 +6,8 @@ from app.domain.entities import UserEntity
 from app.domain.entities.photo import PhotoEntity
 from app.domain.exceptions.photo import (PhotosNotFound, TooManyPhotos,
                                          WrongFileExtension)
-from app.domain.use_cases import RetrieveUserPhotosUseCase
-from app.domain.use_cases.photo import (DeleteUserPhotosUseCase,
+from app.application.use_cases import RetrieveUserPhotosUseCase
+from app.application.use_cases.photo import (DeleteUserPhotosUseCase,
                                         UpdateUserPhotosUseCase,
                                         UploadUserPhotosUseCase)
 
