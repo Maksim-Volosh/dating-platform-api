@@ -6,17 +6,9 @@ from sqlalchemy import Enum as SQLAlchemyEnum
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.domain.entities import Gender, PreferGender
+
 from .base import Base
-
-
-class Gender(str, Enum):
-    MALE = "male"
-    FEMALE = "female"
-    
-class PreferGender(str, Enum):
-    MALE = "male"
-    FEMALE = "female"
-    ANYONE = "anyone"
 
 
 class User(Base):
