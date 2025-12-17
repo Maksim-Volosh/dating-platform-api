@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 from app.domain.entities import FullSwipeEntity, NormalizedSwipeEntity
-from app.infrastructure.models.swipe import Swipe
 
 
 class ISwipeRepository(ABC):
@@ -10,7 +10,7 @@ class ISwipeRepository(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    async def get_by_ids(self, user1_id: int, user2_id: int) -> Swipe | None:
+    async def get_by_ids(self, user1_id: int, user2_id: int) -> Any | None:
         raise NotImplementedError
     
     @abstractmethod
@@ -18,5 +18,5 @@ class ISwipeRepository(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    async def update(self, exist_swipe: Swipe, swipe: NormalizedSwipeEntity) -> FullSwipeEntity:
+    async def update(self, exist_swipe, swipe: NormalizedSwipeEntity) -> FullSwipeEntity:
         raise NotImplementedError
