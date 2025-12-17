@@ -9,7 +9,7 @@ from app.application.use_cases import UserDeckUseCase
 
 router = APIRouter(prefix="/decks", tags=["Deck"])
 
-@router.get("/next/{telegram_id}")
+@router.post("/next/{telegram_id}")
 async def get_next_user_from_deck(
     user: UserEntity = Depends(get_existing_user),
     use_case: UserDeckUseCase = Depends(get_user_deck_use_case)

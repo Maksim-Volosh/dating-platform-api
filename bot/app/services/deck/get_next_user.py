@@ -7,7 +7,7 @@ from config import API_KEY, API_URL
 async def get_next_user(telegram_id: int):
     async with aiohttp.ClientSession() as session:
         try:
-            async with session.get(
+            async with session.post(
                     f"{API_URL}/decks/next/{telegram_id}",
                     headers={"x-api-key": API_KEY}
                 ) as resp:
