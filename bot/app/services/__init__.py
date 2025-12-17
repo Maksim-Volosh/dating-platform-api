@@ -6,12 +6,10 @@ from .photos.update_photos import update_photos_for_user
 from .user.update_description import update_description
 from .deck.get_next_user import get_next_user
 from .swipe.create_swipe import create_swipe
-from .swipe.is_match import is_match
 from .user.get_user import get_user
-from .like.create_like import create_like
-from .like.get_count import get_like_count
-from .like.get_next_like import get_next_like
-from .like.remove_like import remove_like
+from .inbox.get_count import get_inbox_count
+from .inbox.ack_inbox import ack_inbox_item
+from .inbox.get_next_inbox import get_next_item
 
 __all__ = (
     "create_user_profile",
@@ -23,9 +21,7 @@ __all__ = (
     "get_next_user",
     "create_swipe",
     "get_user",
-    "create_like",
-    "get_like_count",
-    "get_next_like",
-    "remove_like",
-    "is_match",
+    "get_inbox_count",
+    "ack_inbox_item",
+    "get_next_item"
 )

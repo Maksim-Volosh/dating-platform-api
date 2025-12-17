@@ -5,7 +5,7 @@ from aiogram.types import InputMediaPhoto, Message
 
 from app.keyboards.keyboards import (get_name_keyboard, main_kb, profile_kb,
                                      profile_with_likes_kb)
-from app.services import get_like_count, get_user, get_user_photos
+from app.services import get_inbox_count, get_user, get_user_photos
 from app.states import LikeSwipeState, SwipeState
 from app.states.registration import Registration
 
@@ -44,7 +44,7 @@ async def my_profile(message: Message, state: FSMContext) -> None:
 
         await message.answer_media_group(media_group) # type: ignore
         # --- 3. Get like count ---
-        count = await get_like_count(telegram_id)
+        count = await get_inbox_count(telegram_id)
         
         if count and count > 1:
             await message.answer(f"🔥. Посмотреть {count} лайков. \n2. Заполнить анкету заново. \n3. Изменить фотографии. \n4. Изменить описание. \n*** \n💤. Обновить меню", reply_markup=profile_with_likes_kb)   

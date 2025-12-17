@@ -4,11 +4,11 @@ import aiohttp
 from config import API_KEY, API_URL
 
 
-async def get_next_like(liked_id: int):
+async def get_next_item(owner_id: int):
     async with aiohttp.ClientSession() as session:
         try:
             async with session.get(
-                f"{API_URL}/likes/pending/{liked_id}",
+                f"{API_URL}/inbox/current/{owner_id}",
                 headers={"x-api-key": API_KEY}
             ) as resp:
                 if resp.status != 200:

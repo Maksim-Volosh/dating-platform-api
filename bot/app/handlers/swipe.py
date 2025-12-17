@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import InputMediaPhoto, Message
 
 from app.keyboards.keyboards import main_kb, swipe_kb
-from app.services import (create_like, create_swipe, get_next_user,
+from app.services import (create_swipe, get_inbox_count, get_next_user,
                           get_user_photos)
 from app.states import SwipeState
 
@@ -63,8 +63,8 @@ async def swipe(message: Message, state: FSMContext, bot: Bot) -> None:
             await message.answer("Отлично, лайк отправлен ✨ Ждем взаимного лайка")
             await create_swipe(message.from_user.id, liked_id, True)
             
-            # --- Create like and get count---
-            count = await create_like(message.from_user.id, liked_id)
+            # --- Get count---
+            count = await get_inbox_count(liked_id)
             
             # --- Send message to liked user ---
             if count and count > 1:
