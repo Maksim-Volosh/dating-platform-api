@@ -1,85 +1,21 @@
-from aiogram import Bot, Dispatcher, F, Router, html
+from aiogram import Bot, Dispatcher, F, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import InputMediaPhoto, Message
+from aiogram.types import Message
 
-from app.keyboards.keyboards import main_kb, swipe_kb
-from app.services import (create_swipe, get_inbox_count, get_next_user,
-                          get_user_photos)
 from app.states import SwipeState
+from app.flows.swipe_flow import SwipeFlow
 
 router = Router()
+flow = SwipeFlow()
 
 @router.message(StateFilter(None), F.text.in_({"1", "Листать анкеты"}))
 async def next_profile(message: Message, state: FSMContext) -> None:
-    if message.text in ["1", "Листать анкеты"]:
-        await message.answer("✨🔍", reply_markup=swipe_kb)
-    
-    if message.from_user:
-        # --- 1. Get user data ---
-        data = await get_next_user(message.from_user.id)
-        
-        if data:
-            # --- Create caption ---
-            caption = (
-                f"{html.bold(data['name'])}, {html.bold(str(data['age']))}, "
-                f"{html.bold(data['city'])}\n\n"
-                f"{html.italic(data['description'] or 'Без описания')}"
-            )
-            
-            # --- 2. Get user photos ---
-            photos = await get_user_photos(data['telegram_id'])
-            await state.update_data(current_profile_id=data['telegram_id'])
-            if not photos:
-                await message.answer(caption, reply_markup=swipe_kb)
-                await state.set_state(SwipeState.swipe)
-                return
-
-            file_ids = [p.get("file_id") for p in photos if p.get("file_id")]
-
-            media_group = [
-                InputMediaPhoto(media=fid) for fid in file_ids
-            ]
-
-            media_group[0].caption = caption
-            media_group[0].parse_mode = "HTML"
-
-            await message.answer_media_group(media_group) # type: ignore
-            await state.set_state(SwipeState.swipe)
-        else:
-            await message.answer("Извини но сейчас нету подходящих анкет по твоим параметрам. Попробуй позже.", reply_markup=main_kb)
-
+    await flow.next_profile(message, state)
 
 @router.message(SwipeState.swipe)
 async def swipe(message: Message, state: FSMContext, bot: Bot) -> None:
-    data = await state.get_data()
-    liked_id = data.get("current_profile_id")
-
-    if message.from_user:
-        if message.text == "❤️" and liked_id:
-            await state.clear()
-            
-            # --- Create swipe ---
-            await message.answer("Отлично, лайк отправлен ✨ Ждем взаимного лайка")
-            await create_swipe(message.from_user.id, liked_id, True)
-            
-            # --- Get count---
-            count = await get_inbox_count(liked_id)
-            
-            # --- Send message to liked user ---
-            if count and count > 1:
-                await bot.send_message(liked_id, f"Эййй, ты понравился {count} людям! Что бы посмотреть их анкеты - выйди в меню ❤️))")
-            elif count and count == 1:
-                await bot.send_message(liked_id, f"Эййй, ты понравился {count} человеку! Что бы посмотреть кто это - выйди в меню ❤️))")
-            
-            # --- Get next profile ---
-            await next_profile(message, state)
-            
-        elif message.text == "👎" and liked_id:
-            await state.clear()
-            await create_swipe(message.from_user.id, liked_id, False)
-            await next_profile(message, state)
-
+    await flow.swipe(message, state, bot)
 
 
 def register(dp: Dispatcher) -> None:
