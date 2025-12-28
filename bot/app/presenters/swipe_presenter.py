@@ -1,4 +1,5 @@
 from aiogram import Bot, html
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import InputMediaPhoto, Message
 
 from app.keyboards.keyboards import main_kb, swipe_kb
@@ -42,7 +43,10 @@ class SwipePresenter:
         await message.answer("Отлично, лайк отправлен ✨ Ждем взаимного лайка")
     
     async def send_notification(self, count: int | None, liked_id: int, bot: Bot) -> None:
-        if count and count > 1:
-            await bot.send_message(liked_id, f"Эййй, ты понравился {count} людям! Что бы посмотреть их анкеты - выйди в меню ❤️))")
-        elif count and count == 1:
-            await bot.send_message(liked_id, f"Эййй, ты понравился {count} человеку! Что бы посмотреть кто это - выйди в меню ❤️))")
+        try:
+            if count and count > 1:
+                await bot.send_message(liked_id, f"Эййй, ты понравился {count} людям! Что бы посмотреть их анкеты - выйди в меню ❤️))")
+            elif count and count == 1:
+                await bot.send_message(liked_id, f"Эййй, ты понравился {count} человеку! Что бы посмотреть кто это - выйди в меню ❤️))")
+        except TelegramBadRequest:
+            pass
