@@ -211,3 +211,7 @@ uploads/
 
 # Profile creator
 create_profiles.py
+
+# Project dumper
+dump.py
+project_dump.txt
