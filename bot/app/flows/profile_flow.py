@@ -1,8 +1,10 @@
-from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
 
 from app.presenters.profile_presenter import ProfilePresenter
 from app.services import get_inbox_count, get_user, get_user_photos
+from app.states.registration import Registration
+
 
 class ProfileFlow:
     def __init__(self):
@@ -16,6 +18,8 @@ class ProfileFlow:
 
         if data is None:
             await self.presenter.start_registration(message, state)
+            await state.set_state(Registration.name)
+            await self.presenter.ask_name(message)
             return
 
         if data is False:

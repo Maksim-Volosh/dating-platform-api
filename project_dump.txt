@@ -1,0 +1,1336 @@
+bot/config.py:
+--------------------------------------------------------------------------------
+from os import getenv
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+TOKEN = getenv("BOT_TOKEN", "key")
+API_URL = getenv("API_URL", "http://localhost:8000/api/v1")
+API_KEY = getenv("API_KEY", "k")
+
+bot/run.py:
+--------------------------------------------------------------------------------
+import asyncio
+import logging
+import sys
+
+from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
+from config import TOKEN
+
+from app.handlers import register_all_handlers
+
+
+async def main() -> None:
+    bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    dp = Dispatcher()
+
+    register_all_handlers(dp)
+
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    asyncio.run(main())
+
+bot/src/__init__.py:
+--------------------------------------------------------------------------------
+
+
+bot/src/handlers/__init__.py:
+--------------------------------------------------------------------------------
+from aiogram import Dispatcher
+from . import start, registration, profile, change_profile, swipe, like
+
+def register_all_handlers(dp: Dispatcher):
+    start.register(dp)
+    registration.register(dp)
+    profile.register(dp)
+    change_profile.register(dp)
+    swipe.register(dp)
+    like.register(dp)
+
+bot/src/handlers/change_profile.py:
+--------------------------------------------------------------------------------
+import asyncio
+
+from aiogram import Dispatcher, F, Router
+from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
+
+from app.keyboards.keyboards import get_name_keyboard, main_kb, photo_kb
+from app.services import update_description, update_photos_for_user
+from app.states import Registration, UpdateDescription, UpdatePhotos
+
+router = Router()
+            
+@router.message(StateFilter(None), F.text == "2")
+async def restart_registration(message: Message, state: FSMContext) -> None:
+    await state.clear()
+    await message.answer("Ну давай по новой ✨")
+    await state.set_state(Registration.name)
+    await state.update_data(update=True)
+    await message.answer("Как тебя зовут?", reply_markup=await get_name_keyboard(message))
+    
+@router.message(StateFilter(None), F.text == "3")
+async def update_photos(message: Message, state: FSMContext) -> None:
+    await state.clear()
+    await message.answer("Окей, пришли мне свои фотографии где можно увидеть твою красоту!) Фотографий не должно быть больше 3х")
+    await state.set_state(UpdatePhotos.photos)
+
+@router.message(UpdatePhotos.photos, F.photo)
+async def process_photos(message: Message, state: FSMContext) -> None:
+    data = await state.get_data()
+    photo_ids = data.get("photo_ids", [])
+
+
+    if len(photo_ids) < 3:
+        file_id = message.photo[-1].file_id # type: ignore
+        # take the highest quality photo
+        photo_ids.append(file_id)
+
+        await state.update_data(photo_ids=photo_ids)
+        if len(photo_ids) == 3:
+            await message.answer(
+                f"Фото добавлено ({len(photo_ids)}/3)."
+            )
+            await finish_photo_upload(message, state)
+        elif len(photo_ids) < 3:
+            await message.answer(
+                f"Фото добавлено ({len(photo_ids)}/3). Отправь ещё или нажми «Завершить», когда закончишь.", reply_markup=photo_kb
+            )
+      
+@router.message(UpdatePhotos.photos, F.text.lower() == "завершить")
+async def finish_photo_upload(message: Message, state: FSMContext):
+    data = await state.get_data()
+    photo_ids = data.get("photo_ids", [])
+
+    if not photo_ids:
+        await message.answer("Ты не отправил ни одной фотографии 🙃")
+        return
+    
+    await asyncio.sleep(0.5)
+    await message.answer("Отлично! Фотографии обновлены! 🎉", reply_markup=main_kb)
+    
+    if message.from_user is not None:
+        await update_photos_for_user(data, message.from_user.id)
+
+    await state.clear()
+    
+@router.message(StateFilter(None), F.text == "4")
+async def update_profile_description(message: Message, state: FSMContext) -> None:
+    await state.clear()
+    await message.answer("Окей, давай по новой! Расскажи немного о себе.")
+    await state.set_state(UpdateDescription.description)
+            
+@router.message(UpdateDescription.description)
+async def process_description(message: Message, state: FSMContext) -> None:
+    if message.text is not None and message.from_user is not None:
+        if len(message.text) > 300:
+            await message.answer("⚠️ Описание не должно превышать 300 символов.")
+            return
+        if len(message.text) < 20: # type: ignore
+            await message.answer("⚠️ Описание не должно быть короче 20 символов.")
+            return
+        
+        await update_description(message.text, message.from_user.id)
+        await state.clear()
+        await message.answer("Описание обновлено! 🎉", reply_markup=main_kb)
+    
+def register(dp: Dispatcher) -> None:
+    dp.include_router(router)
+
+bot/src/handlers/like.py:
+--------------------------------------------------------------------------------
+from aiogram import Bot, Dispatcher, F, Router, html
+from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.types import InputMediaPhoto, Message
+
+from app.keyboards.keyboards import main_kb, swipe_kb
+from app.services import (ack_inbox_item, create_swipe, get_inbox_count,
+                          get_next_item, get_user, get_user_photos)
+from app.states import LikeSwipeState
+
+router = Router()
+
+@router.message(StateFilter(None), F.text == "🔥")
+async def next_like_profile(message: Message, state: FSMContext) -> None:
+    if message.from_user:
+        if message.text == "🔥":
+            await message.answer("✨🔍", reply_markup=swipe_kb)
+            
+        # --- 1. Get next profile who liked us ---
+        inbox_data = await get_next_item(message.from_user.id)
+        
+        if inbox_data:
+            candidate_id = inbox_data.get("candidate_id")
+            type_of_inbox = inbox_data.get("type")
+
+            more = await get_inbox_count(message.from_user.id)
+            
+            # --- 3. Get user data ---
+            data = await get_user(candidate_id)
+            
+            if more and more - 1 > 0:
+                msg = f"Кому-то понравилась твоя анкета (И еще {more - 1}):\n\n"
+            else:
+                msg = "Кому-то понравилась твоя анкета:\n\n"
+            
+            if data:
+                # --- 4. Create caption ---
+                caption = (
+                    f"{msg}"
+                    f"{html.bold(data['name'])}, {html.bold(str(data['age']))}, "
+                    f"{html.bold(data['city'])}\n\n"
+                    f"{html.italic(data['description'] or 'Без описания')}"
+                )
+                
+                # --- 5. Get user photos ---
+                photos = await get_user_photos(data['telegram_id'])
+                
+                # --- 6. Save current profile id and name ---
+                await state.update_data(current_profile_id=candidate_id)
+                await state.update_data(current_profile_name=data['name'])
+                
+                if not photos:
+                    await message.answer(caption, reply_markup=swipe_kb)
+                    if type_of_inbox == "MATCH":
+                        await message.answer(f'Отлично, надеюсь вы хорошо проведете время! \n\nНачинайте общаться -> <a href="tg://user?id={candidate_id}">{data['name']}</a>')
+                        await ack_inbox_item(message.from_user.id, candidate_id)
+                        await state.update_data(not_first_like=True)
+                        await next_like_profile(message, state)
+                        return
+                    else:
+                        await state.set_state(LikeSwipeState.swipe)
+                    return
+
+                file_ids = [p.get("file_id") for p in photos if p.get("file_id")]
+
+                media_group = [
+                    InputMediaPhoto(media=fid) for fid in file_ids
+                ]
+
+                media_group[0].caption = caption
+                media_group[0].parse_mode = "HTML"
+
+                await message.answer_media_group(media_group) # type: ignore
+                if type_of_inbox == "MATCH":
+                    await message.answer(f'Отлично, надеюсь вы хорошо проведете время! \n\nНачинайте общаться -> <a href="tg://user?id={candidate_id}">{data['name']}</a>')
+                    await ack_inbox_item(message.from_user.id, candidate_id)
+                    await state.update_data(not_first_like=True)
+                    await next_like_profile(message, state)
+                    return
+                await state.set_state(LikeSwipeState.swipe)
+            else:
+                await message.answer("Извини но что то пошло не так. Попробуй позже.", reply_markup=main_kb)
+        else:
+            if message.text == "🔥" and not (await state.get_data()).get("not_first_like", False):
+                await message.answer("Уже не актуально", reply_markup=main_kb)
+            else:
+                await message.answer("На сегодня это все 🙃 Идем дальше?", reply_markup=main_kb)
+
+
+@router.message(LikeSwipeState.swipe)
+async def swipe(message: Message, state: FSMContext, bot: Bot) -> None:
+    data = await state.get_data()
+    candidate_id = data.get("current_profile_id")
+    name = data["current_profile_name"]
+    if not name:
+        name = "❤️"
+
+    if message.from_user:
+        if message.text == "❤️" and candidate_id:
+            await state.clear()
+            
+            # --- Create swipe ---
+            await message.answer(f'Отлично, надеюсь вы хорошо проведете время! \n\nНачинайте общаться -> <a href="tg://user?id={candidate_id}">{data["current_profile_name"]}</a>')
+            await create_swipe(message.from_user.id, candidate_id, True)
+            
+            # --- Get count---
+            count = await get_inbox_count(candidate_id)
+            
+            # --- Remove like ---
+            await ack_inbox_item(message.from_user.id, candidate_id)
+            
+            # --- Send message to liked user ---
+            if count and count > 1:
+                await bot.send_message(candidate_id, f"Эййй, ты понравился {count} людям! Что бы посмотреть их анкеты - выйди в меню ❤️))")
+            elif count and count == 1:
+                await bot.send_message(candidate_id, f"Эййй, ты понравился {count} человеку! Что бы посмотреть кто это - выйди в меню ❤️))")
+            
+            # --- Get next like profile ---
+            await next_like_profile(message, state)
+            
+        elif message.text == "👎" and candidate_id:
+            await state.clear()
+            await create_swipe(message.from_user.id, candidate_id, False)
+            await ack_inbox_item(message.from_user.id, candidate_id)
+            await next_like_profile(message, state)
+
+
+
+def register(dp: Dispatcher) -> None:
+    dp.include_router(router)
+
+bot/src/handlers/profile.py:
+--------------------------------------------------------------------------------
+from aiogram import Dispatcher, F, Router, html
+from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.types import InputMediaPhoto, Message
+
+from app.keyboards.keyboards import (get_name_keyboard, main_kb, profile_kb,
+                                     profile_with_likes_kb)
+from app.services import get_inbox_count, get_user, get_user_photos
+from app.states import LikeSwipeState, SwipeState
+from app.states.registration import Registration
+
+router = Router()
+
+@router.message(StateFilter(None, SwipeState.swipe, LikeSwipeState.swipe), F.text.in_({"💤", "Моя анкета"}))
+async def my_profile(message: Message, state: FSMContext) -> None:
+    await state.clear()
+    # --- 1. Get user ---
+    telegram_id = message.from_user.id # type: ignore
+    data = await get_user(telegram_id)
+
+    if data: 
+        # --- Create caption ---
+        caption = (
+            f"{html.bold(data['name'])}, {html.bold(str(data['age']))}, "
+            f"{html.bold(data['city'])}\n\n"
+            f"{html.italic(data['description'] or 'Без описания')}"
+        )
+
+        # --- 2. Get user photos ---
+        photos = await get_user_photos(telegram_id)
+
+        if not photos:
+            await message.answer(caption, reply_markup=main_kb)
+            return
+
+        file_ids = [p.get("file_id") for p in photos if p.get("file_id")]
+
+        media_group = [
+            InputMediaPhoto(media=fid) for fid in file_ids
+        ]
+
+        media_group[0].caption = caption
+        media_group[0].parse_mode = "HTML"
+
+        await message.answer_media_group(media_group) # type: ignore
+        # --- 3. Get like count ---
+        count = await get_inbox_count(telegram_id)
+        
+        if count and count > 1:
+            await message.answer(f"🔥. Посмотреть {count} лайков. \n2. Заполнить анкету заново. \n3. Изменить фотографии. \n4. Изменить описание. \n*** \n💤. Обновить меню", reply_markup=profile_with_likes_kb)   
+        elif count and count == 1:
+            await message.answer(f"🔥. Посмотреть {count} лайк. \n2. Заполнить анкету заново. \n3. Изменить фотографии. \n4. Изменить описание. \n*** \n💤. Обновить меню", reply_markup=profile_with_likes_kb)   
+        else:
+            await message.answer("1. Листать анкеты. \n2. Заполнить анкету заново. \n3. Изменить фотографии. \n4. Изменить описание. \n*** \n💤. Обновить меню", reply_markup=profile_kb)   
+        
+    elif data is None:
+        await message.answer("Привет! Тебя еще нет с нами. Давай зарегистрируемся) ✨")
+        await state.set_state(Registration.name)
+        await message.answer("Как тебя зовут?", reply_markup=await get_name_keyboard(message)) 
+        
+    elif data == False:
+        await message.answer("⚠️ Ошибка при соединении с сервером.")
+            
+def register(dp: Dispatcher) -> None:
+    dp.include_router(router)
+
+bot/src/handlers/registration.py:
+--------------------------------------------------------------------------------
+import asyncio
+
+from aiogram import Dispatcher, F, Router
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message, ReplyKeyboardRemove
+
+from app.keyboards.keyboards import (get_gender_keyboard,
+                                     get_prefer_gender_keyboard, main_kb,
+                                     photo_kb)
+from app.services import (create_photos_for_user, create_user_profile,
+                          update_photos_for_user, update_user_profile)
+from app.states.registration import Registration
+
+router = Router()
+
+@router.message(Registration.name)
+async def process_name(message: Message, state: FSMContext) -> None:
+    await state.update_data(name=message.text)
+    await state.set_state(Registration.age)
+    await message.answer("Сколько тебе лет?", reply_markup=ReplyKeyboardRemove())
+    
+@router.message(Registration.age)
+async def process_age(message: Message, state: FSMContext) -> None:
+    try:
+        age = int(message.text) # type: ignore
+        if not 10 <= age <= 100: 
+            await message.answer("⚠️ Укажи возраст числом от 10 до 100.")
+            return
+    except ValueError:
+        await message.answer("⚠️ Пожалуйста, введи возраст числом.")
+        return
+
+    await state.update_data(age=message.text)
+    await state.set_state(Registration.city)
+    await message.answer("В каком городе живешь?")
+    
+@router.message(Registration.city)
+async def process_city(message: Message, state: FSMContext) -> None:
+    await state.update_data(city=message.text)
+    await state.set_state(Registration.description)
+    await message.answer("Расскажи немного о себе.")
+    
+@router.message(Registration.description)
+async def process_description(message: Message, state: FSMContext) -> None:
+    if len(message.text) > 300: # type: ignore
+        await message.answer("⚠️ Описание не должно превышать 300 символов.")
+        return
+    if len(message.text) < 20: # type: ignore
+        await message.answer("⚠️ Описание не должно быть короче 20 символов.")
+        return
+    await state.update_data(description=message.text)
+    await state.set_state(Registration.gender)
+    await message.answer("Какой у тебя пол?", reply_markup=await get_gender_keyboard())
+    
+@router.message(Registration.gender)
+async def process_gender(message: Message, state: FSMContext) -> None:
+    if message.text not in ["Мужской", "Женский"]:
+        await message.answer("⚠️ Пожалуйста, выбери валидный пол.")
+        return
+    await state.update_data(gender=message.text)
+    await state.set_state(Registration.prefer_gender)
+    await message.answer("Какой у тебя предпочитаемый пол?", reply_markup=await get_prefer_gender_keyboard())
+    
+@router.message(Registration.prefer_gender)
+async def process_prefer_gender(message: Message, state: FSMContext) -> None:
+    if message.text not in ["Мужской", "Женский", "Неважно"]:
+        await message.answer("⚠️ Пожалуйста, выбери валидный пол.")
+        return
+    await state.update_data(prefer_gender=message.text)
+    await state.set_state(Registration.photos)
+    await message.answer("Отлично, теперь пришли мне свои фотографии где можно увидеть твою красоту!) Фотографий не должно быть больше 3х")
+    
+
+@router.message(Registration.photos, F.photo)
+async def process_photos(message: Message, state: FSMContext) -> None:
+    data = await state.get_data()
+    photo_ids = data.get("photo_ids", [])
+
+
+    if len(photo_ids) < 3:
+        file_id = message.photo[-1].file_id # type: ignore
+        # take the highest quality photo
+        photo_ids.append(file_id)
+
+        await state.update_data(photo_ids=photo_ids)
+        if len(photo_ids) == 3:
+            await message.answer(
+                f"Фото добавлено ({len(photo_ids)}/3)."
+            )
+            await finish_photo_upload(message, state)
+        elif len(photo_ids) < 3:
+            await message.answer(
+                f"Фото добавлено ({len(photo_ids)}/3). Отправь ещё или нажми «Завершить», когда закончишь.", reply_markup=photo_kb
+            )
+    
+@router.message(Registration.photos, F.text.lower() == "завершить")
+async def finish_photo_upload(message: Message, state: FSMContext):
+    data = await state.get_data()
+    photo_ids = data.get("photo_ids", [])
+
+    if not photo_ids:
+        await message.answer("Ты не отправил ни одной фотографии 🙃")
+        return
+    
+    await asyncio.sleep(0.5)
+    await message.answer("Отлично! Теперь я знаю о тебе всё! 🎉", reply_markup=main_kb)
+    
+    if message.from_user is not None:
+        if data.get("update"):
+            await update_user_profile(data, message.from_user.id)
+            await update_photos_for_user(data, message.from_user.id)
+        else:
+            await create_user_profile(data, message.from_user.id)
+            await create_photos_for_user(data, message.from_user.id)
+
+    await state.clear()
+    
+def register(dp: Dispatcher) -> None:
+    dp.include_router(router)
+
+bot/src/handlers/start.py:
+--------------------------------------------------------------------------------
+import logging
+
+import aiohttp
+from aiogram import Dispatcher, Router, html
+from aiogram.filters import CommandStart
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
+from config import API_KEY, API_URL
+
+from app.keyboards.keyboards import get_name_keyboard, main_kb
+from app.states.registration import Registration
+
+router = Router()
+
+
+@router.message(CommandStart())
+async def command_start_handler(message: Message, state: FSMContext) -> None:
+    await state.clear()
+    telegram_id = message.from_user.id # type: ignore
+    
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(
+                f"{API_URL}/users/{telegram_id}",
+                headers={"x-api-key": API_KEY}
+            ) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    await message.answer(f"С возвращением, {html.bold(data['name'])}! 👋", reply_markup=main_kb)
+                else:
+                    await message.answer("Привет! Тебя еще нет с нами. Давай зарегистрируемся) ✨")
+                    await state.set_state(Registration.name)
+                    await message.answer("Сначало расскажи - как тебя зовут?", reply_markup=await get_name_keyboard(message))
+
+        except Exception as e:
+            await message.answer("⚠️ Ошибка при соединении с сервером.")
+            logging.error(f"API error: {e}")
+            
+def register(dp: Dispatcher) -> None:
+    dp.include_router(router)
+
+bot/src/handlers/swipe.py:
+--------------------------------------------------------------------------------
+from aiogram import Bot, Dispatcher, F, Router, html
+from aiogram.filters import StateFilter
+from aiogram.fsm.context import FSMContext
+from aiogram.types import InputMediaPhoto, Message
+
+from app.keyboards.keyboards import main_kb, swipe_kb
+from app.services import (create_swipe, get_inbox_count, get_next_user,
+                          get_user_photos)
+from app.states import SwipeState
+
+router = Router()
+
+@router.message(StateFilter(None), F.text.in_({"1", "Листать анкеты"}))
+async def next_profile(message: Message, state: FSMContext) -> None:
+    if message.text in ["1", "Листать анкеты"]:
+        await message.answer("✨🔍", reply_markup=swipe_kb)
+    
+    if message.from_user:
+        # --- 1. Get user data ---
+        data = await get_next_user(message.from_user.id)
+        
+        if data:
+            # --- Create caption ---
+            caption = (
+                f"{html.bold(data['name'])}, {html.bold(str(data['age']))}, "
+                f"{html.bold(data['city'])}\n\n"
+                f"{html.italic(data['description'] or 'Без описания')}"
+            )
+            
+            # --- 2. Get user photos ---
+            photos = await get_user_photos(data['telegram_id'])
+            await state.update_data(current_profile_id=data['telegram_id'])
+            if not photos:
+                await message.answer(caption, reply_markup=swipe_kb)
+                await state.set_state(SwipeState.swipe)
+                return
+
+            file_ids = [p.get("file_id") for p in photos if p.get("file_id")]
+
+            media_group = [
+                InputMediaPhoto(media=fid) for fid in file_ids
+            ]
+
+            media_group[0].caption = caption
+            media_group[0].parse_mode = "HTML"
+
+            await message.answer_media_group(media_group) # type: ignore
+            await state.set_state(SwipeState.swipe)
+        else:
+            await message.answer("Извини но сейчас нету подходящих анкет по твоим параметрам. Попробуй позже.", reply_markup=main_kb)
+
+
+@router.message(SwipeState.swipe)
+async def swipe(message: Message, state: FSMContext, bot: Bot) -> None:
+    data = await state.get_data()
+    liked_id = data.get("current_profile_id")
+
+    if message.from_user:
+        if message.text == "❤️" and liked_id:
+            await state.clear()
+            
+            # --- Create swipe ---
+            await message.answer("Отлично, лайк отправлен ✨ Ждем взаимного лайка")
+            await create_swipe(message.from_user.id, liked_id, True)
+            
+            # --- Get count---
+            count = await get_inbox_count(liked_id)
+            
+            # --- Send message to liked user ---
+            if count and count > 1:
+                await bot.send_message(liked_id, f"Эййй, ты понравился {count} людям! Что бы посмотреть их анкеты - выйди в меню ❤️))")
+            elif count and count == 1:
+                await bot.send_message(liked_id, f"Эййй, ты понравился {count} человеку! Что бы посмотреть кто это - выйди в меню ❤️))")
+            
+            # --- Get next profile ---
+            await next_profile(message, state)
+            
+        elif message.text == "👎" and liked_id:
+            await state.clear()
+            await create_swipe(message.from_user.id, liked_id, False)
+            await next_profile(message, state)
+
+
+
+def register(dp: Dispatcher) -> None:
+    dp.include_router(router)
+
+bot/src/keyboards/keyboards.py:
+--------------------------------------------------------------------------------
+
+from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup
+from aiogram.utils.keyboard import ReplyKeyboardBuilder
+
+
+async def get_name_keyboard(message: Message) -> ReplyKeyboardMarkup:
+    kb = ReplyKeyboardBuilder()
+    kb.button(text=f"{message.from_user.first_name}") # type: ignore
+    return kb.as_markup(resize_keyboard=True, one_time_keyboard=True)
+
+async def get_gender_keyboard() -> ReplyKeyboardMarkup:
+    kb = ReplyKeyboardBuilder()
+    kb.button(text="Мужской")
+    kb.button(text="Женский")
+    return kb.as_markup(resize_keyboard=True, one_time_keyboard=True)
+
+async def get_prefer_gender_keyboard() -> ReplyKeyboardMarkup:
+    kb = ReplyKeyboardBuilder()
+    kb.button(text="Мужской")
+    kb.button(text="Женский")
+    kb.button(text="Неважно")
+    return kb.as_markup(resize_keyboard=True, one_time_keyboard=True)
+
+
+main_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Моя анкета"), KeyboardButton(text="Листать анкеты")]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True,
+)
+
+photo_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Завершить")]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True,
+)
+
+profile_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="1"),
+            KeyboardButton(text="2"),
+            KeyboardButton(text="3"),
+            KeyboardButton(text="4"),
+            KeyboardButton(text="💤")
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True,
+)
+
+profile_with_likes_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="🔥"),
+            KeyboardButton(text="2"),
+            KeyboardButton(text="3"),
+            KeyboardButton(text="4"),
+            KeyboardButton(text="💤")
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True,
+)
+
+swipe_kb = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="❤️"), KeyboardButton(text="👎"), KeyboardButton(text="💤")]
+    ],
+    resize_keyboard=True,
+)
+
+bot/src/services/__init__.py:
+--------------------------------------------------------------------------------
+from .user.create_user import create_user_profile
+from .photos.create_photos import create_photos_for_user
+from .photos.get_photos import get_user_photos
+from .user.update_user import update_user_profile
+from .photos.update_photos import update_photos_for_user
+from .user.update_description import update_description
+from .deck.get_next_user import get_next_user
+from .swipe.create_swipe import create_swipe
+from .user.get_user import get_user
+from .inbox.get_count import get_inbox_count
+from .inbox.ack_inbox import ack_inbox_item
+from .inbox.get_next_inbox import get_next_item
+
+__all__ = (
+    "create_user_profile",
+    "create_photos_for_user",
+    "get_user_photos",
+    "update_user_profile",
+    "update_photos_for_user",
+    "update_description",
+    "get_next_user",
+    "create_swipe",
+    "get_user",
+    "get_inbox_count",
+    "ack_inbox_item",
+    "get_next_item"
+)
+
+bot/src/services/deck/get_next_user.py:
+--------------------------------------------------------------------------------
+import logging
+
+import aiohttp
+from config import API_KEY, API_URL
+
+
+async def get_next_user(telegram_id: int):
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.post(
+                    f"{API_URL}/decks/next/{telegram_id}",
+                    headers={"x-api-key": API_KEY}
+                ) as resp:
+
+                    if resp.status == 404:
+                        return None
+
+                    if resp.status != 200:
+                        logging.error(f"GET PHOTO API {resp.status}: {await resp.text()}")
+                        return None
+
+                    user_data = await resp.json()
+                    if user_data:
+                        return user_data
+                    return
+                
+        except Exception as e:
+            logging.error(f"API error: {e}")
+            return
+
+bot/src/services/inbox/ack_inbox.py:
+--------------------------------------------------------------------------------
+import logging
+
+import aiohttp
+from config import API_KEY, API_URL
+
+
+async def ack_inbox_item(owner_id: int, candidate_id: int):
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.post(
+                f"{API_URL}/inbox/ack/{owner_id}",
+                headers={"x-api-key": API_KEY},
+                json={
+                    "candidate_id": candidate_id
+                }
+                
+            ) as resp:
+                if resp.status != 204:
+                    return None
+
+                return True
+            
+        except Exception as e:
+            logging.error(f"API error: {e}")
+            return None
+
+bot/src/services/inbox/get_count.py:
+--------------------------------------------------------------------------------
+import logging
+
+import aiohttp
+from config import API_KEY, API_URL
+
+
+async def get_inbox_count(owner_id: int):
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(
+                f"{API_URL}/inbox/count/{owner_id}",
+                headers={"x-api-key": API_KEY}
+            ) as resp:
+                if resp.status != 200:
+                    return None
+
+                data = await resp.json()
+                count: int = data.get("count")
+                return count if count else None
+            
+        except Exception as e:
+            logging.error(f"API error: {e}")
+            return None
+
+bot/src/services/inbox/get_next_inbox.py:
+--------------------------------------------------------------------------------
+import logging
+
+import aiohttp
+from config import API_KEY, API_URL
+
+
+async def get_next_item(owner_id: int):
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(
+                f"{API_URL}/inbox/current/{owner_id}",
+                headers={"x-api-key": API_KEY}
+            ) as resp:
+                if resp.status != 200:
+                    return None
+
+                data = await resp.json()
+                return data if data else None
+            
+        except Exception as e:
+            logging.error(f"API error: {e}")
+            return None
+
+bot/src/services/photos/create_photos.py:
+--------------------------------------------------------------------------------
+import logging
+import time
+
+import aiohttp
+from config import API_KEY, API_URL
+
+
+async def create_photos_for_user(data: dict, telegram_id: int) -> bool:
+    photo_payload = [
+        {"file_id": file_id} for file_id in data["photo_ids"]
+    ]
+
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.post(
+                f"{API_URL}/users/{telegram_id}/photos/",
+                headers={"x-api-key": API_KEY},
+                json=photo_payload,
+            ) as resp:
+                if resp.status == 201:
+                    return True
+                else:
+                    logging.error(f"CREATE PHOTO API {resp.status}: {await resp.text()}")
+                    return False
+
+
+        except Exception as e:
+            logging.error(f"API error: {e}")
+    return False
+
+bot/src/services/photos/get_photos.py:
+--------------------------------------------------------------------------------
+import logging
+
+import aiohttp
+from config import API_KEY, API_URL
+
+
+async def get_user_photos(telegram_id: int):
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.get(
+                    f"{API_URL}/users/{telegram_id}/photos",
+                    headers={"x-api-key": API_KEY}
+                ) as resp:
+
+                    if resp.status != 200:
+                        logging.error(f"GET PHOTO API {resp.status}: {await resp.text()}")
+                        return
+
+                    photos_data = await resp.json()
+                    photos = photos_data.get("photos", [])
+                    
+                    return photos
+                
+        except Exception as e:
+            logging.error(f"API error: {e}")
+            return
+
+bot/src/services/photos/update_photos.py:
+--------------------------------------------------------------------------------
+import logging
+import time
+
+import aiohttp
+from config import API_KEY, API_URL
+
+
+async def update_photos_for_user(data: dict, telegram_id: int) -> bool:
+    photo_payload = [
+        {"file_id": file_id} for file_id in data["photo_ids"]
+    ]
+
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.put(
+                f"{API_URL}/users/{telegram_id}/photos/",
+                headers={"x-api-key": API_KEY},
+                json=photo_payload,
+            ) as resp:
+                if resp.status == 201:
+                    return True
+                else:
+                    logging.error(f"UPDATE PHOTO API {resp.status}: {await resp.text()}")
+                    return False
+
+        except Exception as e:
+            logging.error(f"API error: {e}")
+    return False
+
+bot/src/services/swipe/create_swipe.py:
+--------------------------------------------------------------------------------
+import logging
+import time
+
+import aiohttp
+from config import API_KEY, API_URL
+
+
+async def create_swipe(liker_id: int, liked_id: int, decision: bool):
+    swipe_payload = {
+        "liker_id": liker_id,
+        "liked_id": liked_id,
+        "decision": decision
+    }
+    
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.post(
+                f"{API_URL}/swipes/",
+                headers={"x-api-key": API_KEY},
+                json=swipe_payload,
+            ) as resp:
+                if resp.status != 201:
+                    logging.error(f"CREATE SWIPE API {resp.status}: {await resp.text()}")
+                    return
+                
+                data = await resp.json()
+                return data if data else None
+
+        except Exception as e:
+            logging.error(f"API error: {e}")
+
+    return
+
+bot/src/services/user/create_user.py:
+--------------------------------------------------------------------------------
+import logging
+import time
+
+import aiohttp
+from config import API_KEY, API_URL
+
+GENDER_MAP = {
+    "Мужской": "male",
+    "Женский": "female",
+}
+PREFER_GENDER_MAP = {
+    "Мужской": "male",
+    "Женский": "female",
+    "Неважно": "anyone",
+}
+
+async def create_user_profile(data: dict, telegram_id: int) -> bool:
+    user_payload = {
+        "telegram_id": telegram_id,
+        "name": data["name"],
+        "age": int(data["age"]),
+        "city": data["city"],
+        "description": data["description"],
+        "gender": GENDER_MAP[data["gender"]],
+        "prefer_gender": PREFER_GENDER_MAP[data["prefer_gender"]],
+    }
+    
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.post(
+                f"{API_URL}/users/",
+                headers={"x-api-key": API_KEY},
+                json=user_payload,
+            ) as resp:
+                if resp.status != 201:
+                    logging.error(f"CREATE USER API {resp.status}: {await resp.text()}")
+                    return False
+
+        except Exception as e:
+            logging.error(f"API error: {e}")
+
+    return False
+
+bot/src/services/user/get_user.py:
+--------------------------------------------------------------------------------
+import logging
+
+import aiohttp
+from config import API_KEY, API_URL
+
+
+async def get_user(telegram_id: int):
+    async with aiohttp.ClientSession() as session:
+        try:
+            # --- 1. Get user data ---
+            async with session.get(
+                f"{API_URL}/users/{telegram_id}",
+                headers={"x-api-key": API_KEY}
+            ) as resp:
+                if resp.status != 200:
+                    return None
+
+                data = await resp.json()
+                return data if data else None
+        except Exception as e:
+            logging.error(f"API error: {e}")
+            return False
+
+bot/src/services/user/update_description.py:
+--------------------------------------------------------------------------------
+import logging
+import time
+
+import aiohttp
+from config import API_KEY, API_URL
+
+
+async def update_description(description: str, telegram_id: int) -> bool:
+    description_payload = {
+        "description": description
+    }
+
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.patch(
+                f"{API_URL}/users/{telegram_id}/description/",
+                headers={"x-api-key": API_KEY},
+                json=description_payload,
+            ) as resp:
+                if resp.status == 200:
+                    return True
+                else:
+                    logging.error(f"UPDATE DESCRIPTION API {resp.status}: {await resp.text()}")
+                    return False
+
+        except Exception as e:
+            logging.error(f"API error: {e}")
+    return False
+
+bot/src/services/user/update_user.py:
+--------------------------------------------------------------------------------
+import logging
+import time
+
+import aiohttp
+from config import API_KEY, API_URL
+
+GENDER_MAP = {
+    "Мужской": "male",
+    "Женский": "female",
+}
+PREFER_GENDER_MAP = {
+    "Мужской": "male",
+    "Женский": "female",
+    "Неважно": "anyone",
+}
+
+async def update_user_profile(data: dict, telegram_id: int) -> bool:
+    user_payload = {
+        "name": data["name"],
+        "age": int(data["age"]),
+        "city": data["city"],
+        "description": data["description"],
+        "gender": GENDER_MAP[data["gender"]],
+        "prefer_gender": PREFER_GENDER_MAP[data["prefer_gender"]],
+    }
+    
+    async with aiohttp.ClientSession() as session:
+        try:
+            async with session.put(
+                f"{API_URL}/users/{telegram_id}/",
+                headers={"x-api-key": API_KEY},
+                json=user_payload,
+            ) as resp:
+                if resp.status != 201:
+                    logging.error(f"UPDATE USER API {resp.status}: {await resp.text()}")
+                    return False
+
+        except Exception as e:
+            logging.error(f"API error: {e}")
+
+    return False
+
+bot/src/states/__init__.py:
+--------------------------------------------------------------------------------
+from .update_photos import UpdatePhotos
+from .registration import Registration
+from .update_description import UpdateDescription
+from .swipe import SwipeState
+from .like import LikeSwipeState
+
+__all__ = (
+    "Registration",
+    "UpdatePhotos",
+    "UpdateDescription",
+    "SwipeState",
+    "LikeSwipeState",
+)
+
+bot/src/states/like.py:
+--------------------------------------------------------------------------------
+from aiogram.fsm.state import State, StatesGroup
+
+
+class LikeSwipeState(StatesGroup):
+    swipe = State()
+
+bot/src/states/registration.py:
+--------------------------------------------------------------------------------
+from aiogram.fsm.state import State, StatesGroup
+
+
+class Registration(StatesGroup):
+    name = State()
+    age = State()
+    city = State()
+    description = State()
+    gender = State()
+    prefer_gender = State()
+    photos = State()
+    update = State()
+
+bot/src/states/swipe.py:
+--------------------------------------------------------------------------------
+from aiogram.fsm.state import State, StatesGroup
+
+
+class SwipeState(StatesGroup):
+    swipe = State()
+
+bot/src/states/update_description.py:
+--------------------------------------------------------------------------------
+from aiogram.fsm.state import State, StatesGroup
+
+
+class UpdateDescription(StatesGroup):
+    description = State()
+
+bot/src/states/update_photos.py:
+--------------------------------------------------------------------------------
+from aiogram.fsm.state import State, StatesGroup
+
+
+class UpdatePhotos(StatesGroup):
+    photos = State()
+
+create_profiles.py:
+--------------------------------------------------------------------------------
+import requests
+import random
+
+URL = "http://127.0.0.1:8000/api/v1/users/"
+
+def create_man():
+
+    prefer_gender_options = ['male', 'female', 'anyone']
+    names = [
+        "Alex", "Daniil", "Vlad", "Maxim", "Nikita", "Ivan", "Egor", "Timur", "Artem", "Mikhail",
+        "Sergey", "Andrey", "Kirill", "Denis", "Oleg", "Pavel", "Roman", "Semyon", "Victor", "Grigory",
+        "Anatoly", "Yaroslav", "Dmitry", "Stepan", "Matvey", "Leonid", "Valentin", "Ilya", "Bogdan", "Vyacheslav",
+        "Mark", "Fedor", "Ignat", "Arkady", "Platon", "German", "Eduard", "Albert", "Stanislav", "Vadim",
+        "Rodion", "Artur", "Gleb", "Ruslan", "Konstantin", "Boris", "Anatoliy", "Savely", "Trofim", "Zahar"
+    ]
+
+
+    used_names = set()
+
+    for i in range(1, 51):
+        name = names[i - 1]
+
+        profile_data = {
+            "telegram_id": i,
+            "name": name,
+            "age": random.randint(16, 24),
+            "city": "Vil",
+            "description": "Test profile for matchmaking",
+            "gender": "male",
+            "prefer_gender": random.choice(prefer_gender_options),
+        }
+        
+
+        response = requests.post(URL, json=profile_data, headers={"Content-Type": "application/json", "x-api-key": "k"})
+        
+        if response.status_code == 200:
+            print(f"[✅] Profile '{name}' ({i}) created successfully.")
+        else:
+            print(f"[❌] Failed to create profile '{name}' ({i}): {response.status_code} - {response.text}")
+
+def create_women():
+
+    prefer_gender_options = ['male', 'female', 'anyone']
+    names = [
+        "Anna", "Maria", "Elena", "Olga", "Natalia", "Irina", "Tatiana", "Svetlana", "Yulia", "Ekaterina",
+        "Anastasia", "Victoria", "Sofia", "Daria", "Polina", "Alina", "Valeria", "Ksenia", "Veronika", "Alexandra",
+        "Margarita", "Marina", "Lidia", "Nadezhda", "Galina", "Lyudmila", "Zinaida", "Vera", "Elizaveta", "Larisa",
+        "Nina", "Tamara", "Raisa", "Inna", "Antonina", "Irma", "Elvira", "Sofia", "Alyona", "Zhanna",
+        "Oksana", "Alla", "Natalya", "Evgenia", "Lyubov", "Nina", "Rimma", "Olga", "Lyudmila", "Galina"
+    ]
+
+
+    used_names = set()
+
+    for i in range(1, 51):
+        name = names[i - 1]
+
+        profile_data = {
+            "telegram_id": i+50,
+            "name": name,
+            "age": random.randint(16, 24),
+            "city": "Vil",
+            "description": "Test profile for matchmaking",
+            "gender": "female",
+            "prefer_gender": random.choice(prefer_gender_options),
+        }
+        
+
+        response = requests.post(URL, json=profile_data, headers={"Content-Type": "application/json", "x-api-key": "k"})
+        
+        if response.status_code == 200:
+            print(f"[✅] Profile '{name}' ({i+50}) created successfully.")
+        else:
+            print(f"[❌] Failed to create profile '{name}' ({i+50}): {response.status_code} - {response.text}")
+
+def delete():
+    for i in range(1, 110):
+        
+        response = requests.delete(URL+str(i)+"/")
+        
+        if response.status_code in [204, 201]:
+            print(f"[✅] Profile '{i}' deleted successfully.")
+        else:
+            print(f"[❌] Failed to delete profile '{i}': {response.status_code} - {response.text}", URL+str(i)+"/")
+    return
+
+
+if __name__ == "__main__":
+    create_man() 
+    create_women()
+    # delete()
+
+docker-compose.yml:
+--------------------------------------------------------------------------------
+version: "3.8"
+
+services:
+  dating_app:
+    container_name: dating_app
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+    environment:
+      - PYTHONUNBUFFERED=1
+      - REDIS_URL=redis://redis:6379/0
+
+  db:
+    image: postgres:15
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
+
+pytest.ini:
+--------------------------------------------------------------------------------
+[pytest]
+pythonpath = .
+
+requirements.txt:
+--------------------------------------------------------------------------------
+aiofiles==24.1.0
+aiogram==3.22.0
+aiohappyeyeballs==2.6.1
+aiohttp==3.12.15
+aiosignal==1.4.0
+annotated-types==0.7.0
+anyio==4.9.0
+asyncpg==0.30.0
+attrs==25.3.0
+certifi==2025.8.3
+click==8.2.1
+fastapi==0.116.1
+frozenlist==1.7.0
+greenlet==3.2.3
+h11==0.16.0
+httptools==0.6.4
+idna==3.10
+iniconfig==2.1.0
+magic-filter==1.0.12
+multidict==6.6.4
+packaging==25.0
+pluggy==1.6.0
+propcache==0.3.2
+pydantic==2.11.7
+pydantic-settings==2.10.1
+pydantic_core==2.33.2
+Pygments==2.19.2
+pytest==8.4.2
+pytest-asyncio==1.2.0
+python-dotenv==1.1.1
+python-multipart==0.0.20
+PyYAML==6.0.2
+redis==6.2.0
+sniffio==1.3.1
+SQLAlchemy==2.0.41
+starlette==0.47.1
+typing-inspection==0.4.1
+typing_extensions==4.14.1
+uvicorn==0.35.0
+uvloop==0.21.0
+watchfiles==1.1.0
+websockets==15.0.1
+yarl==1.20.1
+

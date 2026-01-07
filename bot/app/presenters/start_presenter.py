@@ -10,7 +10,8 @@ class StartPresenter:
 
     async def start_registration(self, message: Message, state: FSMContext):
         await message.answer("Привет! Тебя еще нет с нами. Давай зарегистрируемся) ✨")
-        await state.set_state(Registration.name)
+        
+    async def ask_name(self, message: Message):
         await message.answer(
             "Как тебя зовут?",
             reply_markup=await get_name_keyboard(message)
