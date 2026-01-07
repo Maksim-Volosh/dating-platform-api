@@ -11,6 +11,7 @@ flow = StartFlow()
 @router.message(CommandStart())
 async def command_start_handler(message: Message, state: FSMContext) -> None:
     await flow.start(message, state)
+     
             
 def register(dp: Dispatcher) -> None:
     dp.include_router(router)

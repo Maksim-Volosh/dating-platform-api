@@ -3,7 +3,6 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from app.keyboards.keyboards import get_name_keyboard, main_kb
-from app.states.registration import Registration
 
 
 class StartPresenter:

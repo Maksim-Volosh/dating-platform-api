@@ -1,10 +1,9 @@
 from aiogram.types import Message, ReplyKeyboardRemove
-from app.keyboards.keyboards import (
-    get_gender_keyboard,
-    get_prefer_gender_keyboard,
-    main_kb,
-    photo_kb,
-)
+
+from app.keyboards.keyboards import (get_gender_keyboard,
+                                     get_prefer_gender_keyboard, main_kb,
+                                     photo_kb)
+
 
 class RegistrationPresenter:
 

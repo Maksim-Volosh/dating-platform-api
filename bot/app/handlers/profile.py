@@ -3,8 +3,8 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from app.states import LikeSwipeState, SwipeState
 from app.flows.profile_flow import ProfileFlow
+from app.states import LikeSwipeState, SwipeState
 
 router = Router()
 flow = ProfileFlow()
@@ -15,6 +15,7 @@ flow = ProfileFlow()
 )
 async def my_profile(message: Message, state: FSMContext) -> None:
     await flow.show_my_profile(message, state)
+    
     
 def register(dp: Dispatcher) -> None:
     dp.include_router(router)

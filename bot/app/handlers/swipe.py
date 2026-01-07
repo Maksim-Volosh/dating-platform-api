@@ -3,8 +3,8 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from app.states import SwipeState
 from app.flows.swipe_flow import SwipeFlow
+from app.states import SwipeState
 
 router = Router()
 flow = SwipeFlow()

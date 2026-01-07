@@ -29,7 +29,6 @@ class ChangeProfileFlow:
         data = await state.get_data()
         photo_ids = data.get("photo_ids", [])
 
-
         if len(photo_ids) < 3:
             file_id = message.photo[-1].file_id # type: ignore
             # take the highest quality photo

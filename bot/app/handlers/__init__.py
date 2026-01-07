@@ -1,5 +1,7 @@
 from aiogram import Dispatcher
-from . import start, registration, profile, change_profile, swipe, like
+
+from . import change_profile, like, profile, registration, start, swipe
+
 
 def register_all_handlers(dp: Dispatcher):
     start.register(dp)

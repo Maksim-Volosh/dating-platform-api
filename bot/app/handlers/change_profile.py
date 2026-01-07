@@ -1,15 +1,10 @@
-import asyncio
-
 from aiogram import Dispatcher, F, Router
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from app.keyboards.keyboards import get_name_keyboard, main_kb, photo_kb
-from app.services import update_description, update_photos_for_user
-from app.states import Registration, UpdateDescription, UpdatePhotos
-
 from app.flows.change_profile import ChangeProfileFlow
+from app.states import UpdateDescription, UpdatePhotos
 
 router = Router()
 flow = ChangeProfileFlow()
@@ -37,6 +32,7 @@ async def update_profile_description(message: Message, state: FSMContext) -> Non
 @router.message(UpdateDescription.description)
 async def process_description(message: Message, state: FSMContext) -> None:
     await flow.process_description(message, state)
+   
     
 def register(dp: Dispatcher) -> None:
     dp.include_router(router)

@@ -2,8 +2,8 @@ from aiogram import Dispatcher, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from app.states.registration import Registration
 from app.flows.registartion_flow import RegistrationFlow
+from app.states.registration import Registration
 
 router = Router()
 flow = RegistrationFlow()
@@ -39,6 +39,7 @@ async def photos(message: Message, state: FSMContext):
 @router.message(Registration.photos, F.text.lower() == "завершить")
 async def finish(message: Message, state: FSMContext):
     await flow.finish_photos(message, state)
+  
     
 def register(dp: Dispatcher) -> None:
     dp.include_router(router)

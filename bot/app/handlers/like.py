@@ -18,6 +18,5 @@ async def swipe(message: Message, state: FSMContext, bot: Bot) -> None:
     await flow.swipe(message, state, bot)
 
 
-
 def register(dp: Dispatcher) -> None:
     dp.include_router(router)
