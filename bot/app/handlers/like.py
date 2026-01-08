@@ -3,11 +3,12 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from app.container import container
 from app.flows.like_flow import LikeFlow
 from app.states import LikeSwipeState
 
 router = Router()
-flow = LikeFlow()
+flow = LikeFlow(container.user_service)
 
 @router.message(StateFilter(None), F.text == "🔥")
 async def next_like_profile(message: Message, state: FSMContext) -> None:

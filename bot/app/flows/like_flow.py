@@ -4,13 +4,15 @@ from aiogram.types import Message
 
 from app.presenters.like_presenter import LikePresenter
 from app.services import (ack_inbox_item, create_swipe, get_inbox_count,
-                          get_next_item, get_user, get_user_photos)
+                          get_next_item, get_user_photos)
+from app.services.user.service import UserService
 from app.states import LikeSwipeState
 
 
 class LikeFlow:
-    def __init__(self):
+    def __init__(self, user_service: UserService):
         self.presenter = LikePresenter()
+        self.user_service = user_service
 
     async def next_like_profile(self, message: Message, state: FSMContext) -> None:
         if message.from_user:
@@ -25,7 +27,7 @@ class LikeFlow:
 
                 more = await get_inbox_count(message.from_user.id)
 
-                data = await get_user(candidate_id)
+                data = await self.user_service.get_user(candidate_id)
                 
                 if data:
                     photos = await get_user_photos(data['telegram_id'])

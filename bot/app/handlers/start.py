@@ -3,10 +3,11 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from app.container import container
 from app.flows.start_flow import StartFlow
 
 router = Router()
-flow = StartFlow()
+flow = StartFlow(container.user_service)
 
 @router.message(CommandStart())
 async def command_start_handler(message: Message, state: FSMContext) -> None:

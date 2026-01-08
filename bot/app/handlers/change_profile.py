@@ -3,11 +3,12 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from app.container import container
 from app.flows.change_profile import ChangeProfileFlow
 from app.states import UpdateDescription, UpdatePhotos
 
 router = Router()
-flow = ChangeProfileFlow()
+flow = ChangeProfileFlow(container.user_service)
             
 @router.message(StateFilter(None), F.text == "2")
 async def restart_registration(message: Message, state: FSMContext) -> None:

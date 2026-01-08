@@ -2,11 +2,12 @@ from aiogram import Dispatcher, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from app.container import container
 from app.flows.registartion_flow import RegistrationFlow
 from app.states.registration import Registration
 
 router = Router()
-flow = RegistrationFlow()
+flow = RegistrationFlow(container.user_service)
 
 @router.message(Registration.name)
 async def name(message: Message, state: FSMContext):
