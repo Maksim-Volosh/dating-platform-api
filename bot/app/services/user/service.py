@@ -1,4 +1,7 @@
+from typing import Any
+
 from app.infrastructure.api_client import APIClient
+from app.infrastructure.errors import HTTPError
 
 GENDER_MAP = {
     "Мужской": "male",
@@ -14,8 +17,15 @@ class UserService:
     def __init__(self, api: APIClient) -> None:
         self._api = api
         
-    async def get_user(self, telegram_id: int):
-        return await self._api.get(f"/users/{telegram_id}")
+    async def get_user(self, telegram_id: int) -> None | Any:
+        try:
+            data = await self._api.get(f"/users/{telegram_id}")
+        except HTTPError as e:
+            if e.status == 404:
+                return None
+            else:
+                raise
+        return data
     
     async def create_user_profile(self, data: dict, telegram_id: int):
         user_payload = {

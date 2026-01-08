@@ -1,4 +1,5 @@
 from app.infrastructure.api_client import APIClient
+from app.infrastructure.errors import HTTPError
 
 class InboxService:
     def __init__(self, api: APIClient) -> None:
@@ -13,4 +14,12 @@ class InboxService:
         return count
     
     async def get_next_item(self, owner_id: int):
-        return await self._api.get(f"/inbox/current/{owner_id}")
+        try:
+            data = await self._api.get(f"/inbox/current/{owner_id}")
+        except HTTPError as e:
+            if e.status == 404:
+                return None
+            else:
+                raise
+            
+        return data
