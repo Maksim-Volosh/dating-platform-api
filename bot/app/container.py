@@ -1,6 +1,6 @@
 from app.infrastructure.api_client import api
-from app.services.user.service import UserService
-from app.services.photos.service import PhotoService
+from app.services import InboxService, PhotoService, UserService
+
 
 class Container:
     def __init__(self):
@@ -9,5 +9,6 @@ class Container:
         # Setup Services
         self.user_service = UserService(self.api)
         self.photo_service = PhotoService(self.api)
+        self.inbox_service = InboxService(self.api)
 
 container = Container()
