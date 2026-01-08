@@ -29,8 +29,7 @@ class ProfileFlow:
             await message.answer("⚠️ Ошибка при соединении с сервером.")
             return
 
-        photos_data = await self.photo_service.get_user_photos(telegram_id)
-        photos = photos_data.get("photos", [])
+        photos = await self.photo_service.get_user_photos(telegram_id)
         inbox_count = await self.inbox_service.get_inbox_count(telegram_id)
 
         await self.presenter.show_profile(

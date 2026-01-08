@@ -5,7 +5,8 @@ class PhotoService:
         self._api = api
         
     async def get_user_photos(self, telegram_id: int):
-        return await self._api.get(f"/users/{telegram_id}/photos")
+        data = await self._api.get(f"/users/{telegram_id}/photos")
+        return data.get("photos", [])
     
     async def create_photos_for_user(self, data: dict, telegram_id: int):
         photo_payload = [
