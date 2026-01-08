@@ -3,8 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from app.presenters.swipe_presenter import SwipePresenter
-from app.services import (InboxService, PhotoService, SwipeService,
-                          get_next_user)
+from app.services import DeckService, InboxService, PhotoService, SwipeService
 from app.states import SwipeState
 from app.states.swipe import SwipeState
 
@@ -14,12 +13,14 @@ class SwipeFlow:
         self,
         photo_service: PhotoService,
         inbox_service: InboxService,
-        swipe_service: SwipeService
+        swipe_service: SwipeService,
+        deck_service: DeckService
     ):
         self.photo_service = photo_service
         self.presenter = SwipePresenter()
         self.inbox_service = inbox_service
         self.swipe_service = swipe_service
+        self.deck_service = deck_service
 
     async def next_profile(self, message: Message, state: FSMContext) -> None:
         if message.text in ["1", "Листать анкеты"]:
@@ -27,7 +28,7 @@ class SwipeFlow:
         
         if message.from_user:
             # --- 1. Get user data ---
-            data = await get_next_user(message.from_user.id)
+            data = await self.deck_service.get_next_user(message.from_user.id)
             
             if data:
                 # --- 2. Get user photos ---

@@ -8,7 +8,12 @@ from app.flows.swipe_flow import SwipeFlow
 from app.states import SwipeState
 
 router = Router()
-flow = SwipeFlow(container.photo_service, container.inbox_service, container.swipe_service)
+flow = SwipeFlow(
+    container.photo_service, 
+    container.inbox_service, 
+    container.swipe_service,
+    container.deck_service
+    )
 
 @router.message(StateFilter(None), F.text.in_({"1", "Листать анкеты"}))
 async def next_profile(message: Message, state: FSMContext) -> None:
