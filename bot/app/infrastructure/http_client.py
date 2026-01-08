@@ -4,6 +4,8 @@ from typing import Any
 import aiohttp
 from config import API_KEY, API_URL
 
+from app.infrastructure.errors import HTTPError
+
 JsonType = dict | list | None
 
 class HTTPClient:
@@ -53,9 +55,7 @@ class HTTPClient:
                 ) as resp:
                     if resp.status != expected_status:
                         text = await resp.text()
-                        raise RuntimeError(
-                            f"HTTP {resp.status}: {text}"
-                        )
+                        raise HTTPError(resp.status, text)
 
                     if expected_status == 204:
                         return None
