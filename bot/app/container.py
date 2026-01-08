@@ -1,5 +1,6 @@
 from app.infrastructure.api_client import api
-from app.services import InboxService, PhotoService, UserService, SwipeService
+from app.services import (DeckService, InboxService, PhotoService,
+                          SwipeService, UserService)
 
 
 class Container:
@@ -11,5 +12,6 @@ class Container:
         self.photo_service = PhotoService(self.api)
         self.inbox_service = InboxService(self.api)
         self.swipe_service = SwipeService(self.api)
+        self.deck_service = DeckService(self.api)
 
 container = Container()
