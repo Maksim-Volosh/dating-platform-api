@@ -34,12 +34,13 @@ class SwipeUserUseCase:
             
         to_user_id_decision = result.user2_decision if result.user2_id == swipe.liked_id else result.user1_decision
         
-        await self.inbox_service.create_inbox_item(
-            InboxSwipe(
-                from_user_id=swipe.liker_id,
-                from_user_id_decision=swipe.decision,
-                to_user_id=swipe.liked_id,
-                to_user_id_decision=to_user_id_decision
+        if swipe.decision:
+            await self.inbox_service.create_inbox_item(
+                InboxSwipe(
+                    from_user_id=swipe.liker_id,
+                    from_user_id_decision=swipe.decision,
+                    to_user_id=swipe.liked_id,
+                    to_user_id_decision=to_user_id_decision
+                )
             )
-        )
         return result
