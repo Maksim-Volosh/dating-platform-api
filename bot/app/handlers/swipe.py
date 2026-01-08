@@ -3,11 +3,12 @@ from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from app.container import container
 from app.flows.swipe_flow import SwipeFlow
 from app.states import SwipeState
 
 router = Router()
-flow = SwipeFlow()
+flow = SwipeFlow(container.photo_service)
 
 @router.message(StateFilter(None), F.text.in_({"1", "Листать анкеты"}))
 async def next_profile(message: Message, state: FSMContext) -> None:

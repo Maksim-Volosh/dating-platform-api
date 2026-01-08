@@ -8,7 +8,7 @@ from app.flows.change_profile import ChangeProfileFlow
 from app.states import UpdateDescription, UpdatePhotos
 
 router = Router()
-flow = ChangeProfileFlow(container.user_service)
+flow = ChangeProfileFlow(container.user_service, container.photo_service)
             
 @router.message(StateFilter(None), F.text == "2")
 async def restart_registration(message: Message, state: FSMContext) -> None:

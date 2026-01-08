@@ -3,14 +3,15 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from app.presenters.swipe_presenter import SwipePresenter
-from app.services import (create_swipe, get_inbox_count, get_next_user,
-                          get_user_photos)
+from app.services import (PhotoService, create_swipe, get_inbox_count,
+                          get_next_user)
 from app.states import SwipeState
 from app.states.swipe import SwipeState
 
 
 class SwipeFlow:
-    def __init__(self):
+    def __init__(self, photo_service: PhotoService):
+        self.photo_service = photo_service
         self.presenter = SwipePresenter()
 
     async def next_profile(self, message: Message, state: FSMContext) -> None:
@@ -23,7 +24,7 @@ class SwipeFlow:
             
             if data:
                 # --- 2. Get user photos ---
-                photos = await get_user_photos(data['telegram_id'])
+                photos = await self.photo_service.get_user_photos(data['telegram_id'])
                 
                 await state.update_data(current_profile_id=data['telegram_id'])
                 if not photos:

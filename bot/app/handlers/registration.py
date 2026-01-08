@@ -7,7 +7,7 @@ from app.flows.registartion_flow import RegistrationFlow
 from app.states.registration import Registration
 
 router = Router()
-flow = RegistrationFlow(container.user_service)
+flow = RegistrationFlow(container.user_service, container.photo_service)
 
 @router.message(Registration.name)
 async def name(message: Message, state: FSMContext):

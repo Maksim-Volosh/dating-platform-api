@@ -4,8 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from app.presenters.registration_presenter import RegistrationPresenter
-from app.services import create_photos_for_user, update_photos_for_user
-from app.services.user.service import UserService
+from app.services import PhotoService, UserService
 from app.states.registration import Registration
 from app.validators.registration_validators import (validate_age,
                                                     validate_description,
@@ -14,9 +13,10 @@ from app.validators.registration_validators import (validate_age,
 
 
 class RegistrationFlow:
-    def __init__(self, user_service: UserService):
-        self.presenter = RegistrationPresenter()
+    def __init__(self, user_service: UserService, photo_service: PhotoService):
         self.user_service = user_service
+        self.photo_service = photo_service
+        self.presenter = RegistrationPresenter()
 
     async def process_name(self, message: Message, state: FSMContext):
         await state.update_data(name=message.text)
@@ -98,9 +98,9 @@ class RegistrationFlow:
         if message.from_user:
             if data.get("update"):
                 await self.user_service.update_user_profile(data, message.from_user.id)
-                await update_photos_for_user(data, message.from_user.id)
+                await self.photo_service.update_photos_for_user(data, message.from_user.id)
             else:
                 await self.user_service.create_user_profile(data, message.from_user.id)
-                await create_photos_for_user(data, message.from_user.id)
+                await self.photo_service.create_photos_for_user(data, message.from_user.id)
 
         await state.clear()

@@ -4,17 +4,17 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from app.presenters.change_profile_presenter import ChangeProfilePresenter
-from app.services import update_photos_for_user
-from app.services.user.service import UserService
+from app.services import PhotoService, UserService
 from app.states import Registration, UpdateDescription, UpdatePhotos
 from app.validators.registration_validators import validate_description
 
 
 class ChangeProfileFlow:
-    def __init__(self, user_service: UserService):
+    def __init__(self, user_service: UserService, photo_service: PhotoService):
         self.presenter = ChangeProfilePresenter()
         self.user_service = user_service
-
+        self.photo_service = photo_service 
+        
     async def restart_registration(self, message: Message, state: FSMContext) -> None:
         await state.clear()
         await self.presenter.restart_registration(message)
@@ -55,7 +55,7 @@ class ChangeProfileFlow:
         await self.presenter.finish_photo_update(message)
         
         if message.from_user is not None:
-            await update_photos_for_user(data, message.from_user.id)
+            await self.photo_service.update_photos_for_user(data, message.from_user.id)
 
         await state.clear()
         
