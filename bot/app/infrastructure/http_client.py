@@ -4,6 +4,7 @@ from typing import Any
 import aiohttp
 from config import API_KEY, API_URL
 
+JsonType = dict | list | None
 
 class HTTPClient:
     def __init__(
@@ -35,7 +36,7 @@ class HTTPClient:
         method: str,
         path: str,
         *,
-        json: dict | None = None,
+        json: JsonType = None,
         expected_status: int = 200,
     ) -> Any:
         if not self._session:
