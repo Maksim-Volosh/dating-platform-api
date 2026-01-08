@@ -30,7 +30,8 @@ class LikeFlow:
                 data = await self.user_service.get_user(candidate_id)
                 
                 if data:
-                    photos = await self.photo_service.get_user_photos(data['telegram_id'])
+                    photos_data = await self.photo_service.get_user_photos(data['telegram_id'])
+                    photos = photos_data.get("photos", [])
                     
                     await state.update_data(current_profile_id=candidate_id)
                     await state.update_data(current_profile_name=data['name'])

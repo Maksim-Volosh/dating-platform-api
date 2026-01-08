@@ -24,7 +24,8 @@ class SwipeFlow:
             
             if data:
                 # --- 2. Get user photos ---
-                photos = await self.photo_service.get_user_photos(data['telegram_id'])
+                photos_data = await self.photo_service.get_user_photos(data['telegram_id'])
+                photos = photos_data.get("photos", [])
                 
                 await state.update_data(current_profile_id=data['telegram_id'])
                 if not photos:
