@@ -2,15 +2,16 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from app.presenters.profile_presenter import ProfilePresenter
-from app.services import PhotoService, UserService, get_inbox_count
+from app.services import PhotoService, UserService, InboxService
 from app.states.registration import Registration
 
 
 class ProfileFlow:
-    def __init__(self, user_service: UserService, photo_service: PhotoService):
+    def __init__(self, user_service: UserService, photo_service: PhotoService, inbox_service: InboxService):
         self.presenter = ProfilePresenter()
         self.user_service = user_service
         self.photo_service = photo_service
+        self.inbox_service = inbox_service
 
     async def show_my_profile(self, message: Message, state: FSMContext) -> None:
         await state.clear()
@@ -30,7 +31,7 @@ class ProfileFlow:
 
         photos_data = await self.photo_service.get_user_photos(telegram_id)
         photos = photos_data.get("photos", [])
-        inbox_count = await get_inbox_count(telegram_id)
+        inbox_count = await self.inbox_service.get_inbox_count(telegram_id)
 
         await self.presenter.show_profile(
             message=message,

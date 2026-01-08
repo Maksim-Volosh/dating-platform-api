@@ -3,29 +3,29 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from app.presenters.like_presenter import LikePresenter
-from app.services import (PhotoService, UserService, ack_inbox_item,
-                          create_swipe, get_inbox_count, get_next_item)
+from app.services import InboxService, PhotoService, UserService, create_swipe
 from app.states import LikeSwipeState
 
 
 class LikeFlow:
-    def __init__(self, user_service: UserService, photo_service: PhotoService):
+    def __init__(self, user_service: UserService, photo_service: PhotoService, inbox_service: InboxService):
         self.presenter = LikePresenter()
         self.user_service = user_service
         self.photo_service = photo_service
+        self.inbox_service = inbox_service
 
     async def next_like_profile(self, message: Message, state: FSMContext) -> None:
         if message.from_user:
             if message.text == "🔥":
                 await self.presenter.start_swiping(message)
 
-            inbox_data = await get_next_item(message.from_user.id)
+            inbox_data = await self.inbox_service.get_next_item(message.from_user.id)
             
             if inbox_data:
                 candidate_id = inbox_data.get("candidate_id")
                 type_of_inbox = inbox_data.get("type")
 
-                more = await get_inbox_count(message.from_user.id)
+                more = await self.inbox_service.get_inbox_count(message.from_user.id)
 
                 data = await self.user_service.get_user(candidate_id)
                 
@@ -43,7 +43,7 @@ class LikeFlow:
 
                     if type_of_inbox == "MATCH":
                         await self.presenter.send_match(message, candidate_id, data['name'])
-                        await ack_inbox_item(message.from_user.id, candidate_id)
+                        await self.inbox_service.ack_inbox_item(message.from_user.id, candidate_id)
                         await state.update_data(not_first_like=True)
                         await self.next_like_profile(message, state)
                         return
@@ -75,10 +75,10 @@ class LikeFlow:
                 await create_swipe(message.from_user.id, candidate_id, True)
                 
                 # --- Get count---
-                count = await get_inbox_count(candidate_id)
+                count = await self.inbox_service.get_inbox_count(candidate_id)
                 
                 # --- Remove like ---
-                await ack_inbox_item(message.from_user.id, candidate_id)
+                await self.inbox_service.ack_inbox_item(message.from_user.id, candidate_id)
                 
                 # --- Send message to liked user ---
                 await self.presenter.send_notification(count, candidate_id, bot)
@@ -89,5 +89,5 @@ class LikeFlow:
             elif message.text == "👎" and candidate_id:
                 await state.clear()
                 await create_swipe(message.from_user.id, candidate_id, False)
-                await ack_inbox_item(message.from_user.id, candidate_id)
+                await self.inbox_service.ack_inbox_item(message.from_user.id, candidate_id)
                 await self.next_like_profile(message, state)
