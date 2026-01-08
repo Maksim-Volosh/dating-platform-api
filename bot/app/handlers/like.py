@@ -8,7 +8,12 @@ from app.flows.like_flow import LikeFlow
 from app.states import LikeSwipeState
 
 router = Router()
-flow = LikeFlow(container.user_service, container.photo_service, container.inbox_service)
+flow = LikeFlow(
+    container.user_service, 
+    container.photo_service, 
+    container.inbox_service, 
+    container.swipe_service
+    )
 
 @router.message(StateFilter(None), F.text == "🔥")
 async def next_like_profile(message: Message, state: FSMContext) -> None:

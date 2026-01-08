@@ -3,17 +3,23 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from app.presenters.swipe_presenter import SwipePresenter
-from app.services import (InboxService, PhotoService, create_swipe,
+from app.services import (InboxService, PhotoService, SwipeService,
                           get_next_user)
 from app.states import SwipeState
 from app.states.swipe import SwipeState
 
 
 class SwipeFlow:
-    def __init__(self, photo_service: PhotoService, inbox_service: InboxService):
+    def __init__(
+        self,
+        photo_service: PhotoService,
+        inbox_service: InboxService,
+        swipe_service: SwipeService
+    ):
         self.photo_service = photo_service
         self.presenter = SwipePresenter()
         self.inbox_service = inbox_service
+        self.swipe_service = swipe_service
 
     async def next_profile(self, message: Message, state: FSMContext) -> None:
         if message.text in ["1", "Листать анкеты"]:
@@ -47,7 +53,7 @@ class SwipeFlow:
             if message.text == "❤️" and liked_id:
                 
                 # --- Create swipe ---
-                await create_swipe(message.from_user.id, liked_id, True)
+                await self.swipe_service.create_swipe(message.from_user.id, liked_id, True)
                 await self.presenter.send_successful_swipe(message)
                 
                 # --- Get count---
@@ -62,5 +68,5 @@ class SwipeFlow:
                 
             elif message.text == "👎" and liked_id:
                 await state.clear()
-                await create_swipe(message.from_user.id, liked_id, False)
+                await self.swipe_service.create_swipe(message.from_user.id, liked_id, False)
                 await self.next_profile(message, state)
