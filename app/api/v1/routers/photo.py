@@ -3,19 +3,13 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.api.v1.schemas.photo import PhotoFileId, PhotoResponse
-from app.core.containers.photo import (get_delete_user_photos_use_case,
-                                       get_retrieve_user_photos_use_case,
-                                       get_update_user_photos_use_case,
-                                       get_upload_user_photos_use_case)
+from app.core.container import Container
 from app.core.dependencies import get_existing_user
+from app.core.di import get_container
 from app.domain.entities import UserEntity
 from app.domain.entities.photo import PhotoEntity
 from app.domain.exceptions import (PhotosNotFound, TooManyPhotos,
                                    UserNotFoundById, WrongFileExtension)
-from app.application.use_cases import (DeleteUserPhotosUseCase,
-                                  RetrieveUserPhotosUseCase,
-                                  UpdateUserPhotosUseCase,
-                                  UploadUserPhotosUseCase)
 from app.infrastructure.mappers.photo_mapper import to_entities
 
 router = APIRouter(prefix="/users", tags=["User Photos"])
@@ -24,10 +18,10 @@ router = APIRouter(prefix="/users", tags=["User Photos"])
 @router.get("/{telegram_id}/photos", status_code=200)
 async def get_user_photos(
     user: UserEntity = Depends(get_existing_user),
-    use_case: RetrieveUserPhotosUseCase = Depends(get_retrieve_user_photos_use_case)
+    container: Container = Depends(get_container)
 ) -> PhotoResponse:
     try:
-        photos: List[PhotoEntity] = await use_case.execute(user)
+        photos: List[PhotoEntity] = await container.retrieve_user_photos_use_case().execute(user)
     except UserNotFoundById as e:
         raise HTTPException(
             status_code=404, detail=e.message
@@ -45,10 +39,10 @@ async def get_user_photos(
 @router.delete("/{telegram_id}/photos", status_code=204)
 async def delete_user_photos(
     user: UserEntity = Depends(get_existing_user),
-    use_case: DeleteUserPhotosUseCase = Depends(get_delete_user_photos_use_case)
+    container: Container = Depends(get_container)
 ):
     try:
-        await use_case.execute(user)
+        await container.delete_user_photos_use_case().execute(user)
     except UserNotFoundById as e:
         raise HTTPException(
             status_code=404, detail=e.message
@@ -63,11 +57,11 @@ async def delete_user_photos(
 async def upload_user_photos(
     photos: List[PhotoFileId],
     user: UserEntity = Depends(get_existing_user),
-    use_case: UploadUserPhotosUseCase = Depends(get_upload_user_photos_use_case)
+    container: Container = Depends(get_container)
 ) -> PhotoResponse:
     photo_entities = await to_entities(photos)
     try:
-        photo_urls = await use_case.execute(user, photo_entities)
+        photo_urls = await container.upload_user_photos_use_case().execute(user, photo_entities)
     except UserNotFoundById as e:
         raise HTTPException(
             status_code=404, detail=e.message
@@ -88,11 +82,11 @@ async def upload_user_photos(
 async def update_user_photos(
     photos: List[PhotoFileId],
     user: UserEntity = Depends(get_existing_user),
-    use_case: UpdateUserPhotosUseCase = Depends(get_update_user_photos_use_case)
+    container: Container = Depends(get_container)
 ) -> PhotoResponse:
     photo_entities = await to_entities(photos)
     try:
-        photo_file_ids = await use_case.execute(user, photo_entities)
+        photo_file_ids = await container.update_user_photos_use_case().execute(user, photo_entities)
     except UserNotFoundById as e:
         raise HTTPException(
             status_code=404, detail=e.message

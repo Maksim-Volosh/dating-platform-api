@@ -1,8 +1,8 @@
 from fastapi import Depends, Header, HTTPException, status
 
-from app.application.use_cases import UserUseCase
 from app.core.config import settings
-from app.core.containers.user import get_user_use_case
+from app.core.container import Container
+from app.core.di import get_container
 from app.domain.entities import UserEntity
 from app.domain.exceptions import UserNotFoundById
 
@@ -15,9 +15,10 @@ async def verify_bot_key(x_api_key: str = Header(...)):
         
 async def get_existing_user(
     telegram_id: int,
-    use_case: UserUseCase = Depends(get_user_use_case),
+    container: Container = Depends(get_container),
 ) -> UserEntity:
     try:
-        return await use_case.get_by_id(telegram_id)
+        return await container.user_use_case().get_by_id(telegram_id)
     except UserNotFoundById as e:
         raise HTTPException(status_code=404, detail=e.message)
+
