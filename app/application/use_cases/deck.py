@@ -1,4 +1,3 @@
-
 from app.domain.entities import UserEntity
 from app.domain.exceptions import UserNotFoundById
 from app.domain.exceptions.deck import NoCandidatesFound
@@ -10,7 +9,7 @@ class UserDeckUseCase:
     def __init__(self, cache: IDeckCache, deck_builder: DeckBuilderService) -> None:
         self.cache = cache
         self.deck_builder = deck_builder
-        
+
     async def next(self, user: UserEntity) -> UserEntity:
         key = f"deck:{user.telegram_id}"
         user_entity = await self.cache.lpop(key)

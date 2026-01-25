@@ -2,22 +2,25 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.api.v1.schemas.user import (UserCreateRequest, UserCreateResponse,
-                                     UserResponse,
-                                     UserUpdateDescriptionRequest,
-                                     UserUpdateRequest, UserUpdateResponse)
+from app.api.v1.schemas.user import (
+    UserCreateRequest,
+    UserCreateResponse,
+    UserResponse,
+    UserUpdateDescriptionRequest,
+    UserUpdateRequest,
+    UserUpdateResponse,
+)
 from app.core.container import Container
 from app.core.di import get_container
 from app.domain.entities import UserEntity
-from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
-                                   UsersNotFound)
+from app.domain.exceptions import UserAlreadyExists, UserNotFoundById, UsersNotFound
 
 router = APIRouter(prefix="/users", tags=["User"])
 
+
 @router.get("/{telegram_id}")
-async def get_user(  
-    telegram_id: int,  
-    container: Container = Depends(get_container)
+async def get_user(
+    telegram_id: int, container: Container = Depends(get_container)
 ) -> UserResponse:
     try:
         user = await container.user_use_case().get_by_id(telegram_id=telegram_id)
@@ -25,9 +28,10 @@ async def get_user(
         raise HTTPException(status_code=404, detail=e.message)
     return UserResponse.model_validate(user, from_attributes=True)
 
+
 @router.get("/")
-async def get_users(    
-    container: Container = Depends(get_container)
+async def get_users(
+    container: Container = Depends(get_container),
 ) -> List[UserResponse]:
     try:
         users = await container.user_use_case().get_all()
@@ -35,41 +39,47 @@ async def get_users(
         raise HTTPException(status_code=404, detail=e.message)
     return [UserResponse.model_validate(user, from_attributes=True) for user in users]
 
+
 @router.post("/", status_code=201)
 async def create_user(
-    user: UserCreateRequest,
-    container: Container = Depends(get_container)
+    user: UserCreateRequest, container: Container = Depends(get_container)
 ) -> UserCreateResponse:
     user_entity = user.to_entity()
     try:
-        new_user: UserEntity = await container.create_user_use_case().execute(user_entity)
+        new_user: UserEntity = await container.create_user_use_case().execute(
+            user_entity
+        )
     except UserAlreadyExists as e:
         raise HTTPException(status_code=400, detail=e.message)
     return UserCreateResponse.model_validate(new_user, from_attributes=True)
 
+
 @router.put("/{telegram_id}")
-async def update_user(  
-    telegram_id: int,  
+async def update_user(
+    telegram_id: int,
     update: UserUpdateRequest,
-    container: Container = Depends(get_container)
+    container: Container = Depends(get_container),
 ) -> UserUpdateResponse:
     update_entity = update.to_entity()
     try:
-        user_model = await container.update_user_use_case().execute(telegram_id, update_entity)
+        user_model = await container.update_user_use_case().execute(
+            telegram_id, update_entity
+        )
     except UserNotFoundById as e:
         raise HTTPException(status_code=404, detail=e.message)
     return UserUpdateResponse.model_validate(user_model, from_attributes=True)
+
 
 @router.patch("/{telegram_id}/description")
-async def update_user_description(  
-    telegram_id: int,  
+async def update_user_description(
+    telegram_id: int,
     update: UserUpdateDescriptionRequest,
-    container: Container = Depends(get_container)
+    container: Container = Depends(get_container),
 ) -> UserUpdateResponse:
     try:
-        user_model = await container.update_user_description_use_case().execute(telegram_id, update.description)
+        user_model = await container.update_user_description_use_case().execute(
+            telegram_id, update.description
+        )
     except UserNotFoundById as e:
         raise HTTPException(status_code=404, detail=e.message)
     return UserUpdateResponse.model_validate(user_model, from_attributes=True)
-
-

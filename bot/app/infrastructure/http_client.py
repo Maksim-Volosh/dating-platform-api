@@ -8,6 +8,7 @@ from app.infrastructure.errors import HTTPError
 
 JsonType = dict | list | None
 
+
 class HTTPClient:
     def __init__(
         self,
@@ -66,6 +67,7 @@ class HTTPClient:
                 if attempt >= self._retries:
                     raise
                 await asyncio.sleep(0.2 * (attempt + 1))
+
 
 http = HTTPClient(
     base_url=API_URL,

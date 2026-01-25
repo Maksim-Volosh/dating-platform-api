@@ -2,22 +2,27 @@ from aiogram import html
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InputMediaPhoto, Message
 
-from app.keyboards.keyboards import (get_name_keyboard, main_kb, profile_kb,
-                                     profile_with_likes_kb)
+from app.keyboards.keyboards import (
+    get_name_keyboard,
+    main_kb,
+    profile_kb,
+    profile_with_likes_kb,
+)
 
 
 class ProfilePresenter:
 
     async def start_registration(self, message: Message, state: FSMContext):
         await message.answer("Привет! Тебя еще нет с нами. Давай зарегистрируемся) ✨")
-        
+
     async def ask_name(self, message: Message):
         await message.answer(
-            "Как тебя зовут?",
-            reply_markup=await get_name_keyboard(message)
+            "Как тебя зовут?", reply_markup=await get_name_keyboard(message)
         )
 
-    async def show_profile(self, message: Message, user: dict, photos, inbox_count: int | None):
+    async def show_profile(
+        self, message: Message, user: dict, photos, inbox_count: int | None
+    ):
         caption = (
             f"{html.bold(user['name'])}, {html.bold(str(user['age']))}, "
             f"{html.bold(user['city'])}\n\n"
@@ -31,7 +36,7 @@ class ProfilePresenter:
             media[0].caption = caption
             media[0].parse_mode = "HTML"
 
-            await message.answer_media_group(media) # type: ignore
+            await message.answer_media_group(media)  # type: ignore
         else:
             await message.answer(caption, reply_markup=main_kb)
 

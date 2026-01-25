@@ -16,6 +16,4 @@ class RedisHelper:
         yield self.client
 
 
-redis_helper = RedisHelper(
-    url=str(settings.cache.url)
-)
+redis_helper = RedisHelper(url=str(settings.cache.url))

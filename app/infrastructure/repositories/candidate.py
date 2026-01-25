@@ -13,29 +13,31 @@ from app.infrastructure.models import User
 class SQLAlchemyCandidateRepository(ICandidateRepository):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
-        
-    async def get_candidates_by_preferences(self, telegram_id: int, city: str, age: int, gender: str, prefer_gender: str) -> List[UserEntity] | None:
+
+    async def get_candidates_by_preferences(
+        self, telegram_id: int, city: str, age: int, gender: str, prefer_gender: str
+    ) -> List[UserEntity] | None:
         prefer_ages = list(range(age - 2, age + 3))
-        
-        if prefer_gender != 'anyone':
+
+        if prefer_gender != "anyone":
             q = select(User).where(
                 User.telegram_id != telegram_id,
                 User.city == city,
                 User.age.in_(prefer_ages),
                 User.gender == prefer_gender,
-                User.prefer_gender.in_(['anyone', gender])
+                User.prefer_gender.in_(["anyone", gender]),
             )
         else:
             q = select(User).where(
                 User.telegram_id != telegram_id,
                 User.city == city,
                 User.age.in_(prefer_ages),
-                User.prefer_gender.in_(['anyone', gender])
+                User.prefer_gender.in_(["anyone", gender]),
             )
-            
+
         result = await self.session.execute(q)
         user_models = result.scalars().all()
         if not user_models:
             return None
-        
+
         return [UserMapper.to_entity(user_model) for user_model in user_models]

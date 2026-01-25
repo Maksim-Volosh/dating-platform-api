@@ -12,13 +12,16 @@ from app.infrastructure.http_client import http
 
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
-    
+
+
 async def on_startup():
     register_all_handlers(dp)
     await http.start()
 
+
 async def on_shutdown():
     await http.close()
+
 
 async def main() -> None:
     dp.startup.register(on_startup)

@@ -13,8 +13,16 @@ __all__ = (
 )
 from .deck import UserDeckUseCase
 from .inbox import InboxUseCase
-from .photo import (DeleteUserPhotosUseCase, RetrieveUserPhotosUseCase,
-                    UpdateUserPhotosUseCase, UploadUserPhotosUseCase)
+from .photo import (
+    DeleteUserPhotosUseCase,
+    RetrieveUserPhotosUseCase,
+    UpdateUserPhotosUseCase,
+    UploadUserPhotosUseCase,
+)
 from .swipe import SwipeUserUseCase
-from .user import (CreateUserUseCase, UpdateUserDescriptionUseCase,
-                   UpdateUserUseCase, UserUseCase)
+from .user import (
+    CreateUserUseCase,
+    UpdateUserDescriptionUseCase,
+    UpdateUserUseCase,
+    UserUseCase,
+)

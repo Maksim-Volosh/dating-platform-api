@@ -13,10 +13,10 @@ class StartFlow:
 
     async def start(self, message: Message, state: FSMContext) -> None:
         await state.clear()
-        telegram_id = message.from_user.id # type: ignore
-        
+        telegram_id = message.from_user.id  # type: ignore
+
         user = await self.user_service.get_user(telegram_id)
-        
+
         if user is None:
             await self.presenter.start_registration(message, state)
             await state.set_state(Registration.name)
@@ -27,9 +27,4 @@ class StartFlow:
             await message.answer("⚠️ Ошибка при соединении с сервером.")
             return
 
-        await self.presenter.send_hello(
-            message=message,
-            user=user
-        )
-        
-        
+        await self.presenter.send_hello(message=message, user=user)

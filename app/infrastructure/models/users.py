@@ -21,7 +21,5 @@ class User(Base):
     description: Mapped[Optional[str]] = mapped_column(String(400), nullable=True)
     gender: Mapped[Gender] = mapped_column(SQLAlchemyEnum(Gender))
     prefer_gender: Mapped[PreferGender] = mapped_column(SQLAlchemyEnum(PreferGender))
-    
-    photos: Mapped[List["Photo"]] = relationship("Photo", back_populates="user", cascade="all, delete-orphan") # type: ignore
 
-
+    photos: Mapped[List["Photo"]] = relationship("Photo", back_populates="user", cascade="all, delete-orphan")  # type: ignore

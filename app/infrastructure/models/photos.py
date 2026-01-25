@@ -11,4 +11,4 @@ class Photo(Base):
     file_id: Mapped[str] = mapped_column(String(255))
 
     user_id: Mapped[int] = mapped_column(ForeignKey("user.telegram_id"))
-    user: Mapped["User"] = relationship("User", back_populates="photos") # type: ignore
+    user: Mapped["User"] = relationship("User", back_populates="photos")  # type: ignore

@@ -1,4 +1,3 @@
-
 class HTTPError(Exception):
     def __init__(self, status: int, body: str | None = None):
         self.status = status

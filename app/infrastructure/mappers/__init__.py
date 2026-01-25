@@ -1,4 +1,2 @@
-__all__ = (
-    "UserMapper",
-)
+__all__ = ("UserMapper",)
 from .user_mapper import UserMapper

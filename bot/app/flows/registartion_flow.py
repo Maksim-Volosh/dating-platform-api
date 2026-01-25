@@ -6,10 +6,12 @@ from aiogram.types import Message
 from app.presenters.registration_presenter import RegistrationPresenter
 from app.services import PhotoService, UserService
 from app.states.registration import Registration
-from app.validators.registration_validators import (validate_age,
-                                                    validate_description,
-                                                    validate_gender,
-                                                    validate_prefer_gender)
+from app.validators.registration_validators import (
+    validate_age,
+    validate_description,
+    validate_gender,
+    validate_prefer_gender,
+)
 
 
 class RegistrationFlow:
@@ -76,7 +78,7 @@ class RegistrationFlow:
             return
 
         # take the highest quality photo
-        photo_ids.append(message.photo[-1].file_id) # type: ignore
+        photo_ids.append(message.photo[-1].file_id)  # type: ignore
         await state.update_data(photo_ids=photo_ids)
 
         await self.presenter.photo_added(message, len(photo_ids))
@@ -98,9 +100,13 @@ class RegistrationFlow:
         if message.from_user:
             if data.get("update"):
                 await self.user_service.update_user_profile(data, message.from_user.id)
-                await self.photo_service.update_photos_for_user(data, message.from_user.id)
+                await self.photo_service.update_photos_for_user(
+                    data, message.from_user.id
+                )
             else:
                 await self.user_service.create_user_profile(data, message.from_user.id)
-                await self.photo_service.create_photos_for_user(data, message.from_user.id)
+                await self.photo_service.create_photos_for_user(
+                    data, message.from_user.id
+                )
 
         await state.clear()

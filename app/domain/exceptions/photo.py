@@ -11,6 +11,7 @@ class WrongFileExtension(Exception):
     def __init__(self) -> None:
         super().__init__(self.message)
 
+
 class TooManyPhotos(Exception):
     def __init__(self, message: str) -> None:
         self.message = message

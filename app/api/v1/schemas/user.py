@@ -15,6 +15,7 @@ class UserResponse(BaseModel):
     gender: Gender
     prefer_gender: PreferGender
 
+
 class UserCreateRequest(BaseModel):
     telegram_id: int
     name: str
@@ -23,9 +24,10 @@ class UserCreateRequest(BaseModel):
     description: Optional[str]
     gender: Gender
     prefer_gender: PreferGender
-    
+
     def to_entity(self) -> UserEntity:
         return UserEntity(**self.model_dump())
+
 
 class UserCreateResponse(BaseModel):
     telegram_id: int
@@ -35,7 +37,8 @@ class UserCreateResponse(BaseModel):
     description: Optional[str]
     gender: Gender
     prefer_gender: PreferGender
-    
+
+
 class UserUpdateRequest(BaseModel):
     name: str
     age: int
@@ -43,10 +46,11 @@ class UserUpdateRequest(BaseModel):
     description: Optional[str]
     gender: Gender
     prefer_gender: PreferGender
-    
+
     def to_entity(self) -> UserEntity:
         return UserEntity(telegram_id=0, **self.model_dump())
-    
+
+
 class UserUpdateResponse(BaseModel):
     telegram_id: int
     name: str
@@ -55,6 +59,7 @@ class UserUpdateResponse(BaseModel):
     description: Optional[str]
     gender: Gender
     prefer_gender: PreferGender
+
 
 class UserUpdateDescriptionRequest(BaseModel):
     description: str

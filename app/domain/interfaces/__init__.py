@@ -4,8 +4,7 @@ __all__ = (
     "IDeckCache",
     "ISwipeRepository",
     "ICandidateRepository",
-    "IInboxCache", 
-    
+    "IInboxCache",
 )
 from .deck_cache import IDeckCache
 from .photo import IPhotoRepository

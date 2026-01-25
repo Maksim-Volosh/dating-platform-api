@@ -65,21 +65,16 @@ class Container:
         )
 
     def inbox_on_swipe_service(self):
-        return InboxOnSwipeService(
-            inbox_cache=self.inbox_cache()
-        )
+        return InboxOnSwipeService(inbox_cache=self.inbox_cache())
 
     # ---------- use cases ----------
 
     def user_use_case(self):
-        return UserUseCase(
-            repo=self.user_repo()
-        )
+        return UserUseCase(repo=self.user_repo())
 
     def create_user_use_case(self):
         return CreateUserUseCase(
-            user_repo=self.user_repo(),
-            deck_builder=self.deck_builder()
+            user_repo=self.user_repo(), deck_builder=self.deck_builder()
         )
 
     def update_user_use_case(self):
@@ -90,43 +85,29 @@ class Container:
         )
 
     def update_user_description_use_case(self):
-        return UpdateUserDescriptionUseCase(
-            user_repo=self.user_repo()
-        )
+        return UpdateUserDescriptionUseCase(user_repo=self.user_repo())
 
     def user_deck_use_case(self):
         return UserDeckUseCase(
-            cache=self.deck_cache(),
-            deck_builder=self.deck_builder()
+            cache=self.deck_cache(), deck_builder=self.deck_builder()
         )
 
     def swipe_user_use_case(self):
         return SwipeUserUseCase(
-            swipe_repo=self.swipe_repo(),
-            inbox_service=self.inbox_on_swipe_service()
+            swipe_repo=self.swipe_repo(), inbox_service=self.inbox_on_swipe_service()
         )
 
     def inbox_use_case(self):
-        return InboxUseCase(
-            cache=self.inbox_cache()
-        )
-        
+        return InboxUseCase(cache=self.inbox_cache())
+
     def delete_user_photos_use_case(self):
-        return DeleteUserPhotosUseCase(
-            photo_repo=self.photo_repo()
-        )
+        return DeleteUserPhotosUseCase(photo_repo=self.photo_repo())
 
     def retrieve_user_photos_use_case(self):
-        return RetrieveUserPhotosUseCase(
-            photo_repo=self.photo_repo()
-        )
+        return RetrieveUserPhotosUseCase(photo_repo=self.photo_repo())
 
     def update_user_photos_use_case(self):
-        return UpdateUserPhotosUseCase(
-            photo_repo=self.photo_repo()
-        )
+        return UpdateUserPhotosUseCase(photo_repo=self.photo_repo())
 
     def upload_user_photos_use_case(self):
-        return UploadUserPhotosUseCase(
-            photo_repo=self.photo_repo()
-        )
+        return UploadUserPhotosUseCase(photo_repo=self.photo_repo())

@@ -9,6 +9,7 @@ from app.domain.exceptions import NoCandidatesFound, UserNotFoundById
 
 router = APIRouter(prefix="/decks", tags=["Deck"])
 
+
 @router.post("/next/{telegram_id}")
 async def get_next_user_from_deck(
     user: UserEntity = Depends(get_existing_user),

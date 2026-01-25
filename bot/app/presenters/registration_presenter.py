@@ -1,8 +1,11 @@
 from aiogram.types import Message, ReplyKeyboardRemove
 
-from app.keyboards.keyboards import (get_gender_keyboard,
-                                     get_prefer_gender_keyboard, main_kb,
-                                     photo_kb)
+from app.keyboards.keyboards import (
+    get_gender_keyboard,
+    get_prefer_gender_keyboard,
+    main_kb,
+    photo_kb,
+)
 
 
 class RegistrationPresenter:
@@ -17,18 +20,19 @@ class RegistrationPresenter:
         await message.answer("Расскажи немного о себе.")
 
     async def ask_gender(self, message: Message):
-        await message.answer("Какой у тебя пол?", reply_markup=await get_gender_keyboard())
+        await message.answer(
+            "Какой у тебя пол?", reply_markup=await get_gender_keyboard()
+        )
 
     async def ask_prefer_gender(self, message: Message):
         await message.answer(
             "Какой у тебя предпочитаемый пол?",
-            reply_markup=await get_prefer_gender_keyboard()
+            reply_markup=await get_prefer_gender_keyboard(),
         )
 
     async def ask_photos(self, message: Message):
         await message.answer(
-            "Отлично, теперь пришли мне свои фотографии (до 3х)",
-            reply_markup=photo_kb
+            "Отлично, теперь пришли мне свои фотографии (до 3х)", reply_markup=photo_kb
         )
 
     async def photo_added(self, message: Message, count: int):
@@ -36,6 +40,5 @@ class RegistrationPresenter:
 
     async def finish_registration(self, message: Message):
         await message.answer(
-            "Отлично! Теперь я знаю о тебе всё! 🎉",
-            reply_markup=main_kb
+            "Отлично! Теперь я знаю о тебе всё! 🎉", reply_markup=main_kb
         )

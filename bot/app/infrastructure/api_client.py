@@ -2,6 +2,7 @@ from app.infrastructure.http_client import HTTPClient, http
 
 JsonType = dict | list | None
 
+
 class APIClient:
     def __init__(self, http: HTTPClient):
         self._http = http
@@ -16,7 +17,7 @@ class APIClient:
             json=json,
             expected_status=expected_status,
         )
-        
+
     async def put(self, path: str, json: JsonType = None, expected_status=200):
         return await self._http.request(
             "PUT",
@@ -24,7 +25,7 @@ class APIClient:
             json=json,
             expected_status=expected_status,
         )
-        
+
     async def patch(self, path: str, json: JsonType = None, expected_status=200):
         return await self._http.request(
             "PATCH",
@@ -32,5 +33,6 @@ class APIClient:
             json=json,
             expected_status=expected_status,
         )
+
 
 api = APIClient(http)

@@ -6,11 +6,13 @@ class InboxItemType(str, Enum):
     INCOMING = "INCOMING"
     MATCH = "MATCH"
 
+
 @dataclass
 class InboxItem:
     candidate_id: int
     type: InboxItemType
-    
+
+
 @dataclass
 class InboxSwipe:
     from_user_id: int

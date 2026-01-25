@@ -15,12 +15,13 @@ from app.infrastructure.redis import redis_helper
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize
-    
-    yield # ---------
-    
+
+    yield  # ---------
+
     # Cleanup
     await db_helper.dispose()
     await redis_helper.dispose()
+
 
 main_app = FastAPI(
     lifespan=lifespan,
@@ -38,8 +39,8 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(
-        "app.main:main_app", 
-        host=settings.run.host, 
-        port=settings.run.port, 
+        "app.main:main_app",
+        host=settings.run.host,
+        port=settings.run.port,
         reload=settings.run.reload,
     )

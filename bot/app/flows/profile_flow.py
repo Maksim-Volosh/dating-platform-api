@@ -7,7 +7,12 @@ from app.states.registration import Registration
 
 
 class ProfileFlow:
-    def __init__(self, user_service: UserService, photo_service: PhotoService, inbox_service: InboxService):
+    def __init__(
+        self,
+        user_service: UserService,
+        photo_service: PhotoService,
+        inbox_service: InboxService,
+    ):
         self.presenter = ProfilePresenter()
         self.user_service = user_service
         self.photo_service = photo_service
@@ -33,8 +38,5 @@ class ProfileFlow:
         inbox_count = await self.inbox_service.get_inbox_count(telegram_id)
 
         await self.presenter.show_profile(
-            message=message,
-            user=data,
-            photos=photos,
-            inbox_count=inbox_count
+            message=message, user=data, photos=photos, inbox_count=inbox_count
         )
