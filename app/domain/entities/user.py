@@ -19,7 +19,8 @@ class UserEntity:
     telegram_id: int
     name: str
     age: int
-    city: str
+    longitude: float
+    latitude: float
     gender: Gender
     prefer_gender: PreferGender
     description: Optional[str] = None
@@ -29,7 +30,8 @@ class UserEntity:
             "telegram_id": self.telegram_id,
             "name": self.name,
             "age": self.age,
-            "city": self.city,
+            "longitude": self.longitude,
+            "latitude": self.latitude,
             "gender": self.gender,
             "prefer_gender": self.prefer_gender,
             "description": self.description,
