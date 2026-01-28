@@ -10,7 +10,8 @@ class UserResponse(BaseModel):
     telegram_id: int
     name: str
     age: int
-    city: str
+    longitude: float
+    latitude: float
     description: Optional[str]
     gender: Gender
     prefer_gender: PreferGender
@@ -20,7 +21,8 @@ class UserCreateRequest(BaseModel):
     telegram_id: int
     name: str
     age: int
-    city: str
+    longitude: float
+    latitude: float
     description: Optional[str]
     gender: Gender
     prefer_gender: PreferGender
@@ -33,7 +35,8 @@ class UserCreateResponse(BaseModel):
     telegram_id: int
     name: str
     age: int
-    city: str
+    longitude: float
+    latitude: float
     description: Optional[str]
     gender: Gender
     prefer_gender: PreferGender
@@ -42,7 +45,8 @@ class UserCreateResponse(BaseModel):
 class UserUpdateRequest(BaseModel):
     name: str
     age: int
-    city: str
+    longitude: float
+    latitude: float
     description: Optional[str]
     gender: Gender
     prefer_gender: PreferGender
@@ -55,7 +59,8 @@ class UserUpdateResponse(BaseModel):
     telegram_id: int
     name: str
     age: int
-    city: str
+    longitude: float
+    latitude: float
     description: Optional[str]
     gender: Gender
     prefer_gender: PreferGender
