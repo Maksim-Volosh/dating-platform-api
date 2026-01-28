@@ -9,6 +9,6 @@ from app.domain.entities import UserEntity
 class ICandidateRepository(ABC):
     @abstractmethod
     async def get_candidates_by_preferences(
-        self, telegram_id: int, city: str, age: int, gender: str, prefer_gender: str
+        self, telegram_id: int, age: int, gender: str, prefer_gender: str
     ) -> List[UserEntity] | None:
         raise NotImplementedError

@@ -19,7 +19,7 @@ class DeckBuilderService:
 
     async def build(self, user: UserEntity) -> None | List[UserEntity]:
         candidates = await self.candidate_repo.get_candidates_by_preferences(
-            user.telegram_id, user.city, user.age, user.gender, user.prefer_gender
+            user.telegram_id, user.age, user.gender, user.prefer_gender
         )
         if candidates is None:
             return None
