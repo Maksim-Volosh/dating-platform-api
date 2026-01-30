@@ -36,3 +36,23 @@ class UserEntity:
             "prefer_gender": self.prefer_gender,
             "description": self.description,
         }
+        
+class UserDistanceEntity:
+    telegram_id: int
+    name: str
+    age: int
+    distance: float
+    gender: Gender
+    prefer_gender: PreferGender
+    description: Optional[str] = None
+
+    def to_dict(self):
+        return {
+            "telegram_id": self.telegram_id,
+            "name": self.name,
+            "age": self.age,
+            "distance": self.distance,
+            "gender": self.gender,
+            "prefer_gender": self.prefer_gender,
+            "description": self.description,
+        }
