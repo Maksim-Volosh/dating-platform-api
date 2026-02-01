@@ -1,7 +1,9 @@
 from math import cos, radians
 
+from app.domain.entities import BBoxEntity
 
-def bounding_box(lat: float, lon: float, radius_km: float) -> tuple[float, float, float, float]:
+
+def bounding_box(lat: float, lon: float, radius_km: float) -> BBoxEntity:
     """
     Calculate bounding box coordinates for a given latitude, longitude and radius in kilometers.
 
@@ -17,9 +19,9 @@ def bounding_box(lat: float, lon: float, radius_km: float) -> tuple[float, float
     lat_delta = radius_km / 111.0
     lon_delta = radius_km / (111.0 * cos(radians(lat)))
 
-    return (
-        lat - lat_delta,
-        lat + lat_delta,
-        lon - lon_delta,
-        lon + lon_delta,
+    return BBoxEntity(
+        min_latitude= lat - lat_delta,
+        max_latitude= lat + lat_delta,
+        min_longitude= lon - lon_delta,
+        max_longitude= lon + lon_delta,
     )
