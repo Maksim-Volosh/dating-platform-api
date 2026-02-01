@@ -5,11 +5,11 @@ from app.infrastructure.mappers.user_mapper import UserMapper
 
 
 class GeoCandidateFilterService:
-    def filter(
+    async def filter(
         self,
         user: UserEntity,
         candidates: list[UserEntity],
-    ) -> list[UserDistanceEntity] | None:
+    ) -> list[UserDistanceEntity]:
         result: list[UserDistanceEntity] = []
         
         for step in settings.deck.radius_steps_km:
@@ -19,6 +19,6 @@ class GeoCandidateFilterService:
                     result.append(UserMapper.to_user_distance_entity(candidate, distance))
             if result:
                 return result
-        return None
+        return []
         
         
