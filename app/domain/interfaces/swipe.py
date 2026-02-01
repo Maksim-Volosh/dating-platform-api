@@ -14,7 +14,7 @@ class ISwipeRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def was_swiped(self, user_id: int, candidate_id: int) -> bool:
+    async def get_swiped_user_ids(self, user_id: int) -> set[int]:
         raise NotImplementedError
 
     @abstractmethod

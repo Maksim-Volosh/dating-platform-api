@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, union_all
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities import FullSwipeEntity, NormalizedSwipeEntity
@@ -34,24 +34,6 @@ class SQLAlchemySwipeRepository(ISwipeRepository):
             return None
         return swipe_model
 
-    async def was_swiped(self, user_id: int, candidate_id: int) -> bool:
-        if user_id > candidate_id:
-            q = select(Swipe).where(
-                Swipe.user1_id == candidate_id, Swipe.user2_id == user_id
-            )
-        else:
-            q = select(Swipe).where(
-                Swipe.user1_id == user_id, Swipe.user2_id == candidate_id
-            )
-        result = await self.session.execute(q)
-        swipe_model = result.scalars().one_or_none()
-        if swipe_model is None:
-            return False
-        if user_id > candidate_id:
-            return swipe_model.user2_decision is not None
-        else:
-            return swipe_model.user1_decision is not None
-
     async def update(
         self, exist_swipe: Swipe, swipe: NormalizedSwipeEntity
     ) -> FullSwipeEntity:
@@ -66,3 +48,25 @@ class SQLAlchemySwipeRepository(ISwipeRepository):
             user2_id=exist_swipe.user2_id,
             user2_decision=exist_swipe.user2_decision,
         )
+        
+    async def get_swiped_user_ids(self, user_id: int) -> set[int]:
+        q1 = (
+            select(Swipe.user2_id)
+            .where(
+                Swipe.user1_id == user_id,
+                Swipe.user1_decision.isnot(None),
+            )
+        )
+
+        q2 = (
+            select(Swipe.user1_id)
+            .where(
+                Swipe.user2_id == user_id,
+                Swipe.user2_decision.isnot(None),
+            )
+        )
+
+        q = union_all(q1, q2)
+        result = await self.session.execute(q)
+        return set(result.scalars().all())
+
