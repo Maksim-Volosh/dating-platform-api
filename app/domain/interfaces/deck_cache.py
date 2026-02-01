@@ -1,16 +1,16 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from app.domain.entities import UserEntity
+from app.domain.entities import UserEntity, UserDistanceEntity
 
 
 class IDeckCache(ABC):
     @abstractmethod
-    async def rpush(self, key: str, users: List[UserEntity], timeout=None):
+    async def rpush(self, key: str, users: List[UserDistanceEntity], timeout=None):
         raise NotImplementedError
 
     @abstractmethod
-    async def lpop(self, key: str) -> UserEntity | None:
+    async def lpop(self, key: str) -> UserDistanceEntity | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -18,5 +18,5 @@ class IDeckCache(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_deck(self, key: str) -> List[UserEntity] | None:
+    async def get_deck(self, key: str) -> List[UserDistanceEntity] | None:
         raise NotImplementedError
