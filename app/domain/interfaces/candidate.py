@@ -3,12 +3,12 @@ from typing import List
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.entities import UserEntity
+from app.domain.entities import BBoxEntity, UserEntity
 
 
 class ICandidateRepository(ABC):
     @abstractmethod
-    async def get_candidates_by_preferences(
-        self, telegram_id: int, age: int, gender: str, prefer_gender: str
+    async def find_by_preferences_and_bbox(
+        self, user: UserEntity, bbox: BBoxEntity
     ) -> List[UserEntity] | None:
         raise NotImplementedError

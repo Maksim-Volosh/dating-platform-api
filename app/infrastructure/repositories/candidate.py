@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.domain.entities import UserEntity
+from app.domain.entities import BBoxEntity, UserEntity
 from app.domain.interfaces import ICandidateRepository
 from app.infrastructure.mappers import UserMapper
 from app.infrastructure.models import User
@@ -14,23 +14,27 @@ class SQLAlchemyCandidateRepository(ICandidateRepository):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_candidates_by_preferences(
-        self, telegram_id: int, age: int, gender: str, prefer_gender: str
+    async def find_by_preferences_and_bbox(
+        self, user: UserEntity, bbox: BBoxEntity
     ) -> List[UserEntity] | None:
-        prefer_ages = list(range(age - 2, age + 3))
+        prefer_ages = list(range(user.age - 2, user.age + 3))
 
-        if prefer_gender != "anyone":
+        if user.prefer_gender != "anyone":
             q = select(User).where(
-                User.telegram_id != telegram_id,
+                User.telegram_id != user.telegram_id,
                 User.age.in_(prefer_ages),
-                User.gender == prefer_gender,
-                User.prefer_gender.in_(["anyone", gender]),
+                User.gender == user.prefer_gender,
+                User.prefer_gender.in_(["anyone", user.gender]),
+                User.latitude.between(bbox.min_latitude, bbox.max_latitude),
+                User.longitude.between(bbox.min_longitude, bbox.max_longitude),
             )
         else:
             q = select(User).where(
-                User.telegram_id != telegram_id,
+                User.telegram_id != user.telegram_id,
                 User.age.in_(prefer_ages),
-                User.prefer_gender.in_(["anyone", gender]),
+                User.prefer_gender.in_(["anyone", user.gender]),
+                User.latitude.between(bbox.min_latitude, bbox.max_latitude),
+                User.longitude.between(bbox.min_longitude, bbox.max_longitude),
             )
 
         result = await self.session.execute(q)
