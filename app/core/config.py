@@ -1,3 +1,4 @@
+from typing import List
 from pydantic import BaseModel, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -49,6 +50,7 @@ class CacheConfig(BaseSettings):
 class DeckConfig(BaseSettings):
     timeout: int = 60 * 60
     max_size: int = 100
+    radius_steps_km: List[int] = [5, 10, 20]
 
 
 class InboxConfig(BaseSettings):
