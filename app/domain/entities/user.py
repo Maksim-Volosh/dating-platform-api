@@ -36,7 +36,8 @@ class UserEntity:
             "prefer_gender": self.prefer_gender,
             "description": self.description,
         }
-        
+       
+@dataclass 
 class UserDistanceEntity:
     telegram_id: int
     name: str

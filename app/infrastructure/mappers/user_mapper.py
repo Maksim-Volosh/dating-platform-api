@@ -1,4 +1,5 @@
-from app.domain.entities import UserEntity, Gender, PreferGender
+from app.domain.entities import (Gender, PreferGender, UserDistanceEntity,
+                                 UserEntity)
 from app.infrastructure.models import User as UserModel
 
 
@@ -27,4 +28,16 @@ class UserMapper:
             gender=entity.gender,
             prefer_gender=entity.prefer_gender,
             description=entity.description,
+        )
+
+    @staticmethod
+    def to_user_distance_entity(model: UserEntity, distance: float) -> UserDistanceEntity:
+        return UserDistanceEntity(
+            telegram_id=model.telegram_id,
+            name=model.name,
+            age=model.age,
+            distance=distance,
+            gender=Gender(model.gender),
+            prefer_gender=PreferGender(model.prefer_gender),
+            description=model.description,
         )
