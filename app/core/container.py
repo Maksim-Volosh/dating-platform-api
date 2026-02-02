@@ -5,7 +5,8 @@ from app.application.services import (DeckBuilderService,
                                       GeoCandidateFilterService,
                                       InboxOnSwipeService, SwipeFilterService)
 from app.application.use_cases import (CreateUserUseCase,
-                                       DeleteUserPhotosUseCase, InboxUseCase,
+                                       DeleteUserPhotosUseCase,
+                                       GetUserProfileViewUseCase, InboxUseCase,
                                        RetrieveUserPhotosUseCase,
                                        SwipeUserUseCase,
                                        UpdateUserDescriptionUseCase,
@@ -68,6 +69,9 @@ class Container:
 
     def user_use_case(self):
         return UserUseCase(repo=self.user_repo())
+    
+    def get_user_profile_view_use_case(self):
+        return GetUserProfileViewUseCase(user_repo=self.user_repo())
 
     def create_user_use_case(self):
         return CreateUserUseCase(

@@ -1,5 +1,6 @@
 __all__ = (
     "UserUseCase",
+    "GetUserProfileViewUseCase",
     "RetrieveUserPhotosUseCase",
     "UploadUserPhotosUseCase",
     "DeleteUserPhotosUseCase",
@@ -25,4 +26,5 @@ from .user import (
     UpdateUserDescriptionUseCase,
     UpdateUserUseCase,
     UserUseCase,
+    GetUserProfileViewUseCase,
 )

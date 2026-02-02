@@ -8,6 +8,8 @@ from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
 from app.domain.interfaces import (ICandidateRepository, IDeckCache,
                                    IUserRepository)
 from app.domain.services.boundaring_box import bounding_box
+from app.domain.services.haversine import haversine
+from app.infrastructure.mappers.user_mapper import UserMapper
 
 
 class UserUseCase:
@@ -119,3 +121,27 @@ class UpdateUserDescriptionUseCase:
             raise UserNotFoundById()
 
         return updated_user
+
+
+class GetUserProfileViewUseCase:
+    def __init__(self, user_repo: IUserRepository):
+        self.user_repo = user_repo
+
+    async def execute(self, viewer_id: int, candidate_id: int):
+        viewer = await self.user_repo.get_by_id(viewer_id)
+        candidate = await self.user_repo.get_by_id(candidate_id)
+
+        if viewer is None or candidate is None:
+            raise UserNotFoundById()
+        
+        distance = haversine(
+            viewer.latitude,
+            viewer.longitude,
+            candidate.latitude,
+            candidate.longitude,
+        )
+
+        return UserMapper.to_user_distance_entity(
+            candidate,
+            distance=distance
+        )

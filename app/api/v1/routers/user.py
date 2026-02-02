@@ -9,6 +9,7 @@ from app.api.v1.schemas.user import (
     UserUpdateDescriptionRequest,
     UserUpdateRequest,
     UserUpdateResponse,
+    UserDistanceResponse,
 )
 from app.core.container import Container
 from app.core.di import get_container
@@ -28,6 +29,19 @@ async def get_user(
         raise HTTPException(status_code=404, detail=e.message)
     return UserResponse.model_validate(user, from_attributes=True)
 
+@router.get("/{telegram_id}/profile")
+async def get_user_profile_view(
+    telegram_id: int, 
+    viewer_id: int,
+    container: Container = Depends(get_container)
+) -> UserDistanceResponse:
+    try:
+        user = await container.get_user_profile_view_use_case().execute(
+            candidate_id=telegram_id, viewer_id=viewer_id
+        )
+    except UserNotFoundById as e:
+        raise HTTPException(status_code=404, detail=e.message)
+    return UserDistanceResponse.model_validate(user, from_attributes=True)
 
 @router.get("/")
 async def get_users(
