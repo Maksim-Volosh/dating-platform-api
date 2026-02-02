@@ -12,7 +12,7 @@ class ChangeProfilePresenter:
 
     async def ask_name(self, message: Message) -> None:
         await message.answer(
-            "Как тебя зовут?", reply_markup=await get_name_keyboard(message)
+            "Ну и как теперь тебя зовут?", reply_markup=await get_name_keyboard(message)
         )
 
     async def ask_photos(self, message: Message) -> None:

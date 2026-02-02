@@ -11,22 +11,22 @@ from app.keyboards.keyboards import (
 class RegistrationPresenter:
 
     async def ask_age(self, message: Message):
-        await message.answer("Сколько тебе лет?", reply_markup=ReplyKeyboardRemove())
+        await message.answer("Итак, сколько тебе лет?", reply_markup=ReplyKeyboardRemove())
 
-    async def ask_city(self, message: Message):
-        await message.answer("В каком городе живешь?")
+    async def ask_location(self, message: Message):
+        await message.answer("Хорошо, теперь отправь свою геолокацию. Это нужно для поиска подходящих профилей 📍")
 
     async def ask_description(self, message: Message):
-        await message.answer("Расскажи немного о себе.")
+        await message.answer("Отлично, теперь расскажи немного о себе.")
 
     async def ask_gender(self, message: Message):
         await message.answer(
-            "Какой у тебя пол?", reply_markup=await get_gender_keyboard()
+            "Окей, теперь какой у тебя пол?", reply_markup=await get_gender_keyboard()
         )
 
     async def ask_prefer_gender(self, message: Message):
         await message.answer(
-            "Какой у тебя предпочитаемый пол?",
+            "А какой у тебя предпочитаемый пол?",
             reply_markup=await get_prefer_gender_keyboard(),
         )
 

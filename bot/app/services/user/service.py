@@ -33,7 +33,8 @@ class UserService:
             "telegram_id": telegram_id,
             "name": data["name"],
             "age": int(data["age"]),
-            "city": data["city"],
+            "longitude": data["longitude"],
+            "latitude": data["latitude"],
             "description": data["description"],
             "gender": GENDER_MAP[data["gender"]],
             "prefer_gender": PREFER_GENDER_MAP[data["prefer_gender"]],
@@ -45,7 +46,8 @@ class UserService:
         user_payload = {
             "name": data["name"],
             "age": int(data["age"]),
-            "city": data["city"],
+            "longitude": data["longitude"],
+            "latitude": data["latitude"],
             "description": data["description"],
             "gender": GENDER_MAP[data["gender"]],
             "prefer_gender": PREFER_GENDER_MAP[data["prefer_gender"]],
@@ -59,3 +61,6 @@ class UserService:
         return await self._api.patch(
             f"/users/{telegram_id}/description/", json=description_payload
         )
+        
+    async def get_user_profile_view(self, candidate_id: int, viewer_id: int):
+        return await self._api.get(f"/users/{candidate_id}/profile?viewer_id={viewer_id}")

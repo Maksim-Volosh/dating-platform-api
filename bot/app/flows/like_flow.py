@@ -34,7 +34,7 @@ class LikeFlow:
 
                 more = await self.inbox_service.get_inbox_count(message.from_user.id)
 
-                data = await self.user_service.get_user(candidate_id)
+                data = await self.user_service.get_user_profile_view(candidate_id, message.from_user.id)
 
                 if data:
                     photos = await self.photo_service.get_user_photos(

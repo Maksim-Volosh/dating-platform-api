@@ -24,8 +24,7 @@ class ProfilePresenter:
         self, message: Message, user: dict, photos, inbox_count: int | None
     ):
         caption = (
-            f"{html.bold(user['name'])}, {html.bold(str(user['age']))}, "
-            f"{html.bold(user['city'])}\n\n"
+            f"{html.bold(user['name'])}, {html.bold(str(user['age']))}\n\n"
             f"{html.italic(user['description'] or 'Без описания')}"
         )
 

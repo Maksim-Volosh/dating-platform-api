@@ -32,13 +32,19 @@ class RegistrationFlow:
             return
 
         await state.update_data(age=message.text)
-        await state.set_state(Registration.city)
-        await self.presenter.ask_city(message)
+        await state.set_state(Registration.location)
+        await self.presenter.ask_location(message)
 
-    async def process_city(self, message: Message, state: FSMContext):
-        await state.update_data(city=message.text)
-        await state.set_state(Registration.description)
-        await self.presenter.ask_description(message)
+    async def process_location(self, message: Message, state: FSMContext):
+        if message.location:
+            await state.update_data(
+                latitude=message.location.latitude,
+                longitude=message.location.longitude
+            )
+            await state.set_state(Registration.description)
+            await self.presenter.ask_description(message)
+        else:
+            await message.answer("Пожалуйста, отправь свое местоположение")
 
     async def process_description(self, message: Message, state: FSMContext):
         ok, error = validate_description(message.text)

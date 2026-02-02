@@ -20,9 +20,9 @@ async def age(message: Message, state: FSMContext):
     await flow.process_age(message, state)
 
 
-@router.message(Registration.city)
-async def city(message: Message, state: FSMContext):
-    await flow.process_city(message, state)
+@router.message(Registration.location)
+async def location(message: Message, state: FSMContext):
+    await flow.process_location(message, state)
 
 
 @router.message(Registration.description)
