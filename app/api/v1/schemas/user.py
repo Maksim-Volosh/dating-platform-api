@@ -16,6 +16,14 @@ class UserResponse(BaseModel):
     gender: Gender
     prefer_gender: PreferGender
 
+class UserDistanceResponse(BaseModel):
+    telegram_id: int
+    name: str
+    age: int
+    distance: float
+    description: Optional[str]
+    gender: Gender
+    prefer_gender: PreferGender
 
 class UserCreateRequest(BaseModel):
     telegram_id: int
