@@ -13,7 +13,7 @@ def haversine(lat1, lon1, lat2, lon2) -> float:
         lon2 (float): Longitude of the second point in degrees.
 
     Returns:
-        float: The distance between the two points in kilometers.
+        float: The distance between the two points in kilometers, rounded to 3 decimal places.
     """
     
     dlat = radians(lat2 - lat1)
@@ -27,4 +27,5 @@ def haversine(lat1, lon1, lat2, lon2) -> float:
     )
 
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    return EARTH_RADIUS_KM * c
+    return round(EARTH_RADIUS_KM * c, 3)
+
