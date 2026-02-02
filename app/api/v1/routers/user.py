@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.api.v1.schemas.user import (
     UserCreateRequest,
@@ -32,7 +32,7 @@ async def get_user(
 @router.get("/{telegram_id}/profile")
 async def get_user_profile_view(
     telegram_id: int, 
-    viewer_id: int,
+    viewer_id: int = Query(..., description="Who is viewing the profile"),
     container: Container = Depends(get_container)
 ) -> UserDistanceResponse:
     try:

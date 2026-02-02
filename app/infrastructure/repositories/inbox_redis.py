@@ -25,9 +25,11 @@ class InboxRedisCache(IInboxCache):
     async def add_match(self, owner_id: int, candidate_id: int, timeout=None):
         key_list = f"inbox:{owner_id}:list"
         set_key = f"inbox:{owner_id}:set"
+        
+        added = await self.client.sadd(set_key, candidate_id)  # type: ignore
 
-        await self.client.rpush(key_list, f"{candidate_id}:MATCH")  # type: ignore
-        await self.client.sadd(set_key, candidate_id)  # type: ignore
+        if added:
+            await self.client.rpush(key_list, f"{candidate_id}:MATCH")  # type: ignore
 
         if timeout:
             await self.client.expire(key_list, timeout)

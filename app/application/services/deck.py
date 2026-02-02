@@ -15,7 +15,8 @@ class DeckBuilderService:
         self.cache = cache
 
     async def build(self, user: UserEntity, candidates: List[UserDistanceEntity]) -> List[UserDistanceEntity]:
-        random.shuffle(candidates[: settings.deck.max_size])
+        candidates = candidates[: settings.deck.max_size]
+        random.shuffle(candidates)
 
         key = f"deck:{user.telegram_id}"
         await self.cache.delete(key)

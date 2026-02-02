@@ -12,7 +12,7 @@ class SwipePresenter:
     async def _create_profile_caption(self, user: dict) -> str:
         caption = (
             f"{html.bold(user['name'])}, {html.bold(str(user['age']))}, "
-            f"📍 {html.bold(user['distance'])} {html.bold("км")}\n\n"
+            f"📍 {html.bold(str(user['distance']))} {html.bold('км')}\n\n"
             f"{html.italic(user['description'] or 'Без описания')}"
         )
 
