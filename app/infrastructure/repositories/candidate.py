@@ -16,7 +16,7 @@ class SQLAlchemyCandidateRepository(ICandidateRepository):
 
     async def find_by_preferences_and_bbox(
         self, user: UserEntity, bbox: BBoxEntity
-    ) -> List[UserEntity] | None:
+    ) -> List[UserEntity]:
         prefer_ages = list(range(user.age - 2, user.age + 3))
 
         if user.prefer_gender != "anyone":
@@ -40,6 +40,6 @@ class SQLAlchemyCandidateRepository(ICandidateRepository):
         result = await self.session.execute(q)
         user_models = result.scalars().all()
         if not user_models:
-            return None
+            return []
 
         return [UserMapper.to_entity(user_model) for user_model in user_models]

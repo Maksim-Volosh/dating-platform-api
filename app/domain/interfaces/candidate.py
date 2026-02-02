@@ -10,5 +10,5 @@ class ICandidateRepository(ABC):
     @abstractmethod
     async def find_by_preferences_and_bbox(
         self, user: UserEntity, bbox: BBoxEntity
-    ) -> List[UserEntity] | None:
+    ) -> List[UserEntity]:
         raise NotImplementedError
