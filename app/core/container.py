@@ -1,31 +1,23 @@
 from redis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.services import (
-    DeckBuilderService,
-    InboxOnSwipeService,
-)
-from app.application.use_cases import (
-    UserUseCase,
-    CreateUserUseCase,
-    UpdateUserUseCase,
-    UpdateUserDescriptionUseCase,
-    UserDeckUseCase,
-    SwipeUserUseCase,
-    InboxUseCase,
-    DeleteUserPhotosUseCase,
-    RetrieveUserPhotosUseCase,
-    UpdateUserPhotosUseCase,
-    UploadUserPhotosUseCase,
-)
-from app.infrastructure.repositories import (
-    SQLAlchemyUserRepository,
-    SQLAlchemySwipeRepository,
-    SQLAlchemyCandidateRepository,
-    SQLAlchemyPhotoRepository,
-    DeckRedisCache,
-    InboxRedisCache,
-)
+from app.application.services import (DeckBuilderService,
+                                      GeoCandidateFilterService,
+                                      InboxOnSwipeService, SwipeFilterService)
+from app.application.use_cases import (CreateUserUseCase,
+                                       DeleteUserPhotosUseCase, InboxUseCase,
+                                       RetrieveUserPhotosUseCase,
+                                       SwipeUserUseCase,
+                                       UpdateUserDescriptionUseCase,
+                                       UpdateUserPhotosUseCase,
+                                       UpdateUserUseCase,
+                                       UploadUserPhotosUseCase,
+                                       UserDeckUseCase, UserUseCase)
+from app.infrastructure.repositories import (DeckRedisCache, InboxRedisCache,
+                                             SQLAlchemyCandidateRepository,
+                                             SQLAlchemyPhotoRepository,
+                                             SQLAlchemySwipeRepository,
+                                             SQLAlchemyUserRepository)
 
 
 class Container:
@@ -59,11 +51,16 @@ class Container:
 
     def deck_builder(self):
         return DeckBuilderService(
-            candidate_repo=self.candidate_repo(),
-            swipe_repo=self.swipe_repo(),
-            cache=self.deck_cache(),
+            cache=self.deck_cache()
         )
-
+    def geo_filter(self):
+        return GeoCandidateFilterService()
+    
+    def swipe_filter(self):
+        return SwipeFilterService(
+            swipe_repo=self.swipe_repo()
+        )
+    
     def inbox_on_swipe_service(self):
         return InboxOnSwipeService(inbox_cache=self.inbox_cache())
 
@@ -74,7 +71,11 @@ class Container:
 
     def create_user_use_case(self):
         return CreateUserUseCase(
-            user_repo=self.user_repo(), deck_builder=self.deck_builder()
+            user_repo=self.user_repo(),
+            deck_builder=self.deck_builder(),
+            candidate_repo=self.candidate_repo(),
+            geo_filter=self.geo_filter(),
+            swipe_filter=self.swipe_filter(),
         )
 
     def update_user_use_case(self):
@@ -82,6 +83,9 @@ class Container:
             user_repo=self.user_repo(),
             deck_builder=self.deck_builder(),
             cache=self.deck_cache(),
+            candidate_repo=self.candidate_repo(),
+            geo_filter=self.geo_filter(),
+            swipe_filter=self.swipe_filter(),
         )
 
     def update_user_description_use_case(self):
@@ -89,7 +93,11 @@ class Container:
 
     def user_deck_use_case(self):
         return UserDeckUseCase(
-            cache=self.deck_cache(), deck_builder=self.deck_builder()
+            cache=self.deck_cache(),
+            deck_builder=self.deck_builder(),
+            candidate_repo=self.candidate_repo(),
+            geo_filter=self.geo_filter(),
+            swipe_filter=self.swipe_filter(),
         )
 
     def swipe_user_use_case(self):

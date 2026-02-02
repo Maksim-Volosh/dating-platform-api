@@ -1,8 +1,13 @@
+from app.application.services import (DeckBuilderService,
+                                      GeoCandidateFilterService,
+                                      SwipeFilterService)
+from app.core.config import settings
 from app.domain.entities import UserEntity
-from app.domain.exceptions import UserAlreadyExists, UserNotFoundById, UsersNotFound
-from app.domain.interfaces import IUserRepository
-from app.domain.interfaces.deck_cache import IDeckCache
-from app.application.services import DeckBuilderService
+from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
+                                   UsersNotFound)
+from app.domain.interfaces import (ICandidateRepository, IDeckCache,
+                                   IUserRepository)
+from app.domain.services.boundaring_box import bounding_box
 
 
 class UserUseCase:
@@ -24,10 +29,18 @@ class UserUseCase:
 
 class CreateUserUseCase:
     def __init__(
-        self, user_repo: IUserRepository, deck_builder: DeckBuilderService
+        self,
+        user_repo: IUserRepository,
+        deck_builder: DeckBuilderService,
+        candidate_repo: ICandidateRepository,
+        geo_filter: GeoCandidateFilterService,
+        swipe_filter: SwipeFilterService
     ) -> None:
         self.user_repo = user_repo
         self.deck_builder = deck_builder
+        self.candidate_repo = candidate_repo
+        self.geo_filter = geo_filter
+        self.swipe_filter = swipe_filter
 
     async def execute(self, user: UserEntity) -> UserEntity:
         created_user = await self.user_repo.create(user)
@@ -35,7 +48,20 @@ class CreateUserUseCase:
             raise UserAlreadyExists()
 
         if created_user:
-            await self.deck_builder.build(created_user)
+            bbx = bounding_box(
+                created_user.latitude, created_user.longitude, settings.deck.radius_steps_km[-1]
+            )
+            candidates = await self.candidate_repo.find_by_preferences_and_bbox(
+                created_user, bbx
+            )
+            swipe_filtered_candidates = await self.swipe_filter.filter(
+                created_user.telegram_id, candidates
+            )
+            geo_filtered_candidates = await self.geo_filter.filter(
+                created_user, swipe_filtered_candidates
+            )
+            if geo_filtered_candidates:
+                await self.deck_builder.build(created_user, geo_filtered_candidates)
 
         return created_user
 
@@ -46,10 +72,17 @@ class UpdateUserUseCase:
         user_repo: IUserRepository,
         deck_builder: DeckBuilderService,
         cache: IDeckCache,
+        candidate_repo: ICandidateRepository,
+        geo_filter: GeoCandidateFilterService,
+        swipe_filter: SwipeFilterService
+        
     ) -> None:
         self.user_repo = user_repo
         self.deck_builder = deck_builder
         self.cache = cache
+        self.candidate_repo = candidate_repo
+        self.geo_filter = geo_filter
+        self.swipe_filter = swipe_filter
 
     async def execute(self, telegram_id: int, update: UserEntity) -> UserEntity:
         updated_user = await self.user_repo.update(telegram_id, update)
@@ -57,7 +90,21 @@ class UpdateUserUseCase:
             raise UserNotFoundById()
 
         if updated_user:
-            await self.deck_builder.build_and_clean_others(updated_user)
+            bbx = bounding_box(
+                updated_user.latitude, updated_user.longitude, settings.deck.radius_steps_km[-1]
+            )
+            candidates = await self.candidate_repo.find_by_preferences_and_bbox(
+                updated_user, bbx
+            )
+            swipe_filtered_candidates = await self.swipe_filter.filter(
+                updated_user.telegram_id, candidates
+            )
+            geo_filtered_candidates = await self.geo_filter.filter(
+                updated_user, swipe_filtered_candidates
+            )
+            if geo_filtered_candidates:
+                await self.deck_builder.build(updated_user, geo_filtered_candidates)
+                await self.deck_builder.clean_others(updated_user, candidates)
 
         return updated_user
 
