@@ -3,7 +3,7 @@ from redis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.services import (AIMatchOpenerService,
-                                      AIProfileAnalizeService,
+                                      AIProfileAnalyzeService,
                                       DeckBuilderService,
                                       GeoCandidateFilterService,
                                       InboxOnSwipeService, SwipeFilterService)
@@ -77,7 +77,7 @@ class Container:
         return InboxOnSwipeService(inbox_cache=self.inbox_cache())
     
     def ai_profile_analize_service(self):
-        return AIProfileAnalizeService(
+        return AIProfileAnalyzeService(
             ai_repo=self.openrouter_client()
         )
 

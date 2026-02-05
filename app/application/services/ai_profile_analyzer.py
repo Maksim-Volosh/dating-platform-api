@@ -2,7 +2,7 @@ from app.domain.entities import UserEntity
 from app.domain.interfaces import IAIClientRepository
 
 
-class AIProfileAnalizeService:
+class AIProfileAnalyzeService:
     def __init__(
         self,
         ai_repo: IAIClientRepository,
@@ -42,7 +42,7 @@ class AIProfileAnalizeService:
         """
         return message
     
-    async def analize(self, user: UserEntity):
+    async def analyze(self, user: UserEntity):
         
         message = self._format_message_by_user(user)
         

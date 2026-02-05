@@ -1,5 +1,5 @@
 from app.application.services import (AIMatchOpenerService,
-                                      AIProfileAnalizeService)
+                                      AIProfileAnalyzeService)
 from app.domain.exceptions import AIUnavailableError, UserNotFoundById
 from app.domain.interfaces import IUserRepository
 
@@ -7,7 +7,7 @@ from app.domain.interfaces import IUserRepository
 class AIProfileAnalizeUseCase:
     def __init__(
         self,
-        ai_analize_service: AIProfileAnalizeService,
+        ai_analize_service: AIProfileAnalyzeService,
         user_repo: IUserRepository
     ) -> None:
         self.ai_analize_service = ai_analize_service
@@ -19,7 +19,7 @@ class AIProfileAnalizeUseCase:
         if user is None:
             raise UserNotFoundById()
         
-        result = await self.ai_analize_service.analize(user)
+        result = await self.ai_analize_service.analyze(user)
         
         if result is None:
             raise AIUnavailableError()
