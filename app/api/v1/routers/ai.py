@@ -21,7 +21,7 @@ async def get_ai_analize_for_user(
     except UserNotFoundById as e:
         raise HTTPException(status_code=404, detail=e.message)
     except AIUnavailableError as e:
-        raise HTTPException(status_code=404, detail=e.message)
+        raise HTTPException(status_code=503, detail=e.message)
     return AIProfileAnalizeResponse(response=result)
 
 @router.get("/match-opener/{telegram_id}")
@@ -35,5 +35,5 @@ async def generate_match_messages(
     except UserNotFoundById as e:
         raise HTTPException(status_code=404, detail=e.message)
     except AIUnavailableError as e:
-        raise HTTPException(status_code=404, detail=e.message)
+        raise HTTPException(status_code=503, detail=e.message)
     return AIProfileAnalizeResponse(response=result)
