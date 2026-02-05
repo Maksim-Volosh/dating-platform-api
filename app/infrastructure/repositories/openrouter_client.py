@@ -1,4 +1,4 @@
-import os
+import asyncio
 
 from openai import (APIConnectionError, APIStatusError, APITimeoutError,
                     AsyncOpenAI, AuthenticationError, BadRequestError,
@@ -8,19 +8,23 @@ from app.domain.interfaces import IAIClientRepository
 
 
 class OpenRouterClient(IAIClientRepository):
-    def __init__(self, client: AsyncOpenAI) -> None:
+    def __init__(self, client: AsyncOpenAI, timeout: int) -> None:
         self._client = client
+        self.timeout = timeout
 
     async def complete(self, message: str, model: str = "openrouter/free", temperature: float = 0.7) -> str | None: 
         try:
-            resp = await self._client.chat.completions.create(
-                model=model,
-                messages=[{"role": "user", "content": message}],
-                temperature=temperature,
+            resp = await asyncio.wait_for(
+                self._client.chat.completions.create(
+                    model=model,
+                    messages=[{"role": "user", "content": message}],
+                    temperature=temperature,
+                ),
+                timeout=self.timeout,
             )
             return resp.choices[0].message.content or None
 
-        except APITimeoutError:
+        except (asyncio.TimeoutError, APITimeoutError):
             return None
         except APIConnectionError:
             return None

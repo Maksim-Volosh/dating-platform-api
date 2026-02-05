@@ -19,6 +19,7 @@ from app.application.use_cases import (AIMatchOpenerUseCase,
                                        UpdateUserUseCase,
                                        UploadUserPhotosUseCase,
                                        UserDeckUseCase, UserUseCase)
+from app.core.config import settings
 from app.infrastructure.repositories import (DeckRedisCache, InboxRedisCache,
                                              OpenRouterClient,
                                              SQLAlchemyCandidateRepository,
@@ -48,7 +49,7 @@ class Container:
         return SQLAlchemyPhotoRepository(self.session)
     
     def openrouter_client(self):
-        return OpenRouterClient(self.ai_client)
+        return OpenRouterClient(self.ai_client, settings.ai.timeout)
 
     # ---------- caches ----------
 
