@@ -1,16 +1,13 @@
 from app.domain.entities import UserEntity
-from app.domain.exceptions import UserNotFoundById
-from app.domain.interfaces import IAIClientRepository, IUserRepository
+from app.domain.interfaces import IAIClientRepository
 
 
 class AIProfileAnalizeService:
     def __init__(
         self,
         ai_repo: IAIClientRepository,
-        user_repo: IUserRepository
     ):
         self.ai_repo = ai_repo
-        self.user_repo = user_repo
         
     def _format_message_by_user(self, user: UserEntity):
         message = f"""
@@ -45,10 +42,7 @@ class AIProfileAnalizeService:
         """
         return message
     
-    async def analize(self, telegram_id: int):
-        user = await self.user_repo.get_by_id(telegram_id)
-        if user is None:
-            raise UserNotFoundById()
+    async def analize(self, user: UserEntity):
         
         message = self._format_message_by_user(user)
         

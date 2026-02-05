@@ -1,13 +1,25 @@
-from app.application.services import AIProfileAnalizeService, AIMatchOpenerService
-from app.domain.exceptions import AIUnavailableError
+from app.application.services import (AIMatchOpenerService,
+                                      AIProfileAnalizeService)
+from app.domain.exceptions import AIUnavailableError, UserNotFoundById
+from app.domain.interfaces import IUserRepository
 
 
 class AIProfileAnalizeUseCase:
-    def __init__(self, ai_analize_service: AIProfileAnalizeService) -> None:
+    def __init__(
+        self,
+        ai_analize_service: AIProfileAnalizeService,
+        user_repo: IUserRepository
+    ) -> None:
         self.ai_analize_service = ai_analize_service
+        self.user_repo = user_repo
         
     async def execute(self, telegram_id: int):
-        result = await self.ai_analize_service.analize(telegram_id)
+        user = await self.user_repo.get_by_id(telegram_id)
+        
+        if user is None:
+            raise UserNotFoundById()
+        
+        result = await self.ai_analize_service.analize(user)
         
         if result is None:
             raise AIUnavailableError()
@@ -15,11 +27,22 @@ class AIProfileAnalizeUseCase:
         return result
     
 class AIMatchOpenerUseCase:
-    def __init__(self, ai_opener_service: AIMatchOpenerService) -> None:
+    def __init__(
+        self,
+        ai_opener_service: AIMatchOpenerService,
+        user_repo: IUserRepository
+    ) -> None:
         self.ai_opener_service = ai_opener_service
+        self.user_repo = user_repo
         
     async def execute(self, liker_id: int, candidate_id: int):
-        result = await self.ai_opener_service.generate(liker_id, candidate_id)
+        liker_user = await self.user_repo.get_by_id(liker_id)
+        candidate_user = await self.user_repo.get_by_id(candidate_id)
+        
+        if liker_user is None or candidate_user is None:
+            raise UserNotFoundById()
+        
+        result = await self.ai_opener_service.generate(liker_user, candidate_user)
         
         if result is None:
             raise AIUnavailableError()

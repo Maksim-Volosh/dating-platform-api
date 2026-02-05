@@ -78,14 +78,12 @@ class Container:
     
     def ai_profile_analize_service(self):
         return AIProfileAnalizeService(
-            ai_repo=self.openrouter_client(),
-            user_repo=self.user_repo()
+            ai_repo=self.openrouter_client()
         )
 
     def ai_match_opener_service(self):
         return AIMatchOpenerService(
-            ai_repo=self.openrouter_client(),
-            user_repo=self.user_repo()
+            ai_repo=self.openrouter_client()
         )
     
     # ---------- use cases ----------
@@ -150,10 +148,12 @@ class Container:
     
     def ai_profile_analize_use_case(self):
         return AIProfileAnalizeUseCase(
-            ai_analize_service=self.ai_profile_analize_service()
+            ai_analize_service=self.ai_profile_analize_service(),
+            user_repo=self.user_repo()
         )
         
     def ai_match_opener_use_case(self):
         return AIMatchOpenerUseCase(
-            ai_opener_service=self.ai_match_opener_service()
+            ai_opener_service=self.ai_match_opener_service(),
+            user_repo=self.user_repo()
         )
