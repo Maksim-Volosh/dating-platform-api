@@ -2,11 +2,14 @@ from openai import AsyncOpenAI
 from redis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.services import (AIProfileAnalizeService,
+from app.application.services import (AIMatchOpenerService,
+                                      AIProfileAnalizeService,
                                       DeckBuilderService,
                                       GeoCandidateFilterService,
                                       InboxOnSwipeService, SwipeFilterService)
-from app.application.use_cases import (CreateUserUseCase,
+from app.application.use_cases import (AIMatchOpenerUseCase,
+                                       AIProfileAnalizeUseCase,
+                                       CreateUserUseCase,
                                        DeleteUserPhotosUseCase,
                                        GetUserProfileViewUseCase, InboxUseCase,
                                        RetrieveUserPhotosUseCase,
@@ -15,7 +18,7 @@ from app.application.use_cases import (CreateUserUseCase,
                                        UpdateUserPhotosUseCase,
                                        UpdateUserUseCase,
                                        UploadUserPhotosUseCase,
-                                       UserDeckUseCase, UserUseCase, AIProfileAnalizeUseCase)
+                                       UserDeckUseCase, UserUseCase)
 from app.infrastructure.repositories import (DeckRedisCache, InboxRedisCache,
                                              OpenRouterClient,
                                              SQLAlchemyCandidateRepository,
@@ -78,6 +81,12 @@ class Container:
             user_repo=self.user_repo()
         )
 
+    def ai_match_opener_service(self):
+        return AIMatchOpenerService(
+            ai_repo=self.openrouter_client(),
+            user_repo=self.user_repo()
+        )
+    
     # ---------- use cases ----------
 
     def user_use_case(self):
@@ -141,4 +150,9 @@ class Container:
     def ai_profile_analize_use_case(self):
         return AIProfileAnalizeUseCase(
             ai_analize_service=self.ai_profile_analize_service()
+        )
+        
+    def ai_match_opener_use_case(self):
+        return AIMatchOpenerUseCase(
+            ai_opener_service=self.ai_match_opener_service()
         )
