@@ -1,7 +1,9 @@
+from openai import AsyncOpenAI
 from redis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.services import (DeckBuilderService,
+from app.application.services import (AIProfileAnalizeService,
+                                      DeckBuilderService,
                                       GeoCandidateFilterService,
                                       InboxOnSwipeService, SwipeFilterService)
 from app.application.use_cases import (CreateUserUseCase,
@@ -13,8 +15,9 @@ from app.application.use_cases import (CreateUserUseCase,
                                        UpdateUserPhotosUseCase,
                                        UpdateUserUseCase,
                                        UploadUserPhotosUseCase,
-                                       UserDeckUseCase, UserUseCase)
+                                       UserDeckUseCase, UserUseCase, AIProfileAnalizeUseCase)
 from app.infrastructure.repositories import (DeckRedisCache, InboxRedisCache,
+                                             OpenRouterClient,
                                              SQLAlchemyCandidateRepository,
                                              SQLAlchemyPhotoRepository,
                                              SQLAlchemySwipeRepository,
@@ -22,9 +25,10 @@ from app.infrastructure.repositories import (DeckRedisCache, InboxRedisCache,
 
 
 class Container:
-    def __init__(self, session: AsyncSession, redis: Redis):
+    def __init__(self, session: AsyncSession, redis: Redis, ai_client: AsyncOpenAI):
         self.session = session
         self.redis = redis
+        self.ai_client = ai_client
 
     # ---------- repositories ----------
 
@@ -39,6 +43,9 @@ class Container:
 
     def photo_repo(self):
         return SQLAlchemyPhotoRepository(self.session)
+    
+    def openrouter_client(self):
+        return OpenRouterClient(self.ai_client)
 
     # ---------- caches ----------
 
@@ -64,6 +71,12 @@ class Container:
     
     def inbox_on_swipe_service(self):
         return InboxOnSwipeService(inbox_cache=self.inbox_cache())
+    
+    def ai_profile_analize_service(self):
+        return AIProfileAnalizeService(
+            ai_repo=self.openrouter_client(),
+            user_repo=self.user_repo()
+        )
 
     # ---------- use cases ----------
 
@@ -106,7 +119,8 @@ class Container:
 
     def swipe_user_use_case(self):
         return SwipeUserUseCase(
-            swipe_repo=self.swipe_repo(), inbox_service=self.inbox_on_swipe_service()
+            swipe_repo=self.swipe_repo(),
+            inbox_service=self.inbox_on_swipe_service()
         )
 
     def inbox_use_case(self):
@@ -123,3 +137,8 @@ class Container:
 
     def upload_user_photos_use_case(self):
         return UploadUserPhotosUseCase(photo_repo=self.photo_repo())
+    
+    def ai_profile_analize_use_case(self):
+        return AIProfileAnalizeUseCase(
+            ai_analize_service=self.ai_profile_analize_service()
+        )

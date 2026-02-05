@@ -55,6 +55,11 @@ class DeckConfig(BaseSettings):
 
 class InboxConfig(BaseSettings):
     timeout: int = 604800
+    
+class AIConfig(BaseSettings):
+    base_url: str | None = None
+    api_key: str = ""
+    timeout: int = 20
 
 
 class Settings(BaseSettings):
@@ -74,6 +79,7 @@ class Settings(BaseSettings):
     details: DetailsConfig = DetailsConfig()
     deck: DeckConfig = DeckConfig()
     inbox: InboxConfig = InboxConfig()
+    ai: AIConfig = AIConfig()
 
 
 settings = Settings()  # type: ignore
