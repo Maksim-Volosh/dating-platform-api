@@ -55,11 +55,22 @@ class DeckConfig(BaseSettings):
 
 class InboxConfig(BaseSettings):
     timeout: int = 604800
+   
     
 class AIConfig(BaseSettings):
     base_url: str | None = None
     api_key: str = ""
     timeout: int = 20
+    
+    
+class RateLimitRule(BaseModel):
+    limit: int
+    window_sec: int
+    
+    
+class AiRateLimits(BaseModel):
+    profile_analyze: RateLimitRule = RateLimitRule(limit=1, window_sec=180)
+    match_opener: RateLimitRule = RateLimitRule(limit=2, window_sec=180)
 
 
 class Settings(BaseSettings):
@@ -80,6 +91,7 @@ class Settings(BaseSettings):
     deck: DeckConfig = DeckConfig()
     inbox: InboxConfig = InboxConfig()
     ai: AIConfig = AIConfig()
+    ai_rate_limits: AiRateLimits = AiRateLimits()
 
 
 settings = Settings()  # type: ignore
