@@ -16,7 +16,7 @@ def ai_rate_limit(
         container: Container = Depends(get_container),
     ) -> None:
         telegram_id = request.path_params["telegram_id"]
-        
+
         key = f"rl:{prefix}:{telegram_id}"
 
         try:
@@ -26,4 +26,5 @@ def ai_rate_limit(
                 status_code=429,
                 detail="Too many requests",
             )
+
     return dependency

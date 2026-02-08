@@ -29,11 +29,12 @@ async def get_user(
         raise HTTPException(status_code=404, detail=e.message)
     return UserResponse.model_validate(user, from_attributes=True)
 
+
 @router.get("/{telegram_id}/profile")
 async def get_user_profile_view(
-    telegram_id: int, 
+    telegram_id: int,
     viewer_id: int = Query(..., description="Who is viewing the profile"),
-    container: Container = Depends(get_container)
+    container: Container = Depends(get_container),
 ) -> UserDistanceResponse:
     try:
         user = await container.get_user_profile_view_use_case().execute(
@@ -42,6 +43,7 @@ async def get_user_profile_view(
     except UserNotFoundById as e:
         raise HTTPException(status_code=404, detail=e.message)
     return UserDistanceResponse.model_validate(user, from_attributes=True)
+
 
 @router.get("/")
 async def get_users(

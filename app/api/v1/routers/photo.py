@@ -9,8 +9,12 @@ from app.core.composition.container import Container
 from app.core.composition.di import get_container
 from app.domain.entities import UserEntity
 from app.domain.entities.photo import PhotoEntity
-from app.domain.exceptions import (PhotosNotFound, TooManyPhotos,
-                                   UserNotFoundById, WrongFileExtension)
+from app.domain.exceptions import (
+    PhotosNotFound,
+    TooManyPhotos,
+    UserNotFoundById,
+    WrongFileExtension,
+)
 
 router = APIRouter(prefix="/users", tags=["User Photos"])
 

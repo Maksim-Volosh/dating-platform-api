@@ -48,25 +48,18 @@ class SQLAlchemySwipeRepository(ISwipeRepository):
             user2_id=exist_swipe.user2_id,
             user2_decision=exist_swipe.user2_decision,
         )
-        
+
     async def get_swiped_user_ids(self, user_id: int) -> set[int]:
-        q1 = (
-            select(Swipe.user2_id)
-            .where(
-                Swipe.user1_id == user_id,
-                Swipe.user1_decision.isnot(None),
-            )
+        q1 = select(Swipe.user2_id).where(
+            Swipe.user1_id == user_id,
+            Swipe.user1_decision.isnot(None),
         )
 
-        q2 = (
-            select(Swipe.user1_id)
-            .where(
-                Swipe.user2_id == user_id,
-                Swipe.user2_decision.isnot(None),
-            )
+        q2 = select(Swipe.user1_id).where(
+            Swipe.user2_id == user_id,
+            Swipe.user2_decision.isnot(None),
         )
 
         q = union_all(q1, q2)
         result = await self.session.execute(q)
         return set(result.scalars().all())
-

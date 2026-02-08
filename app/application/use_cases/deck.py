@@ -1,6 +1,8 @@
-from app.application.services import (DeckBuilderService,
-                                      GeoCandidateFilterService,
-                                      SwipeFilterService)
+from app.application.services import (
+    DeckBuilderService,
+    GeoCandidateFilterService,
+    SwipeFilterService,
+)
 from app.core.config import settings
 from app.domain.entities import UserDistanceEntity, UserEntity
 from app.domain.exceptions import NoCandidatesFound, UserNotFoundById
@@ -15,7 +17,7 @@ class UserDeckUseCase:
         deck_builder: DeckBuilderService,
         candidate_repo: ICandidateRepository,
         geo_filter: GeoCandidateFilterService,
-        swipe_filter: SwipeFilterService
+        swipe_filter: SwipeFilterService,
     ) -> None:
         self.cache = cache
         self.deck_builder = deck_builder
@@ -26,7 +28,7 @@ class UserDeckUseCase:
     async def next(self, user: UserEntity) -> UserDistanceEntity:
         key = f"deck:{user.telegram_id}"
         user_entity = await self.cache.lpop(key)
-        if user_entity is None:            
+        if user_entity is None:
             bbx = bounding_box(
                 user.latitude, user.longitude, settings.deck.radius_steps_km[-1]
             )
@@ -41,11 +43,11 @@ class UserDeckUseCase:
             )
             if not geo_filtered_candidates:
                 raise NoCandidatesFound()
-            
+
             await self.deck_builder.build(user, geo_filtered_candidates)
-            
+
             user_entity = await self.cache.lpop(key)
             if user_entity is None:
                 raise UserNotFoundById()
-            
+
         return user_entity

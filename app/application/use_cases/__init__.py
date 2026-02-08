@@ -12,7 +12,7 @@ __all__ = (
     "UpdateUserDescriptionUseCase",
     "InboxUseCase",
     "AIProfileAnalizeUseCase",
-    "AIMatchOpenerUseCase"
+    "AIMatchOpenerUseCase",
 )
 from .deck import UserDeckUseCase
 from .inbox import InboxUseCase

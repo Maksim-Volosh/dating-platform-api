@@ -2,31 +2,41 @@ from openai import AsyncOpenAI
 from redis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.application.services import (AIMatchOpenerService,
-                                      AIProfileAnalyzeService,
-                                      DeckBuilderService,
-                                      GeoCandidateFilterService,
-                                      InboxOnSwipeService, SwipeFilterService)
-from app.application.use_cases import (AIMatchOpenerUseCase,
-                                       AIProfileAnalizeUseCase,
-                                       CreateUserUseCase,
-                                       DeleteUserPhotosUseCase,
-                                       GetUserProfileViewUseCase, InboxUseCase,
-                                       RetrieveUserPhotosUseCase,
-                                       SwipeUserUseCase,
-                                       UpdateUserDescriptionUseCase,
-                                       UpdateUserPhotosUseCase,
-                                       UpdateUserUseCase,
-                                       UploadUserPhotosUseCase,
-                                       UserDeckUseCase, UserUseCase)
+from app.application.services import (
+    AIMatchOpenerService,
+    AIProfileAnalyzeService,
+    DeckBuilderService,
+    GeoCandidateFilterService,
+    InboxOnSwipeService,
+    SwipeFilterService,
+)
+from app.application.use_cases import (
+    AIMatchOpenerUseCase,
+    AIProfileAnalizeUseCase,
+    CreateUserUseCase,
+    DeleteUserPhotosUseCase,
+    GetUserProfileViewUseCase,
+    InboxUseCase,
+    RetrieveUserPhotosUseCase,
+    SwipeUserUseCase,
+    UpdateUserDescriptionUseCase,
+    UpdateUserPhotosUseCase,
+    UpdateUserUseCase,
+    UploadUserPhotosUseCase,
+    UserDeckUseCase,
+    UserUseCase,
+)
 from app.core.config import settings
 from app.infrastructure.rate_limit import RateLimiter
-from app.infrastructure.repositories import (DeckRedisCache, InboxRedisCache,
-                                             OpenRouterClient,
-                                             SQLAlchemyCandidateRepository,
-                                             SQLAlchemyPhotoRepository,
-                                             SQLAlchemySwipeRepository,
-                                             SQLAlchemyUserRepository)
+from app.infrastructure.repositories import (
+    DeckRedisCache,
+    InboxRedisCache,
+    OpenRouterClient,
+    SQLAlchemyCandidateRepository,
+    SQLAlchemyPhotoRepository,
+    SQLAlchemySwipeRepository,
+    SQLAlchemyUserRepository,
+)
 
 
 class Container:
@@ -48,7 +58,7 @@ class Container:
 
     def photo_repo(self):
         return SQLAlchemyPhotoRepository(self.session)
-    
+
     def openrouter_client(self):
         return OpenRouterClient(self.ai_client, settings.ai.timeout)
 
@@ -61,42 +71,35 @@ class Container:
         return InboxRedisCache(self.redis)
 
     # ---------- rate limit ----------
-    
+
     def rate_limiter(self):
         return RateLimiter(self.redis)
-    
+
     # ---------- services ----------
 
     def deck_builder(self):
-        return DeckBuilderService(
-            cache=self.deck_cache()
-        )
+        return DeckBuilderService(cache=self.deck_cache())
+
     def geo_filter(self):
         return GeoCandidateFilterService()
-    
+
     def swipe_filter(self):
-        return SwipeFilterService(
-            swipe_repo=self.swipe_repo()
-        )
-    
+        return SwipeFilterService(swipe_repo=self.swipe_repo())
+
     def inbox_on_swipe_service(self):
         return InboxOnSwipeService(inbox_cache=self.inbox_cache())
-    
+
     def ai_profile_analize_service(self):
-        return AIProfileAnalyzeService(
-            ai_repo=self.openrouter_client()
-        )
+        return AIProfileAnalyzeService(ai_repo=self.openrouter_client())
 
     def ai_match_opener_service(self):
-        return AIMatchOpenerService(
-            ai_repo=self.openrouter_client()
-        )
-    
+        return AIMatchOpenerService(ai_repo=self.openrouter_client())
+
     # ---------- use cases ----------
 
     def user_use_case(self):
         return UserUseCase(repo=self.user_repo())
-    
+
     def get_user_profile_view_use_case(self):
         return GetUserProfileViewUseCase(user_repo=self.user_repo())
 
@@ -133,8 +136,7 @@ class Container:
 
     def swipe_user_use_case(self):
         return SwipeUserUseCase(
-            swipe_repo=self.swipe_repo(),
-            inbox_service=self.inbox_on_swipe_service()
+            swipe_repo=self.swipe_repo(), inbox_service=self.inbox_on_swipe_service()
         )
 
     def inbox_use_case(self):
@@ -151,15 +153,14 @@ class Container:
 
     def upload_user_photos_use_case(self):
         return UploadUserPhotosUseCase(photo_repo=self.photo_repo())
-    
+
     def ai_profile_analize_use_case(self):
         return AIProfileAnalizeUseCase(
             ai_analize_service=self.ai_profile_analize_service(),
-            user_repo=self.user_repo()
+            user_repo=self.user_repo(),
         )
-        
+
     def ai_match_opener_use_case(self):
         return AIMatchOpenerUseCase(
-            ai_opener_service=self.ai_match_opener_service(),
-            user_repo=self.user_repo()
+            ai_opener_service=self.ai_match_opener_service(), user_repo=self.user_repo()
         )

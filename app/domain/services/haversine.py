@@ -2,6 +2,7 @@ from math import radians, sin, cos, sqrt, atan2
 
 EARTH_RADIUS_KM = 6371.0
 
+
 def haversine(lat1, lon1, lat2, lon2) -> float:
     """
     Calculate the distance between two points on a sphere using the Haversine formula.
@@ -15,17 +16,14 @@ def haversine(lat1, lon1, lat2, lon2) -> float:
     Returns:
         float: The distance between the two points in kilometers, rounded to 3 decimal places.
     """
-    
+
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
 
     a = (
         sin(dlat / 2) ** 2
-        + cos(radians(lat1))
-        * cos(radians(lat2))
-        * sin(dlon / 2) ** 2
+        + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
     )
 
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return round(EARTH_RADIUS_KM * c, 3)
-

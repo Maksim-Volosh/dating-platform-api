@@ -8,7 +8,7 @@ class AIProfileAnalyzeService:
         ai_repo: IAIClientRepository,
     ):
         self.ai_repo = ai_repo
-        
+
     def _format_message_by_user(self, user: UserEntity):
         message = f"""
             Ты анализируешь анкету пользователя в дейтинг-приложении.
@@ -41,9 +41,9 @@ class AIProfileAnalyzeService:
             Описание: {user.description}
         """
         return message
-    
+
     async def analyze(self, user: UserEntity):
-        
+
         message = self._format_message_by_user(user)
-        
+
         return await self.ai_repo.complete(message)

@@ -10,10 +10,15 @@ class GeoCandidateFilterService:
         candidates: list[UserEntity],
     ) -> list[UserDistanceEntity]:
         result: list[UserDistanceEntity] = []
-        
+
         for step in settings.deck.radius_steps_km:
             for candidate in candidates:
-                distance = haversine(user.latitude, user.longitude, candidate.latitude, candidate.longitude)
+                distance = haversine(
+                    user.latitude,
+                    user.longitude,
+                    candidate.latitude,
+                    candidate.longitude,
+                )
                 if distance <= step:
                     result.append(
                         UserDistanceEntity(
@@ -29,5 +34,3 @@ class GeoCandidateFilterService:
             if result:
                 return result
         return []
-        
-        

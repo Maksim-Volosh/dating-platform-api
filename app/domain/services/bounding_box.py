@@ -15,13 +15,13 @@ def bounding_box(lat: float, lon: float, radius_km: float) -> BBoxEntity:
     Returns:
         tuple[float, float, float, float]: A tuple containing the minimum and maximum latitude and longitude.
     """
-    
+
     lat_delta = radius_km / 111.0
     lon_delta = radius_km / (111.0 * cos(radians(lat)))
 
     return BBoxEntity(
-        min_latitude= lat - lat_delta,
-        max_latitude= lat + lat_delta,
-        min_longitude= lon - lon_delta,
-        max_longitude= lon + lon_delta,
+        min_latitude=lat - lat_delta,
+        max_latitude=lat + lat_delta,
+        min_longitude=lon - lon_delta,
+        max_longitude=lon + lon_delta,
     )

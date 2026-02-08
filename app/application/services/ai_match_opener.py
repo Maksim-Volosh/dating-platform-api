@@ -8,8 +8,10 @@ class AIMatchOpenerService:
         ai_repo: IAIClientRepository,
     ):
         self.ai_repo = ai_repo
-        
-    def _format_message_by_users(self, liker_user: UserEntity, candidate_user: UserEntity) -> str:
+
+    def _format_message_by_users(
+        self, liker_user: UserEntity, candidate_user: UserEntity
+    ) -> str:
         message = f"""
             Ты помогаешь написать первое сообщение в дейтинг-приложении после взаимного лайка.
 
@@ -53,9 +55,9 @@ class AIMatchOpenerService:
 
         """
         return message
-    
+
     async def generate(self, liker_user: UserEntity, candidate_user: UserEntity):
-        
+
         message = self._format_message_by_users(liker_user, candidate_user)
-        
+
         return await self.ai_repo.complete(message)

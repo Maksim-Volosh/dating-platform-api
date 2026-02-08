@@ -1,12 +1,12 @@
-from app.application.services import (DeckBuilderService,
-                                      GeoCandidateFilterService,
-                                      SwipeFilterService)
+from app.application.services import (
+    DeckBuilderService,
+    GeoCandidateFilterService,
+    SwipeFilterService,
+)
 from app.core.config import settings
 from app.domain.entities import UserDistanceEntity, UserEntity
-from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
-                                   UsersNotFound)
-from app.domain.interfaces import (ICandidateRepository, IDeckCache,
-                                   IUserRepository)
+from app.domain.exceptions import UserAlreadyExists, UserNotFoundById, UsersNotFound
+from app.domain.interfaces import ICandidateRepository, IDeckCache, IUserRepository
 from app.domain.services.bounding_box import bounding_box
 from app.domain.services.haversine import haversine
 
@@ -35,7 +35,7 @@ class CreateUserUseCase:
         deck_builder: DeckBuilderService,
         candidate_repo: ICandidateRepository,
         geo_filter: GeoCandidateFilterService,
-        swipe_filter: SwipeFilterService
+        swipe_filter: SwipeFilterService,
     ) -> None:
         self.user_repo = user_repo
         self.deck_builder = deck_builder
@@ -50,7 +50,9 @@ class CreateUserUseCase:
 
         if created_user:
             bbx = bounding_box(
-                created_user.latitude, created_user.longitude, settings.deck.radius_steps_km[-1]
+                created_user.latitude,
+                created_user.longitude,
+                settings.deck.radius_steps_km[-1],
             )
             candidates = await self.candidate_repo.find_by_preferences_and_bbox(
                 created_user, bbx
@@ -75,8 +77,7 @@ class UpdateUserUseCase:
         cache: IDeckCache,
         candidate_repo: ICandidateRepository,
         geo_filter: GeoCandidateFilterService,
-        swipe_filter: SwipeFilterService
-        
+        swipe_filter: SwipeFilterService,
     ) -> None:
         self.user_repo = user_repo
         self.deck_builder = deck_builder
@@ -92,7 +93,9 @@ class UpdateUserUseCase:
 
         if updated_user:
             bbx = bounding_box(
-                updated_user.latitude, updated_user.longitude, settings.deck.radius_steps_km[-1]
+                updated_user.latitude,
+                updated_user.longitude,
+                settings.deck.radius_steps_km[-1],
             )
             candidates = await self.candidate_repo.find_by_preferences_and_bbox(
                 updated_user, bbx
@@ -132,7 +135,7 @@ class GetUserProfileViewUseCase:
 
         if viewer is None or candidate is None:
             raise UserNotFoundById()
-        
+
         distance = haversine(
             viewer.latitude,
             viewer.longitude,

@@ -13,10 +13,14 @@ router = APIRouter(prefix="/ai", tags=["AI"])
 
 @router.get(
     "/profile-analize/{telegram_id}",
-    dependencies=[Depends(ai_rate_limit(
-        limit=settings.ai_rate_limits.profile_analyze.limit,
-        window_sec=settings.ai_rate_limits.profile_analyze.window_sec, 
-        prefix="ai:profile"))
+    dependencies=[
+        Depends(
+            ai_rate_limit(
+                limit=settings.ai_rate_limits.profile_analyze.limit,
+                window_sec=settings.ai_rate_limits.profile_analyze.window_sec,
+                prefix="ai:profile",
+            )
+        )
     ],
 )
 async def get_ai_analize_for_user(
@@ -31,12 +35,17 @@ async def get_ai_analize_for_user(
         raise HTTPException(status_code=503, detail=e.message)
     return AIProfileAnalizeResponse(response=result)
 
+
 @router.get(
     "/match-opener/{telegram_id}",
-    dependencies=[Depends(ai_rate_limit(
-        limit=settings.ai_rate_limits.match_opener.limit,
-        window_sec=settings.ai_rate_limits.match_opener.window_sec,
-        prefix="ai:opener"))
+    dependencies=[
+        Depends(
+            ai_rate_limit(
+                limit=settings.ai_rate_limits.match_opener.limit,
+                window_sec=settings.ai_rate_limits.match_opener.window_sec,
+                prefix="ai:opener",
+            )
+        )
     ],
 )
 async def generate_match_messages(
@@ -45,7 +54,9 @@ async def generate_match_messages(
     container: Container = Depends(get_container),
 ) -> AIProfileAnalizeResponse:
     try:
-        result = await container.ai_match_opener_use_case().execute(telegram_id, candidate_id)
+        result = await container.ai_match_opener_use_case().execute(
+            telegram_id, candidate_id
+        )
     except UserNotFoundById as e:
         raise HTTPException(status_code=404, detail=e.message)
     except AIUnavailableError as e:
