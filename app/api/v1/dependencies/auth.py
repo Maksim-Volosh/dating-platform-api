@@ -1,8 +1,8 @@
 from fastapi import Depends, Header, HTTPException, status
 
 from app.core.config import settings
-from app.core.container import Container
-from app.core.di import get_container
+from app.core.composition.container import Container
+from app.core.composition.di import get_container
 from app.domain.entities import UserEntity
 from app.domain.exceptions import UserNotFoundById
 

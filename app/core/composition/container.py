@@ -20,6 +20,7 @@ from app.application.use_cases import (AIMatchOpenerUseCase,
                                        UploadUserPhotosUseCase,
                                        UserDeckUseCase, UserUseCase)
 from app.core.config import settings
+from app.infrastructure.rate_limit import RateLimiter
 from app.infrastructure.repositories import (DeckRedisCache, InboxRedisCache,
                                              OpenRouterClient,
                                              SQLAlchemyCandidateRepository,
@@ -59,6 +60,11 @@ class Container:
     def inbox_cache(self):
         return InboxRedisCache(self.redis)
 
+    # ---------- rate limit ----------
+    
+    def get_rate_limiter(self):
+        return RateLimiter(self.redis)
+    
     # ---------- services ----------
 
     def deck_builder(self):

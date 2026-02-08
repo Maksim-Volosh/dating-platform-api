@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.api.v1.schemas.user import UserDistanceResponse
-from app.core.container import Container
-from app.core.dependencies import get_existing_user
-from app.core.di import get_container
+from app.core.composition.container import Container
+from app.api.v1.dependencies.auth import get_existing_user
+from app.core.composition.di import get_container
 from app.domain.entities import UserEntity
 from app.domain.exceptions import NoCandidatesFound, UserNotFoundById
 

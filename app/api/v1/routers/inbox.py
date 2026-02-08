@@ -5,8 +5,8 @@ from app.api.v1.schemas.inbox import (
     CurrentInboxItemResponse,
     InboxItemCountResponse,
 )
-from app.core.container import Container
-from app.core.di import get_container
+from app.core.composition.container import Container
+from app.core.composition.di import get_container
 from app.domain.entities import InboxItem
 from app.domain.exceptions import InboxItemNotFound
 
