@@ -62,7 +62,7 @@ class Container:
 
     # ---------- rate limit ----------
     
-    def get_rate_limiter(self):
+    def rate_limiter(self):
         return RateLimiter(self.redis)
     
     # ---------- services ----------

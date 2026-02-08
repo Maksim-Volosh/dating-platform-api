@@ -4,9 +4,9 @@ from redis import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.composition.container import Container
-from app.infrastructure.db import db_helper
-from app.infrastructure.redis import redis_helper
-from app.infrastructure.ai.open_ai_helper import ai_helper
+from app.infrastructure.helpers.ai.open_ai_helper import ai_helper
+from app.infrastructure.helpers.db import db_helper
+from app.infrastructure.helpers.redis import redis_helper
 
 
 async def get_container(

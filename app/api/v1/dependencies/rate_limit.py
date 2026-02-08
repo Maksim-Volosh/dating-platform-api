@@ -20,7 +20,7 @@ def ai_rate_limit(
         key = f"rl:{prefix}:{telegram_id}"
 
         try:
-            await container.get_rate_limiter().hit(key, limit=limit, window_sec=window_sec)
+            await container.rate_limiter().hit(key, limit=limit, window_sec=window_sec)
         except RateLimitTooManyRequests:
             raise HTTPException(
                 status_code=429,

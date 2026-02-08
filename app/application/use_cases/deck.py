@@ -3,11 +3,9 @@ from app.application.services import (DeckBuilderService,
                                       SwipeFilterService)
 from app.core.config import settings
 from app.domain.entities import UserDistanceEntity, UserEntity
-from app.domain.exceptions import UserNotFoundById
-from app.domain.exceptions.deck import NoCandidatesFound
+from app.domain.exceptions import NoCandidatesFound, UserNotFoundById
 from app.domain.interfaces import ICandidateRepository, IDeckCache
-from app.domain.interfaces.candidate import ICandidateRepository
-from app.domain.services.boundaring_box import bounding_box
+from app.domain.services.bounding_box import bounding_box
 
 
 class UserDeckUseCase:

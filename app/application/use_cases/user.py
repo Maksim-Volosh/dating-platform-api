@@ -2,14 +2,13 @@ from app.application.services import (DeckBuilderService,
                                       GeoCandidateFilterService,
                                       SwipeFilterService)
 from app.core.config import settings
-from app.domain.entities import UserEntity
+from app.domain.entities import UserDistanceEntity, UserEntity
 from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
                                    UsersNotFound)
 from app.domain.interfaces import (ICandidateRepository, IDeckCache,
                                    IUserRepository)
-from app.domain.services.boundaring_box import bounding_box
+from app.domain.services.bounding_box import bounding_box
 from app.domain.services.haversine import haversine
-from app.infrastructure.mappers.user_mapper import UserMapper
 
 
 class UserUseCase:
@@ -141,7 +140,12 @@ class GetUserProfileViewUseCase:
             candidate.longitude,
         )
 
-        return UserMapper.to_user_distance_entity(
-            candidate,
-            distance=distance
+        return UserDistanceEntity(
+            telegram_id=candidate.telegram_id,
+            name=candidate.name,
+            age=candidate.age,
+            distance=distance,
+            gender=candidate.gender,
+            prefer_gender=candidate.prefer_gender,
+            description=candidate.description,
         )

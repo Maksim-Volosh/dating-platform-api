@@ -7,9 +7,9 @@ from fastapi.staticfiles import StaticFiles
 from app.api.v1 import api_v1_router
 from app.core.config import settings
 from app.api.v1.dependencies.auth import verify_bot_key
-from app.infrastructure.db import db_helper
+from app.infrastructure.helpers.db import db_helper
 from app.infrastructure.models import Base
-from app.infrastructure.redis import redis_helper
+from app.infrastructure.helpers.redis import redis_helper
 
 
 @asynccontextmanager

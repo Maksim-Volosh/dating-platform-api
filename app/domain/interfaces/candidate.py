@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.domain.entities import BBoxEntity, UserEntity
 
 
