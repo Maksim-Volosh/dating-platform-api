@@ -2,23 +2,35 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from app.domain.entities import UserEntity, Gender, PreferGender
-from app.domain.exceptions import UserNotFoundById
-from app.domain.exceptions.deck import NoCandidatesFound
 from app.application.services.deck import DeckBuilderService
-from app.application.use_cases.deck import UserDeckUseCase
+from app.domain.entities import (Gender, PreferGender, UserDistanceEntity,
+                                 UserEntity)
 
 
 @pytest.fixture
-def fake_user():
+def fake_user() -> UserEntity:
     return UserEntity(
         telegram_id=1,
         name="name",
         age=18,
-        city="city",
-        gender=Gender("male"),
-        prefer_gender=PreferGender("female"),
+        latitude=10.0,
+        longitude=20.0,
+        gender=Gender.MALE,
+        prefer_gender=PreferGender.FEMALE,
         description="description",
+    )
+
+
+@pytest.fixture
+def fake_distance_user() -> UserDistanceEntity:
+    return UserDistanceEntity(
+        telegram_id=99,
+        name="cand",
+        age=22,
+        distance=1.123,
+        gender=Gender.FEMALE,
+        prefer_gender=PreferGender.MALE,
+        description="cand desc",
     )
 
 
@@ -26,131 +38,178 @@ def fake_user():
 # Tests for DeckBuilderService
 # -------------------------------
 
-
 @pytest.mark.asyncio
-async def test_deck_builder_service_build_success(fake_user):
-    candidate_repo = AsyncMock()
-    candidate_repo.get_candidates_by_preferences.return_value = [
-        fake_user,
-        fake_user,
-        fake_user,
-        fake_user,
-        fake_user,
-    ]
-    swipe_repo = AsyncMock()
-    swipe_repo.was_swiped.side_effect = [False, False, False, True, True]
+async def test_deck_builder_build_deletes_old_and_pushes_new(fake_user, fake_distance_user, monkeypatch):
+    # arrange
     cache = AsyncMock()
     cache.delete.return_value = None
     cache.rpush.return_value = None
 
-    use_case = DeckBuilderService(candidate_repo, swipe_repo, cache)
+    # чтобы тест не флапал из-за random.shuffle
+    monkeypatch.setattr("app.application.services.deck.random.shuffle", lambda x: None)
 
-    candidates = await use_case.build(fake_user)
+    service = DeckBuilderService(cache=cache)
+    candidates = [
+        fake_distance_user,
+        UserDistanceEntity(**{**fake_distance_user.to_dict(), "telegram_id": 100}),
+        UserDistanceEntity(**{**fake_distance_user.to_dict(), "telegram_id": 101}),
+    ]
 
-    assert candidates == [fake_user, fake_user, fake_user, fake_user, fake_user]
-    candidate_repo.get_candidates_by_preferences.assert_awaited_once_with(
-        fake_user.telegram_id,
-        fake_user.city,
-        fake_user.age,
-        fake_user.gender,
-        fake_user.prefer_gender,
-    )
-    swipe_repo.was_swiped.assert_any_await(fake_user.telegram_id, fake_user.telegram_id)
-    assert swipe_repo.was_swiped.await_count == 5
-    cache.delete.assert_awaited_once_with(f"deck:{fake_user.telegram_id}")
-    not_swiped_candidates = cache.rpush.await_args[0][1]
-    assert not_swiped_candidates == [fake_user, fake_user, fake_user]
+    # act
+    result = await service.build(fake_user, candidates)
+
+    # assert
+    assert result == candidates
+
+    key = f"deck:{fake_user.telegram_id}"
+    cache.delete.assert_awaited_once_with(key)
+
+    # rpush(key, users, timeout=...)
+    assert cache.rpush.await_count == 1
+    args, kwargs = cache.rpush.await_args
+    assert args[0] == key
+    assert args[1] == candidates
+    assert "timeout" in kwargs  # конкретное число можно тоже проверить, но это уже тест настроек
 
 
 @pytest.mark.asyncio
-async def test_deck_builder_service_build_all_was_swiped(fake_user):
-    candidate_repo = AsyncMock()
-    candidate_repo.get_candidates_by_preferences.return_value = [
-        fake_user,
-        fake_user,
-        fake_user,
-        fake_user,
-        fake_user,
-    ]
-    swipe_repo = AsyncMock()
-    swipe_repo.was_swiped.side_effect = [True, True, True, True, True]
+async def test_deck_builder_build_trims_to_max_size(fake_user, fake_distance_user, monkeypatch):
+    """
+    Check that candidates are trimmed to settings.deck.max_size.
+    (Important: this works only if max_size in config is less than the length of the list.)
+    """
     cache = AsyncMock()
+    cache.delete.return_value = None
+    cache.rpush.return_value = None
 
-    use_case = DeckBuilderService(candidate_repo, swipe_repo, cache)
+    monkeypatch.setattr("app.application.services.deck.random.shuffle", lambda x: None)
 
-    await use_case.build(fake_user)
+    service = DeckBuilderService(cache=cache)
 
-    candidate_repo.get_candidates_by_preferences.assert_awaited_once_with(
-        fake_user.telegram_id,
-        fake_user.city,
-        fake_user.age,
-        fake_user.gender,
-        fake_user.prefer_gender,
+    candidates = [
+        UserDistanceEntity(**{**fake_distance_user.to_dict(), "telegram_id": i})
+        for i in range(1, 151)
+    ]
+
+    result = await service.build(fake_user, candidates)
+
+    assert len(result) <= 100
+
+    args, _ = cache.rpush.await_args
+    pushed_users = args[1]
+    assert len(pushed_users) <= 100
+
+
+@pytest.mark.asyncio
+async def test_clean_others_removes_user_from_other_deck_when_present(fake_user):
+    cache = AsyncMock()
+    cache.delete.return_value = None
+    cache.rpush.return_value = None
+
+    suspicious = UserEntity(
+        telegram_id=2,
+        name="sus",
+        age=20,
+        latitude=1.0,
+        longitude=2.0,
+        gender=Gender.FEMALE,
+        prefer_gender=PreferGender.MALE,
+        description="sus",
     )
-    swipe_repo.was_swiped.assert_any_await(fake_user.telegram_id, fake_user.telegram_id)
-    assert swipe_repo.was_swiped.await_count == 5
+
+    other_item = UserDistanceEntity(
+        telegram_id=777,
+        name="other",
+        age=30,
+        distance=3.0,
+        gender=Gender.FEMALE,
+        prefer_gender=PreferGender.MALE,
+        description=None,
+    )
+    deck_item_for_user = UserDistanceEntity(
+        telegram_id=fake_user.telegram_id,
+        name="name",
+        age=18,
+        distance=0.5,
+        gender=Gender.MALE,
+        prefer_gender=PreferGender.FEMALE,
+        description="description",
+    )
+
+    cache.get_deck.return_value = [deck_item_for_user, other_item]
+
+    service = DeckBuilderService(cache=cache)
+
+    await service.clean_others(fake_user, [suspicious])
+
+    cache.get_deck.assert_awaited_once_with("deck:2")
+    cache.delete.assert_awaited_once_with("deck:2")
+    cache.rpush.assert_awaited_once()
+
+    args, kwargs = cache.rpush.await_args
+    assert args[0] == "deck:2"
+    assert args[1] == [other_item]
+    assert "timeout" in kwargs
+
+
+@pytest.mark.asyncio
+async def test_clean_others_does_nothing_if_deck_is_none(fake_user):
+    cache = AsyncMock()
+    cache.get_deck.return_value = None
+
+    suspicious = UserEntity(
+        telegram_id=2,
+        name="sus",
+        age=20,
+        latitude=1.0,
+        longitude=2.0,
+        gender=Gender.FEMALE,
+        prefer_gender=PreferGender.MALE,
+        description="sus",
+    )
+
+    service = DeckBuilderService(cache=cache)
+
+    await service.clean_others(fake_user, [suspicious])
+
+    cache.get_deck.assert_awaited_once_with("deck:2")
     cache.delete.assert_not_awaited()
     cache.rpush.assert_not_awaited()
 
 
 @pytest.mark.asyncio
-async def test_delete_user_from_others_decks(fake_user):
+async def test_clean_others_does_nothing_if_user_not_in_deck(fake_user):
     cache = AsyncMock()
-    other_user = UserEntity(
-        telegram_id=2,
-        name="other",
-        age=20,
-        city="city",
-        gender=Gender("female"),
-        prefer_gender=PreferGender("male"),
-        description="desc",
-    )
-    cache.get_deck.return_value = [fake_user, other_user]
     cache.delete.return_value = None
     cache.rpush.return_value = None
 
-    candidate_repo = AsyncMock()
-    swipe_repo = AsyncMock()
-    service = DeckBuilderService(candidate_repo, swipe_repo, cache)
-
-    await service._delete_user_from_others_decks(fake_user.telegram_id, [other_user])
-
-    cache.get_deck.assert_awaited_once_with("deck:2")
-    cache.delete.assert_awaited_once_with("deck:2")
-    cache.rpush.assert_awaited_once()
-    updated_deck = cache.rpush.await_args[0][1]
-    assert updated_deck == [other_user]
-
-
-@pytest.mark.asyncio
-async def test_build_and_clean_others_with_candidates(fake_user):
-    candidate_repo = AsyncMock()
-    swipe_repo = AsyncMock()
-    cache = AsyncMock()
-    service = DeckBuilderService(candidate_repo, swipe_repo, cache)
-
-    service.build = AsyncMock(return_value=[fake_user])  # подменяем build
-    service._delete_user_from_others_decks = AsyncMock()
-
-    await service.build_and_clean_others(fake_user)
-
-    service.build.assert_awaited_once_with(fake_user)
-    service._delete_user_from_others_decks.assert_awaited_once_with(
-        fake_user.telegram_id, [fake_user]
+    suspicious = UserEntity(
+        telegram_id=2,
+        name="sus",
+        age=20,
+        latitude=1.0,
+        longitude=2.0,
+        gender=Gender.FEMALE,
+        prefer_gender=PreferGender.MALE,
+        description="sus",
     )
 
+    cache.get_deck.return_value = [
+        UserDistanceEntity(
+            telegram_id=777,
+            name="other",
+            age=30,
+            distance=3.0,
+            gender=Gender.FEMALE,
+            prefer_gender=PreferGender.MALE,
+            description=None,
+        )
+    ]
 
-@pytest.mark.asyncio
-async def test_build_and_clean_others_no_candidates(fake_user):
-    candidate_repo = AsyncMock()
-    swipe_repo = AsyncMock()
-    cache = AsyncMock()
-    service = DeckBuilderService(candidate_repo, swipe_repo, cache)
+    service = DeckBuilderService(cache=cache)
 
-    service.build = AsyncMock(return_value=None)
-    service._delete_user_from_others_decks = AsyncMock()
+    await service.clean_others(fake_user, [suspicious])
 
-    await service.build_and_clean_others(fake_user)
-
-    service.build.assert_awaited_once_with(fake_user)
-    service._delete_user_from_others_decks.assert_not_awaited()
+    cache.get_deck.assert_awaited_once_with("deck:2")
+    cache.delete.assert_not_awaited()
+    cache.rpush.assert_not_awaited()

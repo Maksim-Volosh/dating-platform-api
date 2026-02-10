@@ -2,31 +2,39 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from app.domain.entities import UserEntity, Gender, PreferGender
+from app.application.use_cases import (DeleteUserPhotosUseCase,
+                                       RetrieveUserPhotosUseCase,
+                                       UpdateUserPhotosUseCase,
+                                       UploadUserPhotosUseCase)
+from app.domain.entities import (Gender, PreferGender, UserDistanceEntity,
+                                 UserEntity)
 from app.domain.entities.photo import PhotoEntity
-from app.domain.exceptions.photo import (
-    PhotosNotFound,
-    TooManyPhotos,
-    WrongFileExtension,
-)
-from app.application.use_cases import RetrieveUserPhotosUseCase
-from app.application.use_cases.photo import (
-    DeleteUserPhotosUseCase,
-    UpdateUserPhotosUseCase,
-    UploadUserPhotosUseCase,
-)
+from app.domain.exceptions.photo import PhotosNotFound, TooManyPhotos
 
 
 @pytest.fixture
 def fake_user():
     return UserEntity(
         telegram_id=1,
-        name="Maxim",
+        name="name",
         age=18,
-        city="Vilnius",
+        latitude=0,
+        longitude=0,
         gender=Gender("male"),
         prefer_gender=PreferGender("female"),
-        description="Test user",
+        description="description",
+    )
+    
+@pytest.fixture
+def fake_distance_user():
+    return UserDistanceEntity(
+        telegram_id=1,
+        name="name",
+        age=18,
+        distance=1.123,
+        gender=Gender("male"),
+        prefer_gender=PreferGender("female"),
+        description="description",
     )
 
 
