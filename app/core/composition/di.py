@@ -1,6 +1,6 @@
 from fastapi import Depends
 from openai import AsyncOpenAI
-from redis import Redis
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.composition.container import Container

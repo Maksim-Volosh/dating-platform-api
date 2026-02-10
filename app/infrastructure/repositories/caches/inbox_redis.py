@@ -1,4 +1,4 @@
-from redis import Redis
+from redis.asyncio import Redis
 
 from app.domain.interfaces import IInboxCache
 from app.domain.entities import InboxItem, InboxItemType

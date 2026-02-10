@@ -1,7 +1,7 @@
 import json
 from typing import List
 
-from redis import Redis
+from redis.asyncio import Redis
 
 from app.domain.entities import UserEntity, UserDistanceEntity
 from app.domain.interfaces import IDeckCache

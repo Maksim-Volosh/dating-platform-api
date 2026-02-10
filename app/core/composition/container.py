@@ -1,5 +1,5 @@
 from openai import AsyncOpenAI
-from redis import Redis
+from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.application.services import (
