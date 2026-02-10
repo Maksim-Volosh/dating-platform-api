@@ -3,11 +3,11 @@ from app.domain.exceptions import AIUnavailableError, UserNotFoundById
 from app.domain.interfaces import IUserRepository
 
 
-class AIProfileAnalizeUseCase:
+class AIProfileAnalyzeUseCase:
     def __init__(
-        self, ai_analize_service: AIProfileAnalyzeService, user_repo: IUserRepository
+        self, ai_analyze_service: AIProfileAnalyzeService, user_repo: IUserRepository
     ) -> None:
-        self.ai_analize_service = ai_analize_service
+        self.ai_analyze_service = ai_analyze_service
         self.user_repo = user_repo
 
     async def execute(self, telegram_id: int):
@@ -16,7 +16,7 @@ class AIProfileAnalizeUseCase:
         if user is None:
             raise UserNotFoundById()
 
-        result = await self.ai_analize_service.analyze(user)
+        result = await self.ai_analyze_service.analyze(user)
 
         if result is None:
             raise AIUnavailableError()

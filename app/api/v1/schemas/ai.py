@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 
-class AIProfileAnalizeResponse(BaseModel):
+class AIProfileAnalyzeResponse(BaseModel):
     response: str

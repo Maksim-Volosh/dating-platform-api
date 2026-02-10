@@ -1,5 +1,3 @@
-from curses import echo
-from math import e
 from typing import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import (

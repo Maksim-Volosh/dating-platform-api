@@ -12,7 +12,7 @@ from app.application.services import (
 )
 from app.application.use_cases import (
     AIMatchOpenerUseCase,
-    AIProfileAnalizeUseCase,
+    AIProfileAnalyzeUseCase,
     CreateUserUseCase,
     DeleteUserPhotosUseCase,
     GetUserProfileViewUseCase,
@@ -89,7 +89,7 @@ class Container:
     def inbox_on_swipe_service(self):
         return InboxOnSwipeService(inbox_cache=self.inbox_cache())
 
-    def ai_profile_analize_service(self):
+    def ai_profile_analyze_service(self):
         return AIProfileAnalyzeService(ai_repo=self.openrouter_client())
 
     def ai_match_opener_service(self):
@@ -154,9 +154,9 @@ class Container:
     def upload_user_photos_use_case(self):
         return UploadUserPhotosUseCase(photo_repo=self.photo_repo())
 
-    def ai_profile_analize_use_case(self):
-        return AIProfileAnalizeUseCase(
-            ai_analize_service=self.ai_profile_analize_service(),
+    def ai_profile_analyze_use_case(self):
+        return AIProfileAnalyzeUseCase(
+            ai_analyze_service=self.ai_profile_analyze_service(),
             user_repo=self.user_repo(),
         )
 

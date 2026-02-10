@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app.api.v1.schemas.ai import AIProfileAnalizeResponse
+from app.api.v1.schemas.ai import AIProfileAnalyzeResponse
 from app.core.composition.container import Container
 from app.core.composition.di import get_container
 from app.api.v1.dependencies.rate_limit import ai_rate_limit
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/ai", tags=["AI"])
 
 
 @router.get(
-    "/profile-analize/{telegram_id}",
+    "/profile-analyze/{telegram_id}",
     dependencies=[
         Depends(
             ai_rate_limit(
@@ -23,17 +23,17 @@ router = APIRouter(prefix="/ai", tags=["AI"])
         )
     ],
 )
-async def get_ai_analize_for_user(
+async def get_ai_analyze_for_user(
     telegram_id: int,
     container: Container = Depends(get_container),
-) -> AIProfileAnalizeResponse:
+) -> AIProfileAnalyzeResponse:
     try:
-        result = await container.ai_profile_analize_use_case().execute(telegram_id)
+        result = await container.ai_profile_analyze_use_case().execute(telegram_id)
     except UserNotFoundById as e:
         raise HTTPException(status_code=404, detail=e.message)
     except AIUnavailableError as e:
         raise HTTPException(status_code=503, detail=e.message)
-    return AIProfileAnalizeResponse(response=result)
+    return AIProfileAnalyzeResponse(response=result)
 
 
 @router.get(
@@ -52,7 +52,7 @@ async def generate_match_messages(
     telegram_id: int,
     candidate_id: int = Query(..., description="Who is candidate for match opener"),
     container: Container = Depends(get_container),
-) -> AIProfileAnalizeResponse:
+) -> AIProfileAnalyzeResponse:
     try:
         result = await container.ai_match_opener_use_case().execute(
             telegram_id, candidate_id
@@ -61,4 +61,4 @@ async def generate_match_messages(
         raise HTTPException(status_code=404, detail=e.message)
     except AIUnavailableError as e:
         raise HTTPException(status_code=503, detail=e.message)
-    return AIProfileAnalizeResponse(response=result)
+    return AIProfileAnalyzeResponse(response=result)
