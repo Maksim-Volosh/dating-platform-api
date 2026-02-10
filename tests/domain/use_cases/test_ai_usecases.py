@@ -2,8 +2,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from app.application.use_cases.ai import (AIMatchOpenerUseCase,
-                                          AIProfileAnalyzeUseCase)
+from app.application.use_cases.ai import AIMatchOpenerUseCase, AIProfileAnalyzeUseCase
 from app.domain.entities import Gender, PreferGender, UserEntity
 from app.domain.exceptions import AIUnavailableError, UserNotFoundById
 
@@ -26,6 +25,7 @@ def fake_user() -> UserEntity:
 # AIProfileAnalyzeUseCase
 # -------------------------------
 
+
 @pytest.mark.asyncio
 async def test_ai_profile_analyze_success(fake_user):
     user_repo = AsyncMock()
@@ -34,7 +34,9 @@ async def test_ai_profile_analyze_success(fake_user):
     ai_service = AsyncMock()
     ai_service.analyze.return_value = "analysis text"
 
-    use_case = AIProfileAnalyzeUseCase(ai_analyze_service=ai_service, user_repo=user_repo)
+    use_case = AIProfileAnalyzeUseCase(
+        ai_analyze_service=ai_service, user_repo=user_repo
+    )
 
     result = await use_case.execute(telegram_id=fake_user.telegram_id)
 
@@ -50,7 +52,9 @@ async def test_ai_profile_analyze_user_not_found_raises():
 
     ai_service = AsyncMock()
 
-    use_case = AIProfileAnalyzeUseCase(ai_analyze_service=ai_service, user_repo=user_repo)
+    use_case = AIProfileAnalyzeUseCase(
+        ai_analyze_service=ai_service, user_repo=user_repo
+    )
 
     with pytest.raises(UserNotFoundById):
         await use_case.execute(telegram_id=123)
@@ -67,7 +71,9 @@ async def test_ai_profile_analyze_ai_unavailable_raises(fake_user):
     ai_service = AsyncMock()
     ai_service.analyze.return_value = None
 
-    use_case = AIProfileAnalyzeUseCase(ai_analyze_service=ai_service, user_repo=user_repo)
+    use_case = AIProfileAnalyzeUseCase(
+        ai_analyze_service=ai_service, user_repo=user_repo
+    )
 
     with pytest.raises(AIUnavailableError):
         await use_case.execute(telegram_id=fake_user.telegram_id)
@@ -79,6 +85,7 @@ async def test_ai_profile_analyze_ai_unavailable_raises(fake_user):
 # -------------------------------
 # AIMatchOpenerUseCase
 # -------------------------------
+
 
 @pytest.mark.asyncio
 async def test_ai_match_opener_success(fake_user):
@@ -103,7 +110,9 @@ async def test_ai_match_opener_success(fake_user):
 
     use_case = AIMatchOpenerUseCase(ai_opener_service=ai_service, user_repo=user_repo)
 
-    result = await use_case.execute(liker_id=liker.telegram_id, candidate_id=candidate.telegram_id)
+    result = await use_case.execute(
+        liker_id=liker.telegram_id, candidate_id=candidate.telegram_id
+    )
 
     assert result == "opener text"
     assert user_repo.get_by_id.await_count == 2
@@ -178,6 +187,8 @@ async def test_ai_match_opener_ai_unavailable_raises(fake_user):
     use_case = AIMatchOpenerUseCase(ai_opener_service=ai_service, user_repo=user_repo)
 
     with pytest.raises(AIUnavailableError):
-        await use_case.execute(liker_id=liker.telegram_id, candidate_id=candidate.telegram_id)
+        await use_case.execute(
+            liker_id=liker.telegram_id, candidate_id=candidate.telegram_id
+        )
 
     ai_service.generate.assert_awaited_once_with(liker, candidate)

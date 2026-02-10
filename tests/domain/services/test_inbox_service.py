@@ -92,7 +92,9 @@ async def test_create_inbox_item_adds_incoming_when_decision_none(swipe_incoming
 
 
 @pytest.mark.asyncio
-async def test__is_match_returns_true_only_for_true(swipe_match, swipe_incoming, swipe_incoming_none):
+async def test__is_match_returns_true_only_for_true(
+    swipe_match, swipe_incoming, swipe_incoming_none
+):
     service = InboxOnSwipeService(inbox_cache=AsyncMock())
 
     assert await service._is_match(swipe_match) is True

@@ -3,8 +3,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from app.application.services.deck import DeckBuilderService
-from app.domain.entities import (Gender, PreferGender, UserDistanceEntity,
-                                 UserEntity)
+from app.domain.entities import Gender, PreferGender, UserDistanceEntity, UserEntity
 
 
 @pytest.fixture
@@ -38,8 +37,11 @@ def fake_distance_user() -> UserDistanceEntity:
 # Tests for DeckBuilderService
 # -------------------------------
 
+
 @pytest.mark.asyncio
-async def test_deck_builder_build_deletes_old_and_pushes_new(fake_user, fake_distance_user, monkeypatch):
+async def test_deck_builder_build_deletes_old_and_pushes_new(
+    fake_user, fake_distance_user, monkeypatch
+):
     # arrange
     cache = AsyncMock()
     cache.delete.return_value = None
@@ -69,11 +71,15 @@ async def test_deck_builder_build_deletes_old_and_pushes_new(fake_user, fake_dis
     args, kwargs = cache.rpush.await_args
     assert args[0] == key
     assert args[1] == candidates
-    assert "timeout" in kwargs  # конкретное число можно тоже проверить, но это уже тест настроек
+    assert (
+        "timeout" in kwargs
+    )  # конкретное число можно тоже проверить, но это уже тест настроек
 
 
 @pytest.mark.asyncio
-async def test_deck_builder_build_trims_to_max_size(fake_user, fake_distance_user, monkeypatch):
+async def test_deck_builder_build_trims_to_max_size(
+    fake_user, fake_distance_user, monkeypatch
+):
     """
     Check that candidates are trimmed to settings.deck.max_size.
     (Important: this works only if max_size in config is less than the length of the list.)

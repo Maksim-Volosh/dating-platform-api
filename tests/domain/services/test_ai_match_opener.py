@@ -56,7 +56,9 @@ def test_format_message_contains_user_fields(liker_user, candidate_user):
 
 
 @pytest.mark.asyncio
-async def test_generate_calls_repo_complete_with_formatted_message(liker_user, candidate_user):
+async def test_generate_calls_repo_complete_with_formatted_message(
+    liker_user, candidate_user
+):
     ai_repo = AsyncMock()
     ai_repo.complete.return_value = "Вариант 1: ...\nВариант 2: ...\nВариант 3: ..."
 
@@ -76,7 +78,9 @@ async def test_generate_calls_repo_complete_with_formatted_message(liker_user, c
 
 
 @pytest.mark.asyncio
-async def test_generate_returns_none_when_ai_repo_returns_none(liker_user, candidate_user):
+async def test_generate_returns_none_when_ai_repo_returns_none(
+    liker_user, candidate_user
+):
     ai_repo = AsyncMock()
     ai_repo.complete.return_value = None
 

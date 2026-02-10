@@ -2,15 +2,16 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from app.application.use_cases import (CreateUserUseCase,
-                                       GetUserProfileViewUseCase,
-                                       UpdateUserDescriptionUseCase,
-                                       UpdateUserUseCase, UserUseCase)
+from app.application.use_cases import (
+    CreateUserUseCase,
+    GetUserProfileViewUseCase,
+    UpdateUserDescriptionUseCase,
+    UpdateUserUseCase,
+    UserUseCase,
+)
 from app.core.config import settings
-from app.domain.entities import (Gender, PreferGender, UserDistanceEntity,
-                                 UserEntity)
-from app.domain.exceptions import (UserAlreadyExists, UserNotFoundById,
-                                   UsersNotFound)
+from app.domain.entities import Gender, PreferGender, UserDistanceEntity, UserEntity
+from app.domain.exceptions import UserAlreadyExists, UserNotFoundById, UsersNotFound
 
 
 @pytest.fixture
@@ -57,6 +58,7 @@ def fake_distance_candidate(candidate_user) -> UserDistanceEntity:
 # -------------------------------
 # Tests for UserUseCase
 # -------------------------------
+
 
 @pytest.mark.asyncio
 async def test_get_by_id_success(fake_user):
@@ -114,8 +116,11 @@ async def test_get_all_empty():
 # Tests for CreateUserUseCase (NEW DECK LOGIC)
 # -------------------------------
 
+
 @pytest.mark.asyncio
-async def test_create_user_success_builds_deck(fake_user, fake_distance_candidate, candidate_user, monkeypatch):
+async def test_create_user_success_builds_deck(
+    fake_user, fake_distance_candidate, candidate_user, monkeypatch
+):
     repo = AsyncMock()
     repo.create.return_value = fake_user
 
@@ -135,18 +140,26 @@ async def test_create_user_success_builds_deck(fake_user, fake_distance_candidat
 
     bbx_sentinel = object()
     bounding_box_mock = Mock(return_value=bbx_sentinel)
-    monkeypatch.setattr("app.application.use_cases.user.bounding_box", bounding_box_mock)
+    monkeypatch.setattr(
+        "app.application.use_cases.user.bounding_box", bounding_box_mock
+    )
     monkeypatch.setattr(settings.deck, "radius_steps_km", [5, 10, 30])
 
-    use_case = CreateUserUseCase(repo, deck_builder, candidate_repo, geo_filter, swipe_filter)
+    use_case = CreateUserUseCase(
+        repo, deck_builder, candidate_repo, geo_filter, swipe_filter
+    )
 
     user = await use_case.execute(fake_user)
 
     assert user == fake_user
     repo.create.assert_awaited_once_with(fake_user)
 
-    bounding_box_mock.assert_called_once_with(fake_user.latitude, fake_user.longitude, 30)
-    candidate_repo.find_by_preferences_and_bbox.assert_awaited_once_with(fake_user, bbx_sentinel)
+    bounding_box_mock.assert_called_once_with(
+        fake_user.latitude, fake_user.longitude, 30
+    )
+    candidate_repo.find_by_preferences_and_bbox.assert_awaited_once_with(
+        fake_user, bbx_sentinel
+    )
     swipe_filter.filter.assert_awaited_once_with(fake_user.telegram_id, candidates)
     geo_filter.filter.assert_awaited_once_with(fake_user, swipe_filtered)
 
@@ -154,7 +167,9 @@ async def test_create_user_success_builds_deck(fake_user, fake_distance_candidat
 
 
 @pytest.mark.asyncio
-async def test_create_user_does_not_build_when_no_geo_candidates(fake_user, candidate_user, monkeypatch):
+async def test_create_user_does_not_build_when_no_geo_candidates(
+    fake_user, candidate_user, monkeypatch
+):
     repo = AsyncMock()
     repo.create.return_value = fake_user
 
@@ -167,13 +182,17 @@ async def test_create_user_does_not_build_when_no_geo_candidates(fake_user, cand
     swipe_filter.filter.return_value = [candidate_user]
 
     geo_filter = AsyncMock()
-    geo_filter.filter.return_value = []  
+    geo_filter.filter.return_value = []
 
     bbx_sentinel = object()
-    monkeypatch.setattr("app.application.use_cases.user.bounding_box", Mock(return_value=bbx_sentinel))
+    monkeypatch.setattr(
+        "app.application.use_cases.user.bounding_box", Mock(return_value=bbx_sentinel)
+    )
     monkeypatch.setattr(settings.deck, "radius_steps_km", [5, 10, 30])
 
-    use_case = CreateUserUseCase(repo, deck_builder, candidate_repo, geo_filter, swipe_filter)
+    use_case = CreateUserUseCase(
+        repo, deck_builder, candidate_repo, geo_filter, swipe_filter
+    )
 
     user = await use_case.execute(fake_user)
 
@@ -204,14 +223,17 @@ async def test_create_user_already_exists(fake_user):
 # Tests for UpdateUserUseCase (NEW DECK LOGIC)
 # -------------------------------
 
+
 @pytest.mark.asyncio
-async def test_update_user_success_builds_and_cleans(fake_user, candidate_user, fake_distance_candidate, monkeypatch):
+async def test_update_user_success_builds_and_cleans(
+    fake_user, candidate_user, fake_distance_candidate, monkeypatch
+):
     repo = AsyncMock()
     repo.update.return_value = fake_user
 
     deck_builder = AsyncMock()
 
-    cache = AsyncMock()  
+    cache = AsyncMock()
     candidate_repo = AsyncMock()
     candidates = [candidate_user]
     candidate_repo.find_by_preferences_and_bbox.return_value = candidates
@@ -224,17 +246,23 @@ async def test_update_user_success_builds_and_cleans(fake_user, candidate_user, 
     geo_filter.filter.return_value = geo_filtered
 
     bbx_sentinel = object()
-    monkeypatch.setattr("app.application.use_cases.user.bounding_box", Mock(return_value=bbx_sentinel))
+    monkeypatch.setattr(
+        "app.application.use_cases.user.bounding_box", Mock(return_value=bbx_sentinel)
+    )
     monkeypatch.setattr(settings.deck, "radius_steps_km", [5, 10, 30])
 
-    use_case = UpdateUserUseCase(repo, deck_builder, cache, candidate_repo, geo_filter, swipe_filter)
+    use_case = UpdateUserUseCase(
+        repo, deck_builder, cache, candidate_repo, geo_filter, swipe_filter
+    )
 
     user = await use_case.execute(fake_user.telegram_id, fake_user)
 
     assert user == fake_user
     repo.update.assert_awaited_once_with(fake_user.telegram_id, fake_user)
 
-    candidate_repo.find_by_preferences_and_bbox.assert_awaited_once_with(fake_user, bbx_sentinel)
+    candidate_repo.find_by_preferences_and_bbox.assert_awaited_once_with(
+        fake_user, bbx_sentinel
+    )
     swipe_filter.filter.assert_awaited_once_with(fake_user.telegram_id, candidates)
     geo_filter.filter.assert_awaited_once_with(fake_user, candidates)
 
@@ -243,7 +271,9 @@ async def test_update_user_success_builds_and_cleans(fake_user, candidate_user, 
 
 
 @pytest.mark.asyncio
-async def test_update_user_does_not_build_when_no_geo_candidates(fake_user, candidate_user, monkeypatch):
+async def test_update_user_does_not_build_when_no_geo_candidates(
+    fake_user, candidate_user, monkeypatch
+):
     repo = AsyncMock()
     repo.update.return_value = fake_user
 
@@ -259,10 +289,14 @@ async def test_update_user_does_not_build_when_no_geo_candidates(fake_user, cand
     geo_filter = AsyncMock()
     geo_filter.filter.return_value = []
 
-    monkeypatch.setattr("app.application.use_cases.user.bounding_box", Mock(return_value=object()))
+    monkeypatch.setattr(
+        "app.application.use_cases.user.bounding_box", Mock(return_value=object())
+    )
     monkeypatch.setattr(settings.deck, "radius_steps_km", [5, 10, 30])
 
-    use_case = UpdateUserUseCase(repo, deck_builder, cache, candidate_repo, geo_filter, swipe_filter)
+    use_case = UpdateUserUseCase(
+        repo, deck_builder, cache, candidate_repo, geo_filter, swipe_filter
+    )
 
     user = await use_case.execute(fake_user.telegram_id, fake_user)
 
@@ -295,6 +329,7 @@ async def test_update_user_not_found(fake_user):
 # Tests for UpdateUserDescriptionUseCase
 # -------------------------------
 
+
 @pytest.mark.asyncio
 async def test_update_user_description_success(fake_user):
     repo = AsyncMock()
@@ -305,7 +340,9 @@ async def test_update_user_description_success(fake_user):
     user = await use_case.execute(fake_user.telegram_id, "New description")
 
     assert user == fake_user
-    repo.update_description.assert_awaited_once_with(fake_user.telegram_id, "New description")
+    repo.update_description.assert_awaited_once_with(
+        fake_user.telegram_id, "New description"
+    )
 
 
 @pytest.mark.asyncio
@@ -318,12 +355,15 @@ async def test_update_user_description_not_found(fake_user):
     with pytest.raises(UserNotFoundById):
         await use_case.execute(fake_user.telegram_id, "New description")
 
-    repo.update_description.assert_awaited_once_with(fake_user.telegram_id, "New description")
+    repo.update_description.assert_awaited_once_with(
+        fake_user.telegram_id, "New description"
+    )
 
 
 # -------------------------------
 # Tests for GetUserProfileViewUseCase (haversine)
 # -------------------------------
+
 
 @pytest.mark.asyncio
 async def test_get_user_profile_view_success(fake_user, candidate_user, monkeypatch):
@@ -348,14 +388,17 @@ async def test_get_user_profile_view_success(fake_user, candidate_user, monkeypa
 
     assert repo.get_by_id.await_count == 2
     haversine_mock.assert_called_once_with(
-        fake_user.latitude, fake_user.longitude, candidate_user.latitude, candidate_user.longitude
+        fake_user.latitude,
+        fake_user.longitude,
+        candidate_user.latitude,
+        candidate_user.longitude,
     )
 
 
 @pytest.mark.asyncio
 async def test_get_user_profile_view_not_found(fake_user, candidate_user):
     repo = AsyncMock()
-    repo.get_by_id.side_effect = [fake_user, None] 
+    repo.get_by_id.side_effect = [fake_user, None]
 
     use_case = GetUserProfileViewUseCase(repo)
 

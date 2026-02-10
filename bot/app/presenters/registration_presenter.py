@@ -11,10 +11,14 @@ from app.keyboards.keyboards import (
 class RegistrationPresenter:
 
     async def ask_age(self, message: Message):
-        await message.answer("Итак, сколько тебе лет?", reply_markup=ReplyKeyboardRemove())
+        await message.answer(
+            "Итак, сколько тебе лет?", reply_markup=ReplyKeyboardRemove()
+        )
 
     async def ask_location(self, message: Message):
-        await message.answer("Хорошо, теперь отправь свою геолокацию. Это нужно для поиска подходящих профилей 📍")
+        await message.answer(
+            "Хорошо, теперь отправь свою геолокацию. Это нужно для поиска подходящих профилей 📍"
+        )
 
     async def ask_description(self, message: Message):
         await message.answer("Отлично, теперь расскажи немного о себе.")

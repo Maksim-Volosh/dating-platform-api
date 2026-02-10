@@ -38,8 +38,7 @@ class RegistrationFlow:
     async def process_location(self, message: Message, state: FSMContext):
         if message.location:
             await state.update_data(
-                latitude=message.location.latitude,
-                longitude=message.location.longitude
+                latitude=message.location.latitude, longitude=message.location.longitude
             )
             await state.set_state(Registration.description)
             await self.presenter.ask_description(message)

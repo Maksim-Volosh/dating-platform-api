@@ -2,12 +2,13 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from app.application.use_cases import (DeleteUserPhotosUseCase,
-                                       RetrieveUserPhotosUseCase,
-                                       UpdateUserPhotosUseCase,
-                                       UploadUserPhotosUseCase)
-from app.domain.entities import (Gender, PreferGender, UserDistanceEntity,
-                                 UserEntity)
+from app.application.use_cases import (
+    DeleteUserPhotosUseCase,
+    RetrieveUserPhotosUseCase,
+    UpdateUserPhotosUseCase,
+    UploadUserPhotosUseCase,
+)
+from app.domain.entities import Gender, PreferGender, UserDistanceEntity, UserEntity
 from app.domain.entities.photo import PhotoEntity
 from app.domain.exceptions.photo import PhotosNotFound, TooManyPhotos
 
@@ -24,7 +25,8 @@ def fake_user():
         prefer_gender=PreferGender("female"),
         description="description",
     )
-    
+
+
 @pytest.fixture
 def fake_distance_user():
     return UserDistanceEntity(

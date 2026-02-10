@@ -4,8 +4,7 @@ import pytest
 
 from app.application.services.geo_filter import GeoCandidateFilterService
 from app.core.config import settings
-from app.domain.entities import (Gender, PreferGender, UserDistanceEntity,
-                                 UserEntity)
+from app.domain.entities import Gender, PreferGender, UserDistanceEntity, UserEntity
 
 
 @pytest.fixture
@@ -73,7 +72,9 @@ async def test_geo_filter_returns_on_first_step(user, candidates, monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_geo_filter_returns_on_second_step_when_first_empty(user, candidates, monkeypatch):
+async def test_geo_filter_returns_on_second_step_when_first_empty(
+    user, candidates, monkeypatch
+):
     monkeypatch.setattr(settings.deck, "radius_steps_km", [5, 10, 20])
 
     haversine_mock = Mock(side_effect=[6.0, 12.0, 6.0, 12.0])
@@ -89,7 +90,9 @@ async def test_geo_filter_returns_on_second_step_when_first_empty(user, candidat
 
 
 @pytest.mark.asyncio
-async def test_geo_filter_returns_empty_when_no_one_fits_any_step(user, candidates, monkeypatch):
+async def test_geo_filter_returns_empty_when_no_one_fits_any_step(
+    user, candidates, monkeypatch
+):
     monkeypatch.setattr(settings.deck, "radius_steps_km", [5, 10, 20])
 
     haversine_mock = Mock(side_effect=[25.0, 30.0, 25.0, 30.0, 25.0, 30.0])

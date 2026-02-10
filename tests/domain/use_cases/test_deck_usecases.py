@@ -4,8 +4,7 @@ import pytest
 
 from app.application.use_cases.deck import UserDeckUseCase
 from app.core.config import settings
-from app.domain.entities import (Gender, PreferGender, UserDistanceEntity,
-                                 UserEntity)
+from app.domain.entities import Gender, PreferGender, UserDistanceEntity, UserEntity
 from app.domain.exceptions import NoCandidatesFound, UserNotFoundById
 
 
@@ -46,7 +45,9 @@ async def test_user_deck_next_gets_from_cache(fake_user, fake_distance_user):
     geo_filter = AsyncMock()
     swipe_filter = AsyncMock()
 
-    use_case = UserDeckUseCase(cache, deck_builder, candidate_repo, geo_filter, swipe_filter)
+    use_case = UserDeckUseCase(
+        cache, deck_builder, candidate_repo, geo_filter, swipe_filter
+    )
 
     result = await use_case.next(fake_user)
 
@@ -60,7 +61,9 @@ async def test_user_deck_next_gets_from_cache(fake_user, fake_distance_user):
 
 
 @pytest.mark.asyncio
-async def test_user_deck_next_builds_deck_when_cache_empty(fake_user, fake_distance_user, monkeypatch):
+async def test_user_deck_next_builds_deck_when_cache_empty(
+    fake_user, fake_distance_user, monkeypatch
+):
     cache = AsyncMock()
     cache.lpop.side_effect = [None, fake_distance_user]
 
@@ -71,7 +74,9 @@ async def test_user_deck_next_builds_deck_when_cache_empty(fake_user, fake_dista
 
     bbx_sentinel = object()
     bounding_box_mock = Mock(return_value=bbx_sentinel)
-    monkeypatch.setattr("app.application.use_cases.deck.bounding_box", bounding_box_mock)
+    monkeypatch.setattr(
+        "app.application.use_cases.deck.bounding_box", bounding_box_mock
+    )
 
     monkeypatch.setattr(settings.deck, "radius_steps_km", [5, 10, 30])
 
@@ -84,7 +89,9 @@ async def test_user_deck_next_builds_deck_when_cache_empty(fake_user, fake_dista
     geo_filtered = [fake_distance_user]
     geo_filter.filter.return_value = geo_filtered
 
-    use_case = UserDeckUseCase(cache, deck_builder, candidate_repo, geo_filter, swipe_filter)
+    use_case = UserDeckUseCase(
+        cache, deck_builder, candidate_repo, geo_filter, swipe_filter
+    )
 
     result = await use_case.next(fake_user)
 
@@ -93,9 +100,13 @@ async def test_user_deck_next_builds_deck_when_cache_empty(fake_user, fake_dista
     assert cache.lpop.await_count == 2
     cache.lpop.assert_any_await("deck:1")
 
-    bounding_box_mock.assert_called_once_with(fake_user.latitude, fake_user.longitude, 30)
+    bounding_box_mock.assert_called_once_with(
+        fake_user.latitude, fake_user.longitude, 30
+    )
 
-    candidate_repo.find_by_preferences_and_bbox.assert_awaited_once_with(fake_user, bbx_sentinel)
+    candidate_repo.find_by_preferences_and_bbox.assert_awaited_once_with(
+        fake_user, bbx_sentinel
+    )
     swipe_filter.filter.assert_awaited_once_with(fake_user.telegram_id, candidates)
     geo_filter.filter.assert_awaited_once_with(fake_user, swipe_filtered)
 
@@ -113,14 +124,20 @@ async def test_user_deck_next_raises_no_candidates_found(fake_user, monkeypatch)
     geo_filter = AsyncMock()
 
     bbx_sentinel = object()
-    monkeypatch.setattr("app.application.use_cases.deck.bounding_box", Mock(return_value=bbx_sentinel))
+    monkeypatch.setattr(
+        "app.application.use_cases.deck.bounding_box", Mock(return_value=bbx_sentinel)
+    )
     monkeypatch.setattr(settings.deck, "radius_steps_km", [5, 10, 30])
 
-    candidate_repo.find_by_preferences_and_bbox.return_value = [AsyncMock(spec=UserEntity)]
+    candidate_repo.find_by_preferences_and_bbox.return_value = [
+        AsyncMock(spec=UserEntity)
+    ]
     swipe_filter.filter.return_value = [AsyncMock(spec=UserEntity)]
     geo_filter.filter.return_value = []  # <- ключевой момент
 
-    use_case = UserDeckUseCase(cache, deck_builder, candidate_repo, geo_filter, swipe_filter)
+    use_case = UserDeckUseCase(
+        cache, deck_builder, candidate_repo, geo_filter, swipe_filter
+    )
 
     with pytest.raises(NoCandidatesFound):
         await use_case.next(fake_user)
@@ -130,7 +147,9 @@ async def test_user_deck_next_raises_no_candidates_found(fake_user, monkeypatch)
 
 
 @pytest.mark.asyncio
-async def test_user_deck_next_raises_user_not_found_by_id_when_still_empty_after_build(fake_user, monkeypatch):
+async def test_user_deck_next_raises_user_not_found_by_id_when_still_empty_after_build(
+    fake_user, monkeypatch
+):
     cache = AsyncMock()
     cache.lpop.side_effect = [None, None]
 
@@ -140,14 +159,22 @@ async def test_user_deck_next_raises_user_not_found_by_id_when_still_empty_after
     geo_filter = AsyncMock()
 
     bbx_sentinel = object()
-    monkeypatch.setattr("app.application.use_cases.deck.bounding_box", Mock(return_value=bbx_sentinel))
+    monkeypatch.setattr(
+        "app.application.use_cases.deck.bounding_box", Mock(return_value=bbx_sentinel)
+    )
     monkeypatch.setattr(settings.deck, "radius_steps_km", [5, 10, 30])
 
-    candidate_repo.find_by_preferences_and_bbox.return_value = [AsyncMock(spec=UserEntity)]
+    candidate_repo.find_by_preferences_and_bbox.return_value = [
+        AsyncMock(spec=UserEntity)
+    ]
     swipe_filter.filter.return_value = [AsyncMock(spec=UserEntity)]
-    geo_filter.filter.return_value = [AsyncMock(spec=UserDistanceEntity)]  # не пусто, build должен быть
+    geo_filter.filter.return_value = [
+        AsyncMock(spec=UserDistanceEntity)
+    ]  # не пусто, build должен быть
 
-    use_case = UserDeckUseCase(cache, deck_builder, candidate_repo, geo_filter, swipe_filter)
+    use_case = UserDeckUseCase(
+        cache, deck_builder, candidate_repo, geo_filter, swipe_filter
+    )
 
     with pytest.raises(UserNotFoundById):
         await use_case.next(fake_user)

@@ -66,4 +66,3 @@ async def test_analyze_returns_none_when_repo_returns_none(user):
 
     assert result is None
     ai_repo.complete.assert_awaited_once()
-
