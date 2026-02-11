@@ -1,5 +1,6 @@
 from app.infrastructure.api_client import api
 from app.services import (
+    AIService,
     DeckService,
     InboxService,
     PhotoService,
@@ -18,6 +19,7 @@ class Container:
         self.inbox_service = InboxService(self.api)
         self.swipe_service = SwipeService(self.api)
         self.deck_service = DeckService(self.api)
+        self.ai_service = AIService(self.api)
 
 
 container = Container()

@@ -14,7 +14,7 @@ class HTTPClient:
         self,
         base_url: str,
         api_key: str,
-        timeout: int = 5,
+        timeout: int = 50,
         retries: int = 2,
     ):
         self._base_url = base_url.rstrip("/")

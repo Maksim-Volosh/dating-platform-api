@@ -1,5 +1,11 @@
-from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup
-from aiogram.utils.keyboard import ReplyKeyboardBuilder
+from aiogram.filters.callback_data import CallbackData
+from aiogram.types import (
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    Message,
+    ReplyKeyboardMarkup,
+)
+from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 
 
 async def get_name_keyboard(message: Message) -> ReplyKeyboardMarkup:
@@ -44,6 +50,7 @@ profile_kb = ReplyKeyboardMarkup(
             KeyboardButton(text="2"),
             KeyboardButton(text="3"),
             KeyboardButton(text="4"),
+            KeyboardButton(text="5"),
             KeyboardButton(text="💤"),
         ]
     ],
@@ -58,6 +65,7 @@ profile_with_likes_kb = ReplyKeyboardMarkup(
             KeyboardButton(text="2"),
             KeyboardButton(text="3"),
             KeyboardButton(text="4"),
+            KeyboardButton(text="5"),
             KeyboardButton(text="💤"),
         ]
     ],
@@ -75,3 +83,15 @@ swipe_kb = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True,
 )
+
+
+class MatchCb(CallbackData, prefix="profile"):
+    candidate_id: int
+
+
+def match_kb(candidate_id: int) -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(
+        text="🧠 Что написать?", callback_data=MatchCb(candidate_id=candidate_id).pack()
+    )
+    return kb.as_markup()

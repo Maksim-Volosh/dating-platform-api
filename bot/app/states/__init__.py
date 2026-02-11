@@ -3,6 +3,7 @@ from .registration import Registration
 from .update_description import UpdateDescription
 from .swipe import SwipeState
 from .like import LikeSwipeState
+from .ai import AIState
 
 __all__ = (
     "Registration",
@@ -10,4 +11,5 @@ __all__ = (
     "UpdateDescription",
     "SwipeState",
     "LikeSwipeState",
+    "AIState",
 )

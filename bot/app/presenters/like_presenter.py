@@ -2,7 +2,7 @@ from aiogram import Bot, html
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import InputMediaPhoto, Message
 
-from app.keyboards.keyboards import main_kb, swipe_kb
+from app.keyboards.keyboards import main_kb, swipe_kb, match_kb
 
 
 class LikePresenter:
@@ -46,7 +46,8 @@ class LikePresenter:
 
     async def send_match(self, message: Message, candidate_id: int, name: str) -> None:
         await message.answer(
-            f'Отлично, надеюсь вы хорошо проведете время! \n\nНачинайте общаться -> <a href="tg://user?id={candidate_id}">{name}</a>'
+            f'Отлично, надеюсь вы хорошо проведете время! \n\nНачинайте общаться -> <a href="tg://user?id={candidate_id}">{name}</a>',
+            reply_markup=match_kb(candidate_id),
         )
 
     async def send_error_getting_profile(self, message: Message) -> None:
