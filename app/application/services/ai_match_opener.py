@@ -1,3 +1,4 @@
+from app.core.config import settings
 from app.domain.entities import UserEntity
 from app.domain.interfaces import IAIClientRepository
 
@@ -60,4 +61,4 @@ class AIMatchOpenerService:
 
         message = self._format_message_by_users(liker_user, candidate_user)
 
-        return await self.ai_repo.complete(message)
+        return await self.ai_repo.complete(message, model=settings.ai.model)

@@ -23,7 +23,7 @@ class OpenRouterClient(IAIClientRepository):
     async def complete(
         self,
         message: str,
-        model: str = "arcee-ai/trinity-large-preview:free",
+        model: str = "openrouter/free",
         temperature: float = 0.7,
     ) -> str | None:
         try:

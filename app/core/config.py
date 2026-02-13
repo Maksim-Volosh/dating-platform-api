@@ -59,6 +59,7 @@ class InboxConfig(BaseSettings):
 
 class AIConfig(BaseSettings):
     base_url: str | None = None
+    model: str = "openrouter/free"
     api_key: str = ""
     timeout: int = 20
 
@@ -95,3 +96,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()  # type: ignore
+print(settings.ai.model)
