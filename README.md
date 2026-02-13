@@ -37,6 +37,7 @@
 - [🎓 About](#-about)
 - [📌 Features](#-features)
 - [🧱 Tech Stack](#-tech-stack)
+- [📁 Project Structure (high-level)](#-project-structure-high-level)
 - [🏗️ Architecture Layers (Clean-ish)](#️-architecture-layers-clean-ish)
 - [🚀 Installation](#-installation)
   - [✅ Clone the Repository](#-clone-the-repository)
@@ -127,6 +128,55 @@ fast deck/inbox operations and **rate limiting** (especially for AI endpoints).
 | 🧱 Clean Architecture   | Layering: domain → application → infrastructure → API                       |
 
 <br>
+
+## 📁 Project Structure (high-level)
+
+The repository is organized around clean boundaries: **domain (pure logic)** → **application (use cases)** → **infrastructure (I/O)** → **api (delivery)**, plus a separate **Telegram bot client**.
+
+```
+.
+├── alembic/                     # Alembic migrations (DB schema history)
+├── app/
+│   ├── api/v1/                  # FastAPI routers + schemas + dependencies
+│   │   ├── dependencies/        # auth, rate limiting dependencies
+│   │   ├── mappers/             # mappers (DTOs <-> entities)
+│   │   ├── routers/             # ai, deck, inbox, photo, swipe, user
+│   │   └── schemas/             # request/response DTOs
+│   ├── application/             # Orchestration layer
+│   │   ├── services/            # app services (deck builder, filters, inbox, ai formatting)
+│   │   └── use_cases/           # business scenarios (create user, next deck, swipe, ai, etc.)
+│   ├── core/                    # configuration + DI composition
+│   │   └── composition/         # container + wiring helpers
+│   ├── domain/                  # Pure domain (no I/O)
+│   │   ├── entities/            # dataclasses: user, swipe, photo, inbox, bbox
+│   │   ├── interfaces/          # ports (repos/caches/clients contracts)
+│   │   ├── exceptions/          # domain exceptions (mapped to HTTP in API layer)
+│   │   └── services/            # pure services (haversine, bounding_box)
+│   ├── infrastructure/          # Adapters (I/O)
+│   │   ├── models/              # SQLAlchemy ORM models
+│   │   ├── repositories/        # PostgreSQL repos + Redis caches + external clients
+│   │   ├── rate_limit/          # redis rate limiter implementation
+│   │   └── helpers/             # db/redis/openai helpers
+│   └── main.py                  # FastAPI app entrypoint
+├── bot/                         # Telegram bot client (aiogram v3)
+│   ├── app/
+│   │   ├── handlers/            # aiogram handlers (routing)
+│   │   ├── flows/               # multi-step flows (registration, swipe, ai, profile)
+│   │   ├── presenters/          # UI text formatting (messages/keyboards)
+│   │   ├── services/            # bot services calling API (users/deck/swipe/inbox/ai)
+│   │   ├── infrastructure/      # HTTP client + API client + error mapping
+│   │   ├── states/              # FSM states
+│   │   └── container.py         # bot DI container
+│   ├── config.py
+│   └── run.py
+├── tests/                       # Unit tests (services + use cases)
+├── docker-compose.yml           # local stack: api + postgres + redis
+├── Dockerfile
+└── requirements.txt
+```
+
+> If you’re reviewing this project: start from `app/application/use_cases/` and follow dependencies into `domain/` and `infrastructure/`.
+
 
 ## 🏗️ Architecture Layers (Clean-ish)
 
