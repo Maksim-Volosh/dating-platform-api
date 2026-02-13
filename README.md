@@ -45,6 +45,16 @@
   - [⚙️ Configure BOT Environment Variables](#️-configure-bot-environment-variables)
   - [🧠 Run Telegram Bot](#-run-telegram-bot)
   - [🧪 Running Tests (inside Docker)](#-running-tests-inside-docker)
+- [⚙️ Environment Variables Reference](#️-environment-variables-reference)
+  - [🧩 Core / App Metadata](#-core--app-metadata)
+  - [🔐 Security](#-security)
+  - [🐘 Database (PostgreSQL)](#-database-postgresql)
+  - [🔴 Cache (Redis)](#-cache-redis)
+  - [🗂️ Static Files / Uploads](#️-static-files--uploads)
+  - [🎴 Deck (Candidate Feed)](#-deck-candidate-feed)
+  - [📥 Inbox](#-inbox)
+  - [🤖 AI (OpenRouter / OpenAI-compatible)](#-ai-openrouter--openai-compatible)
+  - [🚦 AI Rate Limits (Redis)](#-ai-rate-limits-redis)
 - [📚 API Reference](#-api-reference)
   - [🔐 Authentication](#-authentication)
   - [👤 Users](#-users)
@@ -53,6 +63,7 @@
   - [👍👎 Swipes](#-swipes)
   - [📥 Inbox / Likes](#-inbox--likes)
   - [🤖 AI](#-ai)
+
 
 
 <br>
@@ -172,7 +183,9 @@ cd dating-platform-api
 ---
 
 The project is configured via environment variables using a nested settings structure (`APP_CONFIG__...`).
-For local development, copy the template and fill in the **[required values.](#)**
+If you don't want to chage the default configuration, you can use the `.env.template` file to create your own `.env` file.
+
+If you want to change the default configuration, copy the template and fill in the **[required values.](#️-environment-variables-reference)**
 
 ##### 1. Create your `.env` from template:
 
@@ -185,23 +198,29 @@ For local development, copy the template and fill in the **[required values.](#)
 You can use this as a baseline for local runs:
 
 ```env
-APP_CONFIG__DB__URL=postgresql+asyncpg://user:password@db:5432/app_db
-APP_CONFIG__DB__ECHO=False
+APP_CONFIG__DETAILS__TITLE=Dating Platform API
+APP_CONFIG__DETAILS__DESCRIPTION=API for the Dating Platform
+APP_CONFIG__SECURITY__API_KEY=key
+APP_CONFIG__API__PREFIX=/api
+APP_CONFIG__RUN__HOST=0.0.0.0
+APP_CONFIG__RUN__PORT=8000
+APP_CONFIG__RUN__RELOAD=True
+APP_CONFIG__DB__URL=postgresql+asyncpg://postgres_user:postgres_password@db:5432/dating_platform_db
+APP_CONFIG__DB__ECHO=0
 APP_CONFIG__DB__ECHO_POOL=False
 APP_CONFIG__DB__POOL_SIZE=5
 APP_CONFIG__DB__MAX_OVERFLOW=10
-APP_CONFIG__STATIC__URL=/uploads
-APP_CONFIG__SECURITY__API_KEY=[api_key]
 APP_CONFIG__CACHE__URL=redis://redis:6379/0
-APP_CONFIG__DETAILS__TITLE=Dating Platform API
-APP_CONFIG__DETAILS__DESCRIPTION=API for the Dating Platform
+APP_CONFIG__STATIC__DIRECTORY=./uploads
+APP_CONFIG__STATIC__URL=/uploads
 APP_CONFIG__DECK__MAX_SIZE=20
 APP_CONFIG__DECK__TIMEOUT=3600
 APP_CONFIG__DECK__RADIUS_STEPS_KM=[5,10,15,20]
+APP_CONFIG__INBOX__TIMEOUT=604800
 APP_CONFIG__AI__BASE_URL=https://openrouter.ai/api/v1
-APP_CONFIG__AI__API_KEY=[ai_key]
+APP_CONFIG__AI__API_KEY=sk-or-v1-REPLACE_ME
 APP_CONFIG__AI__TIMEOUT=40
-APP_CONFIG__AI_RATE_LIMITS__PROFILE_ANALYZE__LIMIT=3
+APP_CONFIG__AI_RATE_LIMITS__PROFILE_ANALYZE__LIMIT=5
 APP_CONFIG__AI_RATE_LIMITS__PROFILE_ANALYZE__WINDOW_SEC=3600
 APP_CONFIG__AI_RATE_LIMITS__MATCH_OPENER__LIMIT=5
 APP_CONFIG__AI_RATE_LIMITS__MATCH_OPENER__WINDOW_SEC=3600
@@ -242,6 +261,8 @@ You need to create a bot in telegram via `@BotFather`, get the `bot_token` and s
 
 ```env
 BOT_TOKEN=[bot_token]
+API_URL=[http://localhost:8000/api/v1] # or your API endpoint
+API_KEY=[your_api_key] # your APP_CONFIG__SECURITY__API_KEY in .env 
 ```
 
 #### 🧠 Run Telegram Bot
@@ -258,6 +279,143 @@ All tests can be run inside the docker container:
 ```bash
 docker compose exec my_running_container pytest -v
 ``` 
+
+<br>
+
+## ⚙️ Environment Variables Reference
+
+All configuration is loaded from `.env` using nested keys with prefix `APP_CONFIG__`  
+(see `SettingsConfigDict(env_nested_delimiter="__", env_prefix="APP_CONFIG__")`).
+
+### 🧩 Core / App Metadata
+
+- `APP_CONFIG__DETAILS__TITLE`  
+  Swagger/OpenAPI title shown in `/docs`.
+
+- `APP_CONFIG__DETAILS__DESCRIPTION`  
+  Swagger/OpenAPI description shown in `/docs`.
+
+- `APP_CONFIG__API__PREFIX`  
+  Global API prefix (default: `/api`). Useful if you want versioning like `/api/v1`.
+
+- `APP_CONFIG__RUN__HOST`  
+  Host to bind the server (default: `0.0.0.0`).
+
+- `APP_CONFIG__RUN__PORT`  
+  Port to bind the server (default: `8000`).
+
+- `APP_CONFIG__RUN__RELOAD`  
+  Auto-reload for development (default: `True`).  
+  In production should be `False`.
+
+---
+
+### 🔐 Security
+
+- `APP_CONFIG__SECURITY__API_KEY`  
+  API key used to protect endpoints.  
+  Passed via header: `X-API-KEY: <your_key>`.
+
+---
+
+### 🐘 Database (PostgreSQL)
+
+- `APP_CONFIG__DB__URL`  
+  Async SQLAlchemy DSN for Postgres.  
+  Format: `postgresql+asyncpg://user:password@host:port/dbname`.
+
+- `APP_CONFIG__DB__ECHO`  
+  SQL query logging (default: `False`).  
+  Useful for debugging.
+
+- `APP_CONFIG__DB__ECHO_POOL`  
+  Connection pool logging (default: `False`).
+
+- `APP_CONFIG__DB__POOL_SIZE`  
+  Base DB connection pool size (default in code: `50`, often set lower locally).
+
+- `APP_CONFIG__DB__MAX_OVERFLOW`  
+  Extra connections above pool size allowed (default: `10`).
+
+---
+
+### 🔴 Cache (Redis)
+
+- `APP_CONFIG__CACHE__URL`  
+  Redis connection URL used for:
+  - deck caching
+  - inbox caching
+  - rate limiting  
+  Example: `redis://redis:6379/0`.
+
+---
+
+### 🗂️ Static Files / Uploads
+
+- `APP_CONFIG__STATIC__DIRECTORY`  
+  Directory where uploaded files are stored (default: `./uploads`).
+
+- `APP_CONFIG__STATIC__URL`  
+  URL prefix for serving uploaded files (default: `/uploads`).
+
+---
+
+### 🎴 Deck (Candidate Feed)
+
+- `APP_CONFIG__DECK__MAX_SIZE`  
+  Maximum number of candidates stored in a deck (Redis list).
+
+- `APP_CONFIG__DECK__TIMEOUT`  
+  Deck TTL in seconds (how long the cached deck lives in Redis).
+
+- `APP_CONFIG__DECK__RADIUS_STEPS_KM`  
+  Radius expansion steps (km) used when building a deck.  
+  Example: `[5,10,15,20]`  
+  Meaning: if not enough candidates were found nearby, the search radius increases by these steps.
+
+---
+
+### 📥 Inbox
+
+- `APP_CONFIG__INBOX__TIMEOUT`  
+  Inbox TTL in seconds (default: `604800` = 7 days).  
+  Controls how long cached inbox items/count are stored in Redis.
+
+---
+
+### 🤖 AI (OpenRouter / OpenAI-compatible)
+
+- `APP_CONFIG__AI__BASE_URL`  
+  Base URL for OpenAI-compatible API provider.  
+  Example: `https://openrouter.ai/api/v1`.
+
+- `APP_CONFIG__AI__API_KEY`  
+  API key for the AI provider.  
+  **Do not commit real keys into git** — keep it only in `.env`.
+
+- `APP_CONFIG__AI__TIMEOUT`  
+  Timeout for AI requests in seconds (default in code: `20`).
+
+---
+
+### 🚦 AI Rate Limits (Redis)
+
+Each AI endpoint has its own rate limit rule (limit + time window).
+
+**Profile Analyze**
+- `APP_CONFIG__AI_RATE_LIMITS__PROFILE_ANALYZE__LIMIT`  
+  Max requests per window for profile analysis.
+- `APP_CONFIG__AI_RATE_LIMITS__PROFILE_ANALYZE__WINDOW_SEC`  
+  Window duration in seconds.
+
+**Match Opener**
+- `APP_CONFIG__AI_RATE_LIMITS__MATCH_OPENER__LIMIT`  
+  Max requests per window for opener generation.
+- `APP_CONFIG__AI_RATE_LIMITS__MATCH_OPENER__WINDOW_SEC`  
+  Window duration in seconds.
+
+If the limit is exceeded, API returns **429 Too Many Requests**.
+
 
 <br>
 
