@@ -1,4 +1,4 @@
-# ❤️ Connectly - date platform api 
+# ❤️ Connectly - Dating Platform API
 
 [![Banner](assets/Connectly.png)](https://github.com/Maksim-Volosh/dating-platform-api)
 
@@ -25,7 +25,7 @@
 
 ⭐ Star us on GitHub — it motivates us a lot!
 
-[![Share on X](https://img.shields.io/badge/share-000000?logo=x&logoColor=white)](https://x.com/intent/tweet?text=Check%20out%20this%20project%20on%20GitHub:%20https://github.com/Maksim-Volosh/dating-platform-api%20%23Django%20%23API%20%23CleanArchitecture)
+[![Share on X](https://img.shields.io/badge/share-000000?logo=x&logoColor=white)](https://x.com/intent/tweet?text=Check%20out%20this%20project%20on%20GitHub:%20https://github.com/Maksim-Volosh/dating-platform-api)
 [![Share on Facebook](https://img.shields.io/badge/share-1877F2?logo=facebook&logoColor=white)](https://www.facebook.com/sharer/sharer.php?u=https://github.com/Maksim-Volosh/dating-platform-api)
 [![Share on Reddit](https://img.shields.io/badge/share-FF4500?logo=reddit&logoColor=white)](https://www.reddit.com/submit?title=Check%20out%20this%20project%20on%20GitHub:%20https://github.com/Maksim-Volosh/dating-platform-api)
 [![Share on Telegram](https://img.shields.io/badge/share-0088CC?logo=telegram&logoColor=white)](https://t.me/share/url?url=https://github.com/Maksim-Volosh/dating-platform-api&text=Check%20out%20this%20project%20on%20GitHub)
@@ -164,6 +164,97 @@ The project follows a Clean Architecture-inspired structure with clear boundarie
     - **settings / config**
     - **DI container / providers**
     - app initialization (startup/shutdown)
+
+## 🔁 Data Flows (text diagrams)
+
+Below are the main user-facing scenarios, shown as simplified request-to-response pipelines.
+
+#### 1) Create User → Preload Deck
+
+```
+
+POST /api/.../users
+→ Router (validation)
+→ CreateUserUseCase
+→ UserRepository.create (PostgreSQL)
+→ DeckBuilderService.build_for_user
+→ bounding_box(user_location, radius_steps)
+→ CandidateRepository.find_by_preferences_and_bbox (PostgreSQL)
+→ SwipeFilterService.filter (exclude already swiped)
+→ GeoCandidateFilterService.filter (distance / radius rules)
+→ DeckCache.save (Redis LIST + TTL)
+→ 201 Created (user)
+
+```
+
+**Result:** after registration the user already has a ready-to-use deck cached in Redis.
+
+---
+
+#### 2) Get Next Candidate → Cache First → Rebuild on Miss
+
+```
+
+GET /api/.../deck/next
+→ Router
+→ GetNextCandidateUseCase
+→ DeckCache.lpop (Redis)
+→ HIT  → return candidate_id
+→ MISS → rebuild deck:
+→ bounding_box(user_location, radius_steps)
+→ CandidateRepository.find_by_preferences_and_bbox (PostgreSQL)
+→ SwipeFilterService.filter
+→ GeoCandidateFilterService.filter
+→ DeckCache.save (Redis LIST + TTL)
+→ DeckCache.lpop (Redis)
+→ 200 OK (candidate profile)
+
+```
+
+**Why this is good:** hot path is O(1) Redis `LPOP`, rebuild happens only when needed.
+
+---
+
+#### 3) Swipe → Persist in DB → Inbox Side-effect
+
+```
+
+POST /api/.../swipes
+→ Router
+→ SwipeUseCase
+→ normalize input
+→ SwipeRepository.create_or_update (PostgreSQL)
+→ if LIKE:
+→ InboxService.on_like
+→ InboxCache.push (Redis LIST)
+→ InboxCache.dedup (Redis SET)
+→ set TTL / update counters
+→ 200 OK (swipe result)
+
+```
+
+**Result:** swipes are persistent, while inbox UX stays fast via Redis.
+
+---
+
+#### 4) AI Endpoints → Rate Limiting → AI Client → Safe Fallback
+
+```
+
+POST /api/.../ai/{telegram_id}/...
+→ RateLimiterDependency (Redis)
+→ if exceeded → 429 Too Many Requests
+→ AIUseCase
+→ (optional) load user/profile context (PostgreSQL)
+→ IAIClientRepository.complete(...)
+→ OpenRouter/OpenAI-compatible client
+→ format / validate output
+→ on upstream timeout/error → 503 Service Unavailable
+→ 200 OK (AI response)
+
+```
+
+**Why this is safe:** AI calls are throttled, and upstream failures degrade gracefully.
 
 <br>
 
