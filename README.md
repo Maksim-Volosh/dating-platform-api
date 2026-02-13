@@ -1,6 +1,6 @@
 # ❤️ Connectly - date platform api 
 
-[![Banner image](https://i.imgur.com/lnqJyfc.png)](https://github.com/Maksim-Volosh/dating-platform-api)
+[![Abblix OIDC Server](https://i.imgur.com/lnqJyfc.png)](https://github.com/Maksim-Volosh/dating-platform-api)
 
 
 [![Python](https://img.shields.io/badge/Python-3.12.3-blue?logo=python)](https://www.python.org/)
