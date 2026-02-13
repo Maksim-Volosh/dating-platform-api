@@ -309,6 +309,7 @@ APP_CONFIG__DECK__TIMEOUT=3600
 APP_CONFIG__DECK__RADIUS_STEPS_KM=[5,10,15,20]
 APP_CONFIG__INBOX__TIMEOUT=604800
 APP_CONFIG__AI__BASE_URL=https://openrouter.ai/api/v1
+APP_CONFIG__AI__MODEL=openrouter/free
 APP_CONFIG__AI__API_KEY=sk-or-v1-REPLACE_ME
 APP_CONFIG__AI__TIMEOUT=40
 APP_CONFIG__AI_RATE_LIMITS__PROFILE_ANALYZE__LIMIT=5
@@ -479,6 +480,9 @@ All configuration is loaded from `.env` using nested keys with prefix `APP_CONFI
 - `APP_CONFIG__AI__BASE_URL`  
   Base URL for OpenAI-compatible API provider.  
   Example: `https://openrouter.ai/api/v1`.
+
+- `APP_CONFIG__AI__MODEL`  
+  AI model used for analysis (default: `openrouter/free`).
 
 - `APP_CONFIG__AI__API_KEY`  
   API key for the AI provider.  
